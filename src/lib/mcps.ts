@@ -96,3 +96,36 @@ export const DIFICULTAD_LABELS: Record<string, string> = {
   'media': 'Media',
   'avanzada': 'Avanzada',
 }
+
+// --- MCPs importados desde awesome-mcp-servers ---
+
+export interface ImportedMcp {
+  id: string
+  nombre: string
+  github_url: string
+  descripcion_en: string
+  categoria: string
+  seccion: string
+  lenguaje: string | null
+  scope: string
+  fuente: string
+}
+
+const IMPORTED_FILE = path.join(process.cwd(), 'src/data/imported.json')
+
+export function getImportedMcps(limit?: number): ImportedMcp[] {
+  if (!fs.existsSync(IMPORTED_FILE)) return []
+  const data = JSON.parse(fs.readFileSync(IMPORTED_FILE, 'utf-8'))
+  const all: ImportedMcp[] = data.mcps || []
+  return limit ? all.slice(0, limit) : all
+}
+
+export function getImportedTotal(): number {
+  if (!fs.existsSync(IMPORTED_FILE)) return 0
+  const data = JSON.parse(fs.readFileSync(IMPORTED_FILE, 'utf-8'))
+  return data.total || 0
+}
+
+export function getImportedByCategoria(categoria: string): ImportedMcp[] {
+  return getImportedMcps().filter(m => m.categoria === categoria)
+}

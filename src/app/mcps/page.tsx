@@ -1,6 +1,6 @@
 import McpCard from '@/components/McpCard'
 import CuradosGrid from '@/components/CuradosGrid'
-import ImportedCategoryGroup from '@/components/ImportedCategoryGroup'
+import ImportedDirectory from '@/components/ImportedDirectory'
 import { getAllMcps, getAllCategorias, getImportedMcps, getImportedTotal, CATEGORIA_LABELS } from '@/lib/mcps'
 import Link from 'next/link'
 
@@ -45,16 +45,6 @@ export default function DirectorioPage() {
   const totalImportados = getImportedTotal()
   const categorias = getAllCategorias()
 
-  // Agrupar por categoría y ordenar alfabéticamente dentro de cada grupo
-  const grupos = importados.reduce<Record<string, typeof importados>>((acc, mcp) => {
-    const cat = mcp.categoria || 'otros'
-    if (!acc[cat]) acc[cat] = []
-    acc[cat].push(mcp)
-    return acc
-  }, {})
-  Object.values(grupos).forEach(g => g.sort((a, b) => a.nombre.localeCompare(b.nombre)))
-  const gruposOrdenados = Object.entries(grupos).sort(([a], [b]) => a.localeCompare(b))
-
   return (
     <div className="flex flex-col gap-10">
 
@@ -67,7 +57,7 @@ export default function DirectorioPage() {
         </p>
       </div>
 
-      {/* Filtros categoría */}
+      {/* Filtros categoría (curados) */}
       <div className="flex flex-wrap gap-2">
         <span className="text-xs text-stone-400 self-center uppercase tracking-wider mr-1">Categoría:</span>
         {categorias.map(cat => (
@@ -99,8 +89,8 @@ export default function DirectorioPage() {
         </CuradosGrid>
       </section>
 
-      {/* Importados agrupados por categoría */}
-      <section className="flex flex-col gap-8">
+      {/* Todos los servidores — buscador + sidebar + grid */}
+      <section className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <h2 className="text-sm font-semibold text-stone-400 uppercase tracking-wider">
@@ -122,14 +112,7 @@ export default function DirectorioPage() {
             Fuente: GitHub →
           </a>
         </div>
-
-        {gruposOrdenados.map(([cat, mcps]) => (
-          <ImportedCategoryGroup
-            key={cat}
-            label={IMPORTED_CAT_LABELS[cat] || cat}
-            mcps={mcps}
-          />
-        ))}
+        <ImportedDirectory mcps={importados} catLabels={IMPORTED_CAT_LABELS} />
       </section>
 
     </div>

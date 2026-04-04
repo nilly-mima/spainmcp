@@ -86,27 +86,8 @@ export default function Home() {
       {/* ── Hero cards ── */}
       <HeroCards row1={heroRow1} row2={heroRow2} row3={heroRow3} total={totalImportados} />
 
-      {/* ── Stats ── */}
-      <FadeIn>
-        <div
-          className="grid grid-cols-2 md:grid-cols-4 gap-px rounded-2xl overflow-hidden"
-          style={{ background: '#E8E2D9' }}
-        >
-          {[
-            { n: totalImportados.toLocaleString(), label: 'servidores MCP' },
-            { n: mcps.length.toString(), label: 'guías en español' },
-            { n: categorias.length.toString(), label: 'categorías' },
-            { n: '650M', label: 'hispanohablantes' },
-          ].map(({ n, label }) => (
-            <div key={label} className="bg-white flex flex-col items-center justify-center py-6 gap-1">
-              <span className="text-3xl font-bold text-stone-900">{n}</span>
-              <span className="text-xs text-stone-400">{label}</span>
-            </div>
-          ))}
-        </div>
-      </FadeIn>
 
-      {/* ── Cómo conectar ── */}
+{/* ── Cómo conectar ── */}
       <FadeIn>
         <HowToConnect />
       </FadeIn>

@@ -62,10 +62,7 @@ const handler = createMcpHandler(
       }
     )
   },
-  {
-    name: "SpainMCP",
-    version: "0.1.0",
-  },
+  {},
   { basePath: "/api", maxDuration: 60 }
 )
 
@@ -95,12 +92,10 @@ const verifyToken = async (
     .single()
   if (!data) return undefined
   // Incrementar contador (fire & forget — no bloqueamos la respuesta)
-  supabase
+  void supabase
     .from("api_keys")
-    .update({ last_used_at: new Date().toISOString(), requests_count: (data as any).requests_count + 1 })
+    .update({ last_used_at: new Date().toISOString() })
     .eq("id", data.id)
-    .then(() => {})
-    .catch(() => {})
   return {
     token: bearerToken,
     scopes: ["mcp"],

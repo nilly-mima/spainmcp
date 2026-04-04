@@ -2,9 +2,9 @@
 
 import { useState } from 'react'
 import { ImportedMcp } from '@/lib/mcps'
-import ImportedMcpRow from './ImportedMcpRow'
+import ImportedMcpCard from './ImportedMcpCard'
 
-const LIMIT = 5
+const LIMIT = 8
 
 export default function ImportedCategoryGroup({
   label,
@@ -24,22 +24,18 @@ export default function ImportedCategoryGroup({
         </span>
         <span className="text-xs text-stone-300">{mcps.length}</span>
       </div>
-      <div
-        className="bg-white rounded-xl divide-y"
-        style={{ border: '1px solid #E8E2D9' }}
-      >
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
         {visible.map(mcp => (
-          <ImportedMcpRow key={mcp.id + mcp.github_url} mcp={mcp} />
+          <ImportedMcpCard key={mcp.id + mcp.github_url} mcp={mcp} />
         ))}
       </div>
       {mcps.length > LIMIT && (
         <button
           onClick={() => setExpanded(!expanded)}
-          className="text-xs text-stone-400 hover:text-orange-600 transition-colors text-left pl-2 py-1"
+          className="text-sm text-stone-400 hover:text-orange-600 transition-colors text-center py-2 rounded-lg"
+          style={{ border: '1px solid #E8E2D9', background: '#FAFAF9' }}
         >
-          {expanded
-            ? '↑ Ver menos'
-            : `↓ Ver ${mcps.length - LIMIT} más`}
+          {expanded ? '↑ Ver menos' : `↓ Ver ${mcps.length - LIMIT} más`}
         </button>
       )}
     </div>

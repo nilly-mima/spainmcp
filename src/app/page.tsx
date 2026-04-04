@@ -5,6 +5,7 @@ import FadeIn from '@/components/FadeIn'
 import CopyButton from '@/components/CopyButton'
 import HeroCards from '@/components/HeroCards'
 import HowToConnect from '@/components/HowToConnect'
+import McpListPreview from '@/components/McpListPreview'
 import { getAllMcps, getAllCategorias, CATEGORIA_LABELS, getImportedTotal, getImportedMcps } from '@/lib/mcps'
 
 const CAT_META: Record<string, { emoji: string; accent: string; bg: string }> = {
@@ -87,9 +88,12 @@ export default function Home() {
       <HeroCards row1={heroRow1} row2={heroRow2} row3={heroRow3} total={totalImportados} />
 
 
-{/* ── Cómo conectar ── */}
+      {/* ── Cómo conectar + lista MCPs ── */}
       <FadeIn>
-        <HowToConnect />
+        <div className="flex flex-col items-center gap-8">
+          <HowToConnect />
+          <McpListPreview mcps={destacados} total={totalImportados} />
+        </div>
       </FadeIn>
 
       {/* ── Destacados ── */}

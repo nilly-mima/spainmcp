@@ -38,3 +38,12 @@ body {
 .animate-fade-in {
   animation: fadeIn 0.4s ease both;
 }
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.12; transform: scale(0.8) rotate(0deg); }
+  50%       { opacity: 0.65; transform: scale(1.15) rotate(18deg); }
+}
+.sparkle-1 { animation: twinkle 3.2s ease-in-out infinite; }
+.sparkle-2 { animation: twinkle 2.7s ease-in-out infinite 0.8s; }
+.sparkle-3 { animation: twinkle 3.8s ease-in-out infinite 1.4s; }
+.sparkle-4 { animation: twinkle 2.4s ease-in-out infinite 0.3s; }

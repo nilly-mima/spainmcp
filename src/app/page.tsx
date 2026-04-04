@@ -2,6 +2,7 @@ import Link from 'next/link'
 import McpCard from '@/components/McpCard'
 import NetworkAnimation from '@/components/NetworkAnimation'
 import FadeIn from '@/components/FadeIn'
+import CopyButton from '@/components/CopyButton'
 import { getAllMcps, getAllCategorias, CATEGORIA_LABELS, getImportedTotal } from '@/lib/mcps'
 
 const CAT_META: Record<string, { emoji: string; accent: string; bg: string }> = {
@@ -35,26 +36,27 @@ export default function Home() {
     <div className="flex flex-col gap-16">
 
       {/* ── Hero ── */}
-      <section className="pt-12 pb-4 flex flex-col lg:flex-row items-center gap-8">
-        <div className="flex flex-col gap-6 flex-1 min-w-0 animate-fade-in-up">
+      <section className="pt-14 pb-4 flex flex-col lg:flex-row items-center gap-10">
+        <div className="flex flex-col gap-7 flex-1 min-w-0 animate-fade-in-up">
           <div className="inline-flex items-center gap-2 bg-orange-50 text-orange-700 text-xs font-medium px-3 py-1.5 rounded-full w-fit" style={{ border: '1px solid #FDBA74' }}>
             <span className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-pulse" />
             Directorio MCP en español · España y LATAM
           </div>
-          <h1 className="text-5xl md:text-6xl font-bold text-stone-900 leading-tight tracking-tight">
+          <h1 className="text-6xl md:text-7xl lg:text-8xl font-black text-stone-900 leading-none tracking-tighter">
             La forma más rápida de extender tu IA
           </h1>
-          <p className="text-lg text-stone-500 max-w-md leading-relaxed">
+          <p className="text-lg text-stone-500 max-w-sm leading-relaxed">
             Conecta Claude a miles de herramientas con servidores MCP.
             Guías en español, verificados, para España y LATAM.
           </p>
           <div className="flex items-center gap-3 flex-wrap">
             <div
-              className="flex items-center gap-2 bg-white rounded-xl px-4 py-2.5 text-sm font-mono text-stone-600"
+              className="flex items-center gap-3 bg-white rounded-xl px-4 py-2.5 text-sm font-mono text-stone-600"
               style={{ border: '1px solid #E8E2D9' }}
             >
               <span className="text-stone-400">$</span>
-              claude mcp add github
+              <span>claude mcp add github</span>
+              <CopyButton text="claude mcp add github" />
             </div>
             <Link
               href="/mcps"
@@ -65,7 +67,12 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="hidden lg:block w-[520px] h-[380px] shrink-0">
+        <div className="hidden lg:block relative w-[520px] h-[420px] shrink-0">
+          {/* Sparkle decorations */}
+          <span className="sparkle-1 absolute top-6  left-20 text-2xl text-stone-400 select-none pointer-events-none">✦</span>
+          <span className="sparkle-2 absolute top-12 right-8  text-xl  text-stone-400 select-none pointer-events-none">✦</span>
+          <span className="sparkle-3 absolute bottom-24 left-6 text-lg  text-stone-400 select-none pointer-events-none">✦</span>
+          <span className="sparkle-4 absolute top-1/2 right-2 text-base text-stone-400 select-none pointer-events-none">✦</span>
           <NetworkAnimation />
         </div>
       </section>

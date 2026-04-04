@@ -1,0 +1,27 @@
+{
+  "id": "datos-gob-es-mcp",
+  "nombre": "Open Data España MCP",
+  "descripcion_es": "Accede a miles de datasets públicos del Gobierno de España directamente desde Claude. Busca datos del INE, AEMET, SEPE, catastro y cualquier organismo oficial español.",
+  "descripcion_corta": "Datos públicos del Gobierno de España en Claude",
+  "categoria": ["datos", "espana", "gobierno"],
+  "tags": ["datos-abiertos", "espana", "gobierno", "INE", "AEMET", "datos-gob-es", "open-data"],
+  "instalacion_npx": "npx datos-gob-es-mcp",
+  "instalacion_claude_code": "claude mcp add datos-gob-es -- npx -y datos-gob-es-mcp",
+  "variables_entorno": [],
+  "github_url": "https://github.com/albertouah/datos-gob-es-mcp",
+  "compatible_con": ["claude-desktop", "claude-code", "cursor"],
+  "verificado": true,
+  "destacado": true,
+  "gratuito": true,
+  "creador": "albertouah",
+  "num_tools": 8,
+  "casos_uso_es": [
+    "Consultar estadísticas del INE sobre población o economía",
+    "Obtener datos meteorológicos de la AEMET",
+    "Buscar información del catastro",
+    "Analizar datos del SEPE sobre empleo en España"
+  ],
+  "fecha_verificado": "2026-04-04",
+  "dificultad_instalacion": "facil",
+  "especifico_espana": true
+}

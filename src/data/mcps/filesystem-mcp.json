@@ -1,0 +1,26 @@
+{
+  "id": "filesystem-mcp",
+  "nombre": "Filesystem MCP",
+  "descripcion_es": "Da acceso a Claude a tu sistema de archivos local. Puede leer, escribir, mover y organizar archivos y carpetas en las rutas que tú definas. Esencial para trabajar con proyectos locales.",
+  "descripcion_corta": "Lectura y escritura de archivos locales desde Claude",
+  "categoria": ["productividad", "desarrollo", "archivos"],
+  "tags": ["archivos", "filesystem", "local", "carpetas", "ficheros"],
+  "instalacion_npx": "npx @modelcontextprotocol/server-filesystem /ruta/a/tu/carpeta",
+  "instalacion_claude_code": "claude mcp add filesystem -- npx -y @modelcontextprotocol/server-filesystem /ruta/a/tu/carpeta",
+  "variables_entorno": [],
+  "github_url": "https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem",
+  "compatible_con": ["claude-desktop", "claude-code", "cursor", "windsurf"],
+  "verificado": true,
+  "destacado": false,
+  "gratuito": true,
+  "creador": "Anthropic",
+  "num_tools": 11,
+  "casos_uso_es": [
+    "Organizar y renombrar archivos en lote",
+    "Leer y modificar archivos de configuración",
+    "Generar informes y guardarlos automáticamente",
+    "Gestionar proyectos de código locales"
+  ],
+  "fecha_verificado": "2026-04-04",
+  "dificultad_instalacion": "facil"
+}

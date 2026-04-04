@@ -1,0 +1,26 @@
+{
+  "id": "notion-mcp",
+  "nombre": "Notion MCP",
+  "descripcion_es": "Conecta Claude con tu espacio de Notion. Crea páginas, actualiza bases de datos, busca contenido y gestiona tu wiki desde el chat. Ideal para equipos que usan Notion como sistema de conocimiento.",
+  "descripcion_corta": "Gestiona tu Notion desde Claude",
+  "categoria": ["productividad", "documentacion", "colaboracion"],
+  "tags": ["notion", "wiki", "documentacion", "bases-de-datos", "paginas", "notas"],
+  "instalacion_npx": "npx @notionhq/notion-mcp-server",
+  "instalacion_claude_code": "claude mcp add notion -- npx -y @notionhq/notion-mcp-server",
+  "variables_entorno": ["OPENAPI_MCP_HEADERS"],
+  "github_url": "https://github.com/makenotion/notion-mcp-server",
+  "compatible_con": ["claude-desktop", "claude-code", "cursor"],
+  "verificado": true,
+  "destacado": true,
+  "gratuito": true,
+  "creador": "Notion",
+  "num_tools": 15,
+  "casos_uso_es": [
+    "Crear páginas de documentación automáticamente",
+    "Actualizar tablas y bases de datos de Notion",
+    "Buscar información en tu wiki empresarial",
+    "Generar informes y añadirlos a Notion"
+  ],
+  "fecha_verificado": "2026-04-04",
+  "dificultad_instalacion": "media"
+}

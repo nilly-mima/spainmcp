@@ -1,0 +1,30 @@
+{
+  "id": "librebor-mcp",
+  "nombre": "LibreBOR MCP",
+  "descripcion_es": "Accede a datos oficiales del BORME (Boletín Oficial del Registro Mercantil) directamente desde Claude. Consulta información de empresas españolas: administradores, capital social, actos registrales y más.",
+  "descripcion_corta": "Datos del Registro Mercantil español en Claude",
+  "categoria": ["datos", "espana", "empresas", "legal"],
+  "tags": ["borme", "registro-mercantil", "empresas", "espana", "legal", "librebor", "sociedades"],
+  "instalacion_npx": "npx librebor-mcp",
+  "instalacion_claude_code": "claude mcp add librebor -- npx -y librebor-mcp",
+  "variables_entorno": ["LIBREBOR_API_KEY"],
+  "github_url": "https://librebor.me",
+  "web_oficial": "https://librebor.me",
+  "compatible_con": ["claude-desktop", "claude-code"],
+  "verificado": false,
+  "destacado": true,
+  "gratuito": false,
+  "precio_info": "Desde €24.99/mes — sandbox gratuito disponible",
+  "creador": "LibreBOR",
+  "num_tools": 6,
+  "casos_uso_es": [
+    "Verificar información oficial de empresas españolas",
+    "Consultar el historial de administradores de una sociedad",
+    "Investigar cambios societarios en el BORME",
+    "Due diligence de proveedores o clientes"
+  ],
+  "fecha_verificado": "2026-04-04",
+  "dificultad_instalacion": "media",
+  "especifico_espana": true,
+  "nota_es": "MCP no publicado aún — oportunidad de crearlo para LibreBOR"
+}

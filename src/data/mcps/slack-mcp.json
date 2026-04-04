@@ -1,0 +1,26 @@
+{
+  "id": "slack-mcp",
+  "nombre": "Slack MCP",
+  "descripcion_es": "Conecta Claude con tu workspace de Slack. Lee canales, envía mensajes, busca conversaciones y gestiona notificaciones directamente desde el chat. Perfecto para equipos que usan Slack como canal principal.",
+  "descripcion_corta": "Mensajes y canales de Slack desde Claude",
+  "categoria": ["comunicacion", "colaboracion", "productividad"],
+  "tags": ["slack", "mensajes", "canales", "equipos", "comunicacion", "notificaciones"],
+  "instalacion_npx": "npx @modelcontextprotocol/server-slack",
+  "instalacion_claude_code": "claude mcp add slack -- npx -y @modelcontextprotocol/server-slack",
+  "variables_entorno": ["SLACK_BOT_TOKEN", "SLACK_TEAM_ID"],
+  "github_url": "https://github.com/modelcontextprotocol/servers/tree/main/src/slack",
+  "compatible_con": ["claude-desktop", "claude-code"],
+  "verificado": true,
+  "destacado": false,
+  "gratuito": true,
+  "creador": "Anthropic",
+  "num_tools": 8,
+  "casos_uso_es": [
+    "Enviar resúmenes de reuniones al canal del equipo",
+    "Buscar decisiones pasadas en el historial de Slack",
+    "Notificar automáticamente resultados de procesos",
+    "Gestionar recordatorios y menciones"
+  ],
+  "fecha_verificado": "2026-04-04",
+  "dificultad_instalacion": "media"
+}

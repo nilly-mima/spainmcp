@@ -1,0 +1,27 @@
+{
+  "id": "brave-search-mcp",
+  "nombre": "Brave Search MCP",
+  "descripcion_es": "Permite a Claude buscar información actualizada en internet usando Brave Search. Accede a noticias, precios, datos de empresas y cualquier información web en tiempo real.",
+  "descripcion_corta": "Búsquedas en internet en tiempo real desde Claude",
+  "categoria": ["busqueda", "informacion", "productividad"],
+  "tags": ["brave", "busqueda", "internet", "web-search", "noticias", "tiempo-real"],
+  "instalacion_npx": "npx @modelcontextprotocol/server-brave-search",
+  "instalacion_claude_code": "claude mcp add brave-search -- npx -y @modelcontextprotocol/server-brave-search",
+  "variables_entorno": ["BRAVE_API_KEY"],
+  "github_url": "https://github.com/modelcontextprotocol/servers/tree/main/src/brave-search",
+  "compatible_con": ["claude-desktop", "claude-code", "cursor", "windsurf"],
+  "verificado": true,
+  "destacado": false,
+  "gratuito": false,
+  "precio_info": "API Key gratuita hasta 2000 búsquedas/mes en Brave",
+  "creador": "Anthropic",
+  "num_tools": 2,
+  "casos_uso_es": [
+    "Consultar noticias de actualidad española",
+    "Investigar competidores o mercados",
+    "Verificar precios y disponibilidad de productos",
+    "Buscar documentación técnica actualizada"
+  ],
+  "fecha_verificado": "2026-04-04",
+  "dificultad_instalacion": "media"
+}

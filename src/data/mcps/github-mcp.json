@@ -1,0 +1,26 @@
+{
+  "id": "github-mcp",
+  "nombre": "GitHub MCP",
+  "descripcion_es": "Gestiona repositorios, issues, pull requests y código de GitHub directamente desde Claude. Puedes buscar código, crear branches, revisar PRs y mucho más sin salir del chat.",
+  "descripcion_corta": "Repositorios, issues y PRs de GitHub en Claude",
+  "categoria": ["desarrollo", "colaboracion"],
+  "tags": ["github", "git", "codigo", "repositorios", "pull-requests", "issues"],
+  "instalacion_npx": "npx @modelcontextprotocol/server-github",
+  "instalacion_claude_code": "claude mcp add github -- npx -y @modelcontextprotocol/server-github",
+  "variables_entorno": ["GITHUB_PERSONAL_ACCESS_TOKEN"],
+  "github_url": "https://github.com/modelcontextprotocol/servers/tree/main/src/github",
+  "compatible_con": ["claude-desktop", "claude-code", "cursor", "windsurf"],
+  "verificado": true,
+  "destacado": true,
+  "gratuito": true,
+  "creador": "Anthropic",
+  "num_tools": 25,
+  "casos_uso_es": [
+    "Revisar y aprobar pull requests",
+    "Crear y gestionar issues",
+    "Buscar código en cualquier repositorio",
+    "Crear branches y hacer commits"
+  ],
+  "fecha_verificado": "2026-04-04",
+  "dificultad_instalacion": "media"
+}

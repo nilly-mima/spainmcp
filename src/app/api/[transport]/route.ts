@@ -23,6 +23,58 @@ const handler = createMcpHandler(
       })
     )
 
+    // --- TOOL 2: Buscar empresa en BORME ---
+    server.registerTool(
+      "buscar_empresa",
+      {
+        title: "Buscar empresa en el Registro Mercantil",
+        description:
+          "Busca empresas en el BORME (Boletín Oficial del Registro Mercantil). " +
+          "Útil para verificar datos de empresas españolas: constitución, administradores, capital social.",
+        inputSchema: {
+          nombre: z.string().describe("Nombre de la empresa a buscar"),
+          fecha: z.string().optional().describe("Fecha YYYY-MM-DD, opcional"),
+        },
+        annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true },
+      },
+      async ({ nombre, fecha }) => {
+        const params = new URLSearchParams({ busqueda: nombre })
+        if (fecha) params.set("fecha", fecha)
+        const res = await fetch(
+          `https://www.boe.es/datosabiertos/api/borme/sumario?${params}`,
+          { headers: { Accept: "application/json" } }
+        )
+        if (!res.ok) return { isError: true, content: [{ type: "text" as const, text: `Error BORME API: ${res.status} ${res.statusText}` }] }
+        const data = await res.json()
+        return { content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }] }
+      }
+    )
+
+    // --- TOOL 3: Datos INE ---
+    server.registerTool(
+      "datos_ine",
+      {
+        title: "Consultar datos del INE",
+        description:
+          "Consulta estadísticas del Instituto Nacional de Estadística español. " +
+          "Población por municipio, IPC, PIB, paro, demografía y más.",
+        inputSchema: {
+          operacion: z.string().describe("Código de operación INE, p.ej. 'IPC' para inflación, 'EPA' para paro"),
+        },
+        annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true },
+      },
+      async ({ operacion }) => {
+        const res = await fetch(
+          `https://servicios.ine.es/wstempus/js/ES/OPERACIONES_DISPONIBLES?busqueda=${encodeURIComponent(operacion)}`,
+          { headers: { Accept: "application/json" } }
+        )
+        if (!res.ok) return { isError: true, content: [{ type: "text" as const, text: `Error INE API: ${res.status} ${res.statusText}` }] }
+        const data = await res.json()
+        return { content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }] }
+      }
+    )
+
+    // --- TOOL 4: Buscar en el BOE ---
     server.registerTool(
       "buscar_en_boe",
       {

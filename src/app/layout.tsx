@@ -26,7 +26,7 @@ export default function RootLayout({
     <html lang="es">
       <body className={inter.className}>
         <Header />
-        <main className="max-w-6xl mx-auto px-6 py-8">
+        <main className="max-w-6xl mx-auto px-6 pt-2 pb-8">
           {children}
         </main>
         <footer className="mt-16 py-8 text-center text-sm text-stone-400" style={{ borderTop: '1px solid #E8E2D9' }}>

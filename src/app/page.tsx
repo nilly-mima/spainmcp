@@ -36,7 +36,7 @@ export default function Home() {
     <div className="flex flex-col gap-16">
 
       {/* ── Hero ── */}
-      <section className="pt-14 pb-4 flex flex-col lg:flex-row items-center gap-10">
+      <section className="pt-6 pb-4 flex flex-col lg:flex-row items-center gap-10">
         <div className="flex flex-col gap-7 flex-1 min-w-0 animate-fade-in-up">
           <div className="inline-flex items-center gap-2 bg-orange-50 text-orange-700 text-xs font-medium px-3 py-1.5 rounded-full w-fit" style={{ border: '1px solid #FDBA74' }}>
             <span className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-pulse" />

@@ -23,94 +23,76 @@ const handler = createMcpHandler(
       })
     )
 
-    // --- TOOL 2: Buscar empresa en BORME ---
+    // --- TOOL 2: BOE del día ---
     server.registerTool(
-      "buscar_empresa",
+      "boe_del_dia",
       {
-        title: "Buscar empresa en el Registro Mercantil",
+        title: "BOE del día",
         description:
-          "Busca empresas en el BORME (Boletín Oficial del Registro Mercantil). " +
-          "Útil para verificar datos de empresas españolas: constitución, administradores, capital social.",
+          "Obtiene el sumario del Boletín Oficial del Estado de hoy o de una fecha concreta. " +
+          "Devuelve las disposiciones, resoluciones y edictos publicados ese día.",
         inputSchema: {
-          nombre: z.string().describe("Nombre de la empresa a buscar"),
-          fecha: z.string().optional().describe("Fecha YYYY-MM-DD, opcional"),
+          fecha: z.string().optional().describe("Fecha en formato YYYYMMDD, p.ej. '20260404'. Sin fecha = hoy."),
         },
         annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true },
       },
-      async ({ nombre, fecha }) => {
-        const params = new URLSearchParams({ busqueda: nombre })
-        if (fecha) params.set("fecha", fecha)
+      async ({ fecha }) => {
+        const d = fecha ?? new Date().toISOString().slice(0, 10).replace(/-/g, "")
         const res = await fetch(
-          `https://www.boe.es/datosabiertos/api/borme/sumario?${params}`,
+          `https://www.boe.es/datosabiertos/api/boe/sumario/${d}`,
           { headers: { Accept: "application/json" } }
         )
-        if (!res.ok) return { isError: true, content: [{ type: "text" as const, text: `Error BORME API: ${res.status} ${res.statusText}` }] }
+        if (!res.ok) return { isError: true, content: [{ type: "text" as const, text: `Error BOE API: ${res.status} — puede que sea fin de semana o festivo` }] }
         const data = await res.json()
         return { content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }] }
       }
     )
 
-    // --- TOOL 3: Datos INE ---
+    // --- TOOL 3: BORME del día ---
+    server.registerTool(
+      "borme_del_dia",
+      {
+        title: "BORME del día",
+        description:
+          "Obtiene el sumario del Boletín Oficial del Registro Mercantil de una fecha concreta. " +
+          "Lista las empresas constituidas, disueltas y actos inscritos ese día. Solo días laborables.",
+        inputSchema: {
+          fecha: z.string().describe("Fecha en formato YYYYMMDD, p.ej. '20260401'. Solo días laborables."),
+        },
+        annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true },
+      },
+      async ({ fecha }) => {
+        const res = await fetch(
+          `https://www.boe.es/datosabiertos/api/borme/sumario/${fecha}`,
+          { headers: { Accept: "application/json" } }
+        )
+        if (!res.ok) return { isError: true, content: [{ type: "text" as const, text: `Error BORME API: ${res.status} — comprueba que sea un día laborable (BORME no se publica en fines de semana ni festivos)` }] }
+        const data = await res.json()
+        return { content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }] }
+      }
+    )
+
+    // --- TOOL 4: Datos INE ---
     server.registerTool(
       "datos_ine",
       {
         title: "Consultar datos del INE",
         description:
           "Consulta estadísticas del Instituto Nacional de Estadística español. " +
-          "Población por municipio, IPC, PIB, paro, demografía y más.",
+          "Busca operaciones disponibles por nombre, p.ej. 'IPC', 'EPA', 'padrón'.",
         inputSchema: {
-          operacion: z.string().describe("Código de operación INE, p.ej. 'IPC' para inflación, 'EPA' para paro"),
+          busqueda: z.string().describe("Término a buscar, p.ej. 'IPC' para inflación, 'EPA' para paro, 'padron' para población"),
         },
         annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true },
       },
-      async ({ operacion }) => {
+      async ({ busqueda }) => {
         const res = await fetch(
-          `https://servicios.ine.es/wstempus/js/ES/OPERACIONES_DISPONIBLES?busqueda=${encodeURIComponent(operacion)}`,
+          `https://servicios.ine.es/wstempus/js/ES/OPERACIONES_DISPONIBLES?busqueda=${encodeURIComponent(busqueda)}`,
           { headers: { Accept: "application/json" } }
         )
         if (!res.ok) return { isError: true, content: [{ type: "text" as const, text: `Error INE API: ${res.status} ${res.statusText}` }] }
         const data = await res.json()
         return { content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }] }
-      }
-    )
-
-    // --- TOOL 4: Buscar en el BOE ---
-    server.registerTool(
-      "buscar_en_boe",
-      {
-        title: "Buscar en el BOE",
-        description:
-          "Busca documentos en el Boletín Oficial del Estado español. " +
-          "Útil para encontrar leyes, resoluciones, convocatorias y edictos oficiales.",
-        inputSchema: {
-          termino: z.string().describe("Término de búsqueda, p.ej. 'subvenciones pymes Barcelona'"),
-          fecha_desde: z.string().optional().describe("Fecha inicio YYYYMMDD, opcional"),
-        },
-        annotations: {
-          readOnlyHint: true,
-          destructiveHint: false,
-          idempotentHint: true,
-          openWorldHint: true,
-        },
-      },
-      async ({ termino, fecha_desde }) => {
-        // API legislación consolidada BOE — búsqueda por expresión
-        const params = new URLSearchParams({ expresion: termino })
-        if (fecha_desde) params.set("fechaDesde", fecha_desde)
-        const res = await fetch(
-          `https://www.boe.es/datosabiertos/api/legislacion-consolidada?${params}`,
-          { headers: { Accept: "application/json" } }
-        )
-        if (!res.ok) {
-          return {
-            isError: true,
-            content: [{ type: "text" as const, text: `Error BOE API: ${res.status} ${res.statusText}` }],
-          }
-        }
-        const data = await res.json()
-        return {
-          content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }],
-        }
       }
     )
   },

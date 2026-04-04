@@ -3,7 +3,9 @@ import McpCard from '@/components/McpCard'
 import NetworkAnimation from '@/components/NetworkAnimation'
 import FadeIn from '@/components/FadeIn'
 import CopyButton from '@/components/CopyButton'
-import { getAllMcps, getAllCategorias, CATEGORIA_LABELS, getImportedTotal } from '@/lib/mcps'
+import MarqueeMcps from '@/components/MarqueeMcps'
+import HowToConnect from '@/components/HowToConnect'
+import { getAllMcps, getAllCategorias, CATEGORIA_LABELS, getImportedTotal, getImportedMcps } from '@/lib/mcps'
 
 const CAT_META: Record<string, { emoji: string; accent: string; bg: string }> = {
   'archivos':       { emoji: '📁', accent: '#D97706', bg: '#FFFBEB' },
@@ -31,6 +33,9 @@ export default function Home() {
   const destacados = mcps.filter(m => m.destacado)
   const categorias = getAllCategorias()
   const totalImportados = getImportedTotal()
+  const imported60 = getImportedMcps(60)
+  const marqueeRow1 = imported60.slice(0, 30)
+  const marqueeRow2 = imported60.slice(30, 60)
 
   return (
     <div className="flex flex-col gap-16">
@@ -77,6 +82,9 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ── Marquee ── */}
+      <MarqueeMcps row1={marqueeRow1} row2={marqueeRow2} />
+
       {/* ── Stats ── */}
       <FadeIn>
         <div
@@ -95,6 +103,11 @@ export default function Home() {
             </div>
           ))}
         </div>
+      </FadeIn>
+
+      {/* ── Cómo conectar ── */}
+      <FadeIn>
+        <HowToConnect />
       </FadeIn>
 
       {/* ── Destacados ── */}

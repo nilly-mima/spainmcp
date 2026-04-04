@@ -26,11 +26,11 @@ export default function RootLayout({
     <html lang="es">
       <body className={`${inter.className} bg-gray-50 text-gray-900`}>
         <Header />
-        <main className="max-w-6xl mx-auto px-4 py-8">
+        <main className="max-w-6xl mx-auto px-6 py-8">
           {children}
         </main>
-        <footer className="border-t border-gray-200 mt-16 py-8 text-center text-sm text-gray-400">
-          <p>SpainMCP — El directorio MCP en español · <a href="https://github.com/nilly-mima/spainmcp" className="hover:text-gray-600">GitHub</a></p>
+        <footer className="mt-16 py-8 text-center text-sm text-stone-400" style={{ borderTop: '1px solid #E8E2D9' }}>
+          <p>SpainMCP — El directorio MCP en español · <a href="https://github.com/nilly-mima/spainmcp" className="hover:text-stone-600 transition-colors">GitHub</a></p>
         </footer>
       </body>
     </html>

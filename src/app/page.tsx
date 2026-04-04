@@ -8,101 +8,102 @@ export default function Home() {
   const categorias = getAllCategorias()
 
   return (
-    <div className="flex flex-col gap-12">
+    <div className="flex flex-col gap-16">
 
       {/* Hero */}
-      <section className="text-center py-12 flex flex-col items-center gap-6">
-        <div className="inline-flex items-center gap-2 bg-orange-50 text-orange-700 border border-orange-200 px-3 py-1 rounded-full text-sm font-medium">
-          <span>⚡</span>
-          El directorio MCP en español
-        </div>
-        <h1 className="text-4xl md:text-5xl font-bold text-gray-900 max-w-2xl leading-tight">
-          Servidores MCP para{' '}
-          <span className="text-orange-500">España y LATAM</span>
+      <section className="pt-16 pb-8 flex flex-col gap-6">
+        <h1 className="text-5xl md:text-6xl font-bold text-stone-900 max-w-2xl leading-tight tracking-tight">
+          La forma más rápida de extender tu IA
         </h1>
-        <p className="text-lg text-gray-500 max-w-xl">
-          Encuentra, instala y aprende a usar servidores MCP con guías en español.
-          Conecta Claude a tus herramientas favoritas.
+        <p className="text-lg text-stone-500 max-w-xl leading-relaxed">
+          Conecta Claude a miles de herramientas con servidores MCP.
+          Guías en español, verificados, para España y LATAM.
         </p>
-        <div className="flex gap-3">
+        <div className="flex items-center gap-3">
+          <div
+            className="flex items-center gap-2 bg-white rounded-xl px-4 py-2.5 text-sm font-mono text-stone-600"
+            style={{ border: '1px solid #E8E2D9' }}
+          >
+            <span className="text-stone-400">$</span>
+            claude mcp add github
+          </div>
           <Link
             href="/mcps"
-            className="bg-orange-500 text-white px-5 py-2.5 rounded-lg hover:bg-orange-600 transition-colors font-medium"
+            className="bg-orange-600 text-white px-5 py-2.5 rounded-xl hover:bg-orange-700 transition-colors font-medium text-sm"
           >
-            Ver directorio →
+            Ver {mcps.length}+ MCPs
           </Link>
-          <Link
-            href="/guias"
-            className="border border-gray-200 text-gray-700 px-5 py-2.5 rounded-lg hover:border-gray-300 hover:bg-white transition-colors font-medium"
-          >
-            Guías de instalación
-          </Link>
-        </div>
-        <p className="text-sm text-gray-400">{mcps.length} servidores MCP · Guías en español · Verificados</p>
-      </section>
-
-      {/* Categorías */}
-      <section className="flex flex-col gap-4">
-        <h2 className="text-lg font-semibold text-gray-700">Explorar por categoría</h2>
-        <div className="flex flex-wrap gap-2">
-          {categorias.map(cat => (
-            <Link
-              key={cat}
-              href={`/categoria/${cat}`}
-              className="bg-white border border-gray-200 text-gray-600 px-3 py-1.5 rounded-lg text-sm hover:border-orange-400 hover:text-orange-600 transition-colors"
-            >
-              {CATEGORIA_LABELS[cat] || cat}
-            </Link>
-          ))}
         </div>
       </section>
 
-      {/* Destacados */}
+      {/* Cards grid destacados — sin sección header, directo */}
       <section className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-700">⭐ Destacados</h2>
-          <Link href="/mcps" className="text-sm text-orange-500 hover:text-orange-600">
+          <h2 className="text-sm font-semibold text-stone-400 uppercase tracking-wider">Destacados</h2>
+          <Link href="/mcps" className="text-sm text-orange-600 hover:text-orange-700 font-medium">
             Ver todos →
           </Link>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
           {destacados.map(mcp => (
             <McpCard key={mcp.id} mcp={mcp} />
           ))}
         </div>
       </section>
 
+      {/* Categorías */}
+      <section className="flex flex-col gap-4">
+        <h2 className="text-sm font-semibold text-stone-400 uppercase tracking-wider">Categorías</h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {categorias.slice(0, 8).map(cat => (
+            <Link
+              key={cat}
+              href={`/categoria/${cat}`}
+              className="bg-white rounded-xl p-4 flex flex-col gap-1 hover:shadow-md transition-shadow group"
+              style={{ border: '1px solid #E8E2D9' }}
+            >
+              <span className="font-medium text-stone-800 group-hover:text-orange-600 transition-colors text-sm">
+                {CATEGORIA_LABELS[cat] || cat}
+              </span>
+              <span className="text-xs text-stone-400">Explorar →</span>
+            </Link>
+          ))}
+        </div>
+      </section>
+
       {/* Todos */}
       <section className="flex flex-col gap-4">
-        <h2 className="text-lg font-semibold text-gray-700">Todos los servidores MCP</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <h2 className="text-sm font-semibold text-stone-400 uppercase tracking-wider">Todos los servidores MCP</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
           {mcps.filter(m => !m.destacado).map(mcp => (
             <McpCard key={mcp.id} mcp={mcp} />
           ))}
         </div>
       </section>
 
-      {/* CTA contribuir */}
-      <section className="bg-white border border-gray-200 rounded-2xl p-8 text-center flex flex-col items-center gap-4">
-        <h2 className="text-xl font-semibold">¿Conoces un MCP que falta?</h2>
-        <p className="text-gray-500 max-w-md">
-          SpainMCP es un directorio abierto. Abre un PR en GitHub o usa el formulario
-          para proponer nuevos servidores MCP.
+      {/* CTA banner oscuro — estilo Smithery */}
+      <section
+        className="rounded-2xl p-10 text-center flex flex-col items-center gap-4"
+        style={{ background: '#1C1917' }}
+      >
+        <h2 className="text-2xl font-bold text-white">¿Tu empresa quiere su MCP?</h2>
+        <p className="text-stone-400 max-w-md">
+          Publica tu servidor MCP en SpainMCP. Visibilidad en toda la comunidad hispanohablante.
         </p>
         <div className="flex gap-3">
           <a
             href="https://github.com/nilly-mima/spainmcp"
             target="_blank"
             rel="noopener noreferrer"
-            className="border border-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors text-sm"
+            className="border border-stone-600 text-stone-300 px-4 py-2 rounded-lg hover:bg-stone-800 transition-colors text-sm"
           >
             Abrir PR en GitHub
           </a>
           <Link
             href="/submit"
-            className="bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors text-sm"
+            className="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors text-sm font-medium"
           >
-            Proponer MCP
+            Publicar MCP →
           </Link>
         </div>
       </section>

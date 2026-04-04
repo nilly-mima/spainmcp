@@ -57,6 +57,12 @@ export default async function Header() {
 
           <PublishDropdown />
           <Link
+            href="/get-key"
+            className="px-3 py-1.5 rounded-md bg-orange-600 hover:bg-orange-700 text-white text-sm font-medium transition-colors"
+          >
+            Obtener key
+          </Link>
+          <Link
             href="/login"
             className="px-3 py-1.5 rounded-md text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-200/50 dark:hover:bg-stone-800/50 transition-colors"
           >

@@ -73,25 +73,13 @@ export async function POST(req: Request) {
 
   if (emailError) {
     console.error("Resend error:", emailError)
-    // En desarrollo: devolver la key en claro para poder testear sin dominio verificado
-    if (process.env.NODE_ENV === "development") {
-      return Response.json({
-        success: true,
-        message: "[DEV] Email falló — key devuelta en claro para testing",
-        key_prefix: keyPrefix,
-        dev_key: rawKey,
-      })
-    }
-    return Response.json(
-      { error: "Clave creada pero falló el email. Contacta hola@mcp.lat" },
-      { status: 500 }
-    )
   }
 
-  // 5. Devolver solo el prefijo (nunca la key en claro en producción)
+  // 5. Devolver la key en el response (patrón OpenAI — mostrada una sola vez, segura por HTTPS)
   return Response.json({
     success: true,
-    message: "Clave enviada a tu email",
+    key: rawKey,
     key_prefix: keyPrefix,
+    email_sent: !emailError,
   })
 }

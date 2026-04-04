@@ -47,77 +47,49 @@ function McpListItem({ mcp }: { mcp: Mcp }) {
   )
 }
 
-function NetworkIllustration() {
-  const C = { x: 150, y: 185 }
-  const nodes = [
-    { x: 245, y: 52,  label: 'GH', name: 'GitHub' },
-    { x: 282, y: 192, label: 'NO', name: 'Notion' },
-    { x: 218, y: 315, label: 'YT', name: 'YouTube' },
-    { x: 66,  y: 308, label: 'FS', name: 'Files' },
-    { x: 18,  y: 178, label: 'BS', name: 'Brave' },
-    { x: 76,  y: 55,  label: 'SL', name: 'Slack' },
-  ]
-
+function MascotSvg() {
   return (
-    <svg viewBox="0 0 305 390" fill="none" className="w-full">
-      {/* Warm hill at bottom */}
-      <path d="M-10,348 Q152,284 315,348 L315,390 L-10,390 Z" fill="#EA580C" fillOpacity="0.10"/>
-      <path d="M-10,362 Q152,310 315,362 L315,390 L-10,390 Z" fill="#EA580C" fillOpacity="0.08"/>
+    <svg viewBox="0 0 280 420" fill="none" className="w-full">
 
-      {/* Pulse rings around Claude */}
-      <circle cx={C.x} cy={C.y} r="74"  stroke="#EA580C" strokeOpacity="0.12" fill="none" strokeWidth="1.5"/>
-      <circle cx={C.x} cy={C.y} r="100" stroke="#EA580C" strokeOpacity="0.06" fill="none" strokeWidth="1"/>
+      {/* ── Colina cálida (hill) ── */}
+      <path d="M-20,372 Q140,308 300,372 L300,420 L-20,420 Z"
+        fill="#EDB99A" fillOpacity="0.55"/>
 
-      {/* Connection lines */}
-      {nodes.map((n, i) => (
-        <line key={`l${i}`}
-          x1={C.x} y1={C.y} x2={n.x} y2={n.y}
-          stroke="#EA580C" strokeOpacity="0.28" strokeWidth="1.5"/>
-      ))}
+      {/* ── Sombra del personaje ── */}
+      <ellipse cx="140" cy="372" rx="57" ry="14"
+        fill="#292524" fillOpacity="0.65"/>
 
-      {/* Particles on lines */}
-      {nodes.map((n, i) => {
-        const t = 0.32 + (i % 3) * 0.14
-        return (
-          <circle key={`p${i}`}
-            cx={C.x + (n.x - C.x) * t}
-            cy={C.y + (n.y - C.y) * t}
-            r="3.5" fill="#EA580C"/>
-        )
-      })}
+      {/* ── Piernas (dos píldoras blancas) ── */}
+      <rect x="108" y="332" width="26" height="44" rx="13" fill="white"/>
+      <rect x="146" y="332" width="26" height="44" rx="13" fill="white"/>
 
-      {/* Claude center */}
-      <circle cx={C.x} cy={C.y} r="52" fill="#EA580C"/>
-      <text x={C.x} y={C.y - 5} textAnchor="middle" fill="white"
-        fontSize="14" fontWeight="bold" fontFamily="Inter, system-ui, sans-serif">Claude</text>
-      <text x={C.x} y={C.y + 12} textAnchor="middle" fill="rgba(255,255,255,0.65)"
-        fontSize="9" fontFamily="Inter, system-ui, sans-serif">MCP Hub</text>
+      {/* ── Cuerpo principal (círculo naranja) ── */}
+      <circle cx="140" cy="234" r="84" fill="#EA580C"/>
 
-      {/* Tool nodes */}
-      {nodes.map((n, i) => (
-        <g key={`n${i}`}>
-          <circle cx={n.x} cy={n.y} r="26" fill="white" stroke="#E8E2D9" strokeWidth="1.5"/>
-          <text x={n.x} y={n.y + 4} textAnchor="middle" fill="#57534E"
-            fontSize="11" fontWeight="600" fontFamily="Inter, system-ui, sans-serif">
-            {n.label}
-          </text>
-        </g>
-      ))}
+      {/* ── Llama (mismo naranja — se fusiona con el cuerpo)
+           Lóbulo izquierdo alto + curva derecha secundaria ── */}
+      <path d="
+        M 102,160
+        C 78,122  76,70  106,44
+        C 120,30  142,40  138,66
+        C 153,28  180,44  177,80
+        C 174,110  157,134  166,160
+        Z
+      " fill="#EA580C"/>
 
-      {/* Node name labels */}
-      {nodes.map((n, i) => {
-        // Position label outside the circle
-        const dx = n.x - C.x, dy = n.y - C.y
-        const len = Math.sqrt(dx * dx + dy * dy)
-        const lx = n.x + (dx / len) * 34
-        const ly = n.y + (dy / len) * 34 + 4
-        return (
-          <text key={`t${i}`} x={lx} y={ly} textAnchor="middle" fill="#A8A29E"
-            fontSize="9" fontFamily="Inter, system-ui, sans-serif">
-            {n.name}
-          </text>
-        )
-      })}
+      {/* ── Barriga amarilla ── */}
+      <ellipse cx="140" cy="265" rx="51" ry="44" fill="#FCD34D"/>
+
+      {/* ── Cara: ceja (preocupada — arco descendente) ── */}
+      <path d="M 110,204 Q 127,192 146,202"
+        stroke="#1C1917" strokeWidth="4.5" fill="none" strokeLinecap="round"/>
+
+      {/* ── Ojo ── */}
+      <circle cx="124" cy="220" r="5.5" fill="#1C1917"/>
+
+      {/* ── Boca (O pequeña, sorprendida/preocupada) ── */}
+      <ellipse cx="135" cy="246" rx="8" ry="7" fill="#1C1917"/>
+
     </svg>
   )
 }
@@ -179,7 +151,7 @@ export default function McpListPreview({
 
         {/* Ilustración red neuronal */}
         <div className="hidden lg:flex lg:w-[280px] shrink-0 items-end self-stretch">
-          <NetworkIllustration />
+          <MascotSvg />
         </div>
 
       </div>

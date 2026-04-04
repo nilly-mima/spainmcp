@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import PublishDropdown from './PublishDropdown'
 
 async function getGitHubStars(): Promise<number> {
   try {
@@ -48,18 +49,13 @@ export default async function Header() {
         {/* Nav */}
         <nav className="flex items-center gap-0.5 text-sm text-stone-500 dark:text-stone-400">
           <Link href="/mcps"    className="px-3 py-1.5 rounded-md hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-200/50 dark:hover:bg-stone-800/50 transition-colors">MCPs</Link>
-          <Link href="/guias"   className="px-3 py-1.5 rounded-md hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-200/50 dark:hover:bg-stone-800/50 transition-colors">Guías</Link>
+          <Link href="/guias"   className="px-3 py-1.5 rounded-md hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-200/50 dark:hover:bg-stone-800/50 transition-colors">Skills</Link>
           <Link href="/docs"    className="px-3 py-1.5 rounded-md hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-200/50 dark:hover:bg-stone-800/50 transition-colors">Docs</Link>
           <Link href="/precios" className="px-3 py-1.5 rounded-md hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-200/50 dark:hover:bg-stone-800/50 transition-colors">Precios</Link>
 
           <div className="w-px h-4 bg-stone-300 dark:bg-stone-700 mx-2" />
 
-          <Link
-            href="/submit"
-            className="flex items-center gap-1 border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-300 px-3 py-1.5 rounded-lg hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors font-medium"
-          >
-            Publicar <span className="text-stone-400 text-[10px]">▾</span>
-          </Link>
+          <PublishDropdown />
           <Link
             href="/login"
             className="px-3 py-1.5 rounded-md text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-200/50 dark:hover:bg-stone-800/50 transition-colors"

@@ -1,0 +1,255 @@
+{
+  "total": 128764,
+  "skills": [
+    {
+      "id": "smithery-ai-cli",
+      "creator": "smithery-ai",
+      "nombre": "cli",
+      "descripcion": "Find, connect, and use MCP tools and skills via the Smithery CLI. Use when the user searches for new tools or skills, wants to discover integrations, connect to an MCP, install a skill, or wants to interact with an external service.",
+      "categoria": "Productivity",
+      "installs": 1922,
+      "stars": 508,
+      "verified": true
+    },
+    {
+      "id": "anthropics-skill-creator",
+      "creator": "anthropics",
+      "nombre": "skill-creator",
+      "descripcion": "Guide for creating effective skills. This skill should be used when users want to create a new skill (or update an existing skill) that extends Claude's capabilities with specialized knowledge, workflows, or tool integrations.",
+      "categoria": "AI & ML",
+      "installs": 1030,
+      "stars": 66293,
+      "verified": true
+    },
+    {
+      "id": "anthropics-frontend-design",
+      "creator": "anthropics",
+      "nombre": "frontend-design",
+      "descripcion": "Create distinctive, production-grade frontend interfaces with high design quality. Use this skill when the user asks to build web components, pages, or applications. Generates creative, polished code that avoids generic approaches.",
+      "categoria": "Coding",
+      "installs": 1519,
+      "stars": 66293,
+      "verified": true
+    },
+    {
+      "id": "anthropics-pdf",
+      "creator": "anthropics",
+      "nombre": "pdf",
+      "descripcion": "Use this skill whenever the user wants to do anything with PDF files. This includes reading or extracting text/tables from PDFs, combining or merging multiple PDFs into one, splitting PDFs apart, rotating pages, and more.",
+      "categoria": "Productivity",
+      "installs": 787,
+      "stars": 66293,
+      "verified": true
+    },
+    {
+      "id": "anthropics-docx",
+      "creator": "anthropics",
+      "nombre": "docx",
+      "descripcion": "Use this skill any time the user wants to create, read, edit, or manipulate Word documents (.docx files). Triggers include: any mention of 'Word doc', 'word document', '.docx', or requests to produce professional documents.",
+      "categoria": "Productivity",
+      "installs": 539,
+      "stars": 66293,
+      "verified": true
+    },
+    {
+      "id": "anthropics-pptx",
+      "creator": "anthropics",
+      "nombre": "pptx",
+      "descripcion": "Use this skill any time a .pptx file is involved in any way as input, output, or both. This includes: creating slide decks, pitch decks, presentations; reading, parsing, or extracting text from any .pptx file.",
+      "categoria": "Productivity",
+      "installs": 685,
+      "stars": 66293,
+      "verified": true
+    },
+    {
+      "id": "anthropics-xlsx",
+      "creator": "anthropics",
+      "nombre": "xlsx",
+      "descripcion": "Use this skill any time a spreadsheet file is the primary input or output. This means any task where the user wants to: open, read, edit, or fix an existing .xlsx, .xlsm, .csv, or .tsv file (e.g., adding columns, computing formulas).",
+      "categoria": "Data & Analytics",
+      "installs": 599,
+      "stars": 66293,
+      "verified": true
+    },
+    {
+      "id": "anthropics-creating-financial-models",
+      "creator": "anthropics",
+      "nombre": "creating-financial-models",
+      "descripcion": "This skill provides an advanced financial modeling suite with DCF analysis, sensitivity testing, Monte Carlo simulations, and scenario planning for investment decisions.",
+      "categoria": "Business",
+      "installs": 594,
+      "stars": 32676,
+      "verified": true
+    },
+    {
+      "id": "anthropics-analyzing-financial-statements",
+      "creator": "anthropics",
+      "nombre": "analyzing-financial-statements",
+      "descripcion": "This skill calculates key financial ratios and metrics from financial statement data for investment analysis.",
+      "categoria": "Business",
+      "installs": 558,
+      "stars": 32676,
+      "verified": true
+    },
+    {
+      "id": "anthropics-theme-factory",
+      "creator": "anthropics",
+      "nombre": "theme-factory",
+      "descripcion": "Toolkit for styling artifacts with a theme. These artifacts can be slides, docs, reportings, HTML landing pages, etc. There are 10 pre-set themes with colors and fonts that you can apply to any artifact that has been created.",
+      "categoria": "Design",
+      "installs": 369,
+      "stars": 66293,
+      "verified": true
+    },
+    {
+      "id": "anthropics-webapp-testing",
+      "creator": "anthropics",
+      "nombre": "webapp-testing",
+      "descripcion": "Toolkit for interacting with and testing local web applications using Playwright. Supports verifying frontend functionality, debugging UI behavior, capturing browser screenshots, and viewing browser logs.",
+      "categoria": "Coding",
+      "installs": 392,
+      "stars": 66293,
+      "verified": true
+    },
+    {
+      "id": "anthropics-canvas-design",
+      "creator": "anthropics",
+      "nombre": "canvas-design",
+      "descripcion": "Create beautiful visual art in .png and .pdf documents using design philosophy. Use this skill when the user asks to create a poster, piece of art, design, or other static piece. Creates original visual designs, never generic.",
+      "categoria": "Design",
+      "installs": 316,
+      "stars": 66293,
+      "verified": true
+    },
+    {
+      "id": "anthropics-skill-development",
+      "creator": "anthropics",
+      "nombre": "skill-development",
+      "descripcion": "This skill should be used when the user wants to 'create a skill', 'add a skill to plugin', 'write a new skill', 'improve skill description', 'organize skill content', or needs guidance on skill structure and progressive disclosure.",
+      "categoria": "AI & ML",
+      "installs": 363,
+      "stars": 65489,
+      "verified": true
+    },
+    {
+      "id": "github-prd",
+      "creator": "github",
+      "nombre": "prd",
+      "descripcion": "Generate high-quality Product Requirements Documents (PRDs) for software systems and AI-powered features. Includes executive summaries, user stories, technical specifications, and risk analysis.",
+      "categoria": "Planning",
+      "installs": 315,
+      "stars": 20589,
+      "verified": true
+    },
+    {
+      "id": "github-web-design-reviewer",
+      "creator": "github",
+      "nombre": "web-design-reviewer",
+      "descripcion": "This skill enables visual inspection of websites running locally or remotely to identify and fix design issues. Triggers on requests like 'review website design', 'check the UI', 'fix the layout', 'find design problems'.",
+      "categoria": "Design",
+      "installs": 314,
+      "stars": 20589,
+      "verified": true
+    },
+    {
+      "id": "github-refactor",
+      "creator": "github",
+      "nombre": "refactor",
+      "descripcion": "Surgical code refactoring to improve maintainability without changing behavior. Covers extracting functions, renaming variables, breaking down god functions, improving type safety, and eliminating code smells.",
+      "categoria": "Coding",
+      "installs": 308,
+      "stars": 20589,
+      "verified": true
+    },
+    {
+      "id": "anthropics-applying-brand-guidelines",
+      "creator": "anthropics",
+      "nombre": "applying-brand-guidelines",
+      "descripcion": "This skill applies consistent corporate branding and styling to all generated documents including colors, fonts, layouts, and messaging.",
+      "categoria": "Business",
+      "installs": 296,
+      "stars": 32676,
+      "verified": true
+    },
+    {
+      "id": "anthropics-agent-identifier",
+      "creator": "anthropics",
+      "nombre": "agent-identifier",
+      "descripcion": "This skill should be used when the user asks to 'create an agent', 'add an agent', 'write a subagent', 'agent frontmatter', or needs guidance on agent tools, agent colors, agent examples, or autonomous agent design.",
+      "categoria": "AI & ML",
+      "installs": 208,
+      "stars": 65489,
+      "verified": true
+    },
+    {
+      "id": "github-chrome-devtools",
+      "creator": "github",
+      "nombre": "chrome-devtools",
+      "descripcion": "Expert-level browser automation, debugging, and performance analysis using Chrome DevTools MCP. Use for interacting with web pages, capturing screenshots, analyzing network traffic, and profiling performance.",
+      "categoria": "DevOps",
+      "installs": 266,
+      "stars": 20589,
+      "verified": true
+    },
+    {
+      "id": "anthropics-web-artifacts-builder",
+      "creator": "anthropics",
+      "nombre": "web-artifacts-builder",
+      "descripcion": "Suite of tools for creating elaborate, multi-component claude.ai HTML artifacts using modern frontend web technologies (React, Tailwind CSS, shadcn/ui). Use for complex artifacts requiring state management and routing.",
+      "categoria": "Coding",
+      "installs": 211,
+      "stars": 66293,
+      "verified": true
+    },
+    {
+      "id": "anthropics-research-assistant",
+      "creator": "anthropics",
+      "nombre": "research-assistant",
+      "descripcion": "Deep research assistant for complex topics. Synthesizes information from multiple sources, identifies knowledge gaps, and produces structured research reports with citations and confidence levels.",
+      "categoria": "Research",
+      "installs": 445,
+      "stars": 58320,
+      "verified": true
+    },
+    {
+      "id": "anthropics-data-analyst",
+      "creator": "anthropics",
+      "nombre": "data-analyst",
+      "descripcion": "Statistical analysis and data visualization skill. Use when the user needs to analyze datasets, create charts, run statistical tests, or derive insights from structured data.",
+      "categoria": "Data & Analytics",
+      "installs": 512,
+      "stars": 54100,
+      "verified": true
+    },
+    {
+      "id": "anthropics-technical-writer",
+      "creator": "anthropics",
+      "nombre": "technical-writer",
+      "descripcion": "Produces clear, accurate, and well-structured technical documentation. Use for API docs, README files, user guides, architecture documents, and developer-facing content.",
+      "categoria": "Writing",
+      "installs": 389,
+      "stars": 49870,
+      "verified": true
+    },
+    {
+      "id": "anthropics-email-composer",
+      "creator": "anthropics",
+      "nombre": "email-composer",
+      "descripcion": "Compose professional emails for any business context. Handles cold outreach, follow-ups, internal communications, client updates, and sensitive topics with appropriate tone and structure.",
+      "categoria": "Communication",
+      "installs": 621,
+      "stars": 41230,
+      "verified": true
+    },
+    {
+      "id": "anthropics-security-reviewer",
+      "creator": "anthropics",
+      "nombre": "security-reviewer",
+      "descripcion": "Code security analysis skill. Reviews code for OWASP Top 10 vulnerabilities, injection flaws, authentication issues, and insecure data handling. Provides actionable remediation steps.",
+      "categoria": "Security",
+      "installs": 178,
+      "stars": 38540,
+      "verified": true
+    }
+  ]
+}

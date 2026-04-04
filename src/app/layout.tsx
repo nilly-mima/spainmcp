@@ -24,7 +24,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es">
-      <body className={`${inter.className} bg-gray-50 text-gray-900`}>
+      <body className={inter.className}>
         <Header />
         <main className="max-w-6xl mx-auto px-6 py-8">
           {children}

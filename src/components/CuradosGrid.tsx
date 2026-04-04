@@ -12,7 +12,7 @@ export default function CuradosGrid({ children }: { children: React.ReactNode })
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 items-stretch">
         {visible}
       </div>
       {hasMore && (

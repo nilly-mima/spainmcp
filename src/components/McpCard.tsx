@@ -28,7 +28,7 @@ function McpIcon({ nombre }: { nombre: string }) {
 
 export default function McpCard({ mcp }: { mcp: Mcp }) {
   return (
-    <Link href={`/mcps/${mcp.id}`} className="group block">
+    <Link href={`/mcps/${mcp.id}`} className="group block h-full">
       <div
         className="bg-white rounded-xl p-5 h-full flex flex-col gap-3 transition-shadow hover:shadow-md"
         style={{ border: '1px solid #E8E2D9' }}

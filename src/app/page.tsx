@@ -3,7 +3,7 @@ import McpCard from '@/components/McpCard'
 import NetworkAnimation from '@/components/NetworkAnimation'
 import FadeIn from '@/components/FadeIn'
 import CopyButton from '@/components/CopyButton'
-import MarqueeMcps from '@/components/MarqueeMcps'
+import HeroCards from '@/components/HeroCards'
 import HowToConnect from '@/components/HowToConnect'
 import { getAllMcps, getAllCategorias, CATEGORIA_LABELS, getImportedTotal, getImportedMcps } from '@/lib/mcps'
 
@@ -33,9 +33,10 @@ export default function Home() {
   const destacados = mcps.filter(m => m.destacado)
   const categorias = getAllCategorias()
   const totalImportados = getImportedTotal()
-  const imported60 = getImportedMcps(60)
-  const marqueeRow1 = imported60.slice(0, 30)
-  const marqueeRow2 = imported60.slice(30, 60)
+  const imported = getImportedMcps(36)
+  const heroRow1 = imported.slice(0, 12)
+  const heroRow2 = imported.slice(12, 24)
+  const heroRow3 = imported.slice(24, 36)
 
   return (
     <div className="flex flex-col gap-16">
@@ -82,8 +83,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── Marquee ── */}
-      <MarqueeMcps row1={marqueeRow1} row2={marqueeRow2} />
+      {/* ── Hero cards ── */}
+      <HeroCards row1={heroRow1} row2={heroRow2} row3={heroRow3} total={totalImportados} />
 
       {/* ── Stats ── */}
       <FadeIn>

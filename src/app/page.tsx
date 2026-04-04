@@ -6,6 +6,8 @@ import CopyButton from '@/components/CopyButton'
 import HeroCards from '@/components/HeroCards'
 import HowToConnect from '@/components/HowToConnect'
 import McpListPreview from '@/components/McpListPreview'
+import PublishSection from '@/components/PublishSection'
+import FireUpSection from '@/components/FireUpSection'
 import { getAllMcps, getAllCategorias, CATEGORIA_LABELS, getImportedTotal, getImportedMcps } from '@/lib/mcps'
 
 const CAT_META: Record<string, { emoji: string; accent: string; bg: string }> = {
@@ -45,21 +47,17 @@ export default function Home() {
       {/* ── Hero ── */}
       <section className="pt-6 pb-4 flex flex-col lg:flex-row items-center gap-10">
         <div className="flex flex-col gap-7 flex-1 min-w-0 animate-fade-in-up">
-          <div className="inline-flex items-center gap-2 bg-orange-50 text-orange-700 text-xs font-medium px-3 py-1.5 rounded-full w-fit" style={{ border: '1px solid #FDBA74' }}>
-            <span className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-pulse" />
-            Directorio MCP en español · España y LATAM
-          </div>
-          <h1 className="text-6xl md:text-7xl lg:text-8xl font-black text-stone-900 leading-none tracking-tighter">
+          <h1 className="text-[3.375rem] md:text-[4.05rem] lg:text-[5.4rem] font-black text-stone-900 dark:text-stone-100 leading-none tracking-tighter">
             La forma más rápida de extender tu IA
           </h1>
-          <p className="text-lg text-stone-500 max-w-sm leading-relaxed">
+          <p className="text-lg text-stone-500 dark:text-stone-400 max-w-sm leading-relaxed">
             Conecta Claude a miles de herramientas con servidores MCP.
             Guías en español, verificados, para España y LATAM.
           </p>
           <div className="flex items-center gap-3 flex-wrap">
             <div
-              className="flex items-center gap-3 bg-white rounded-xl px-4 py-2.5 text-sm font-mono text-stone-600"
-              style={{ border: '1px solid #E8E2D9' }}
+              className="flex items-center gap-3 bg-white dark:bg-[var(--card)] rounded-xl px-4 py-2.5 text-sm font-mono text-stone-600 dark:text-stone-300"
+              style={{ border: '1px solid var(--border)' }}
             >
               <span className="text-stone-400">$</span>
               <span>claude mcp add github</span>
@@ -96,112 +94,16 @@ export default function Home() {
         </div>
       </FadeIn>
 
-      {/* ── Destacados ── */}
+
+
+      {/* ── Publish section ── */}
       <FadeIn>
-        <section className="flex flex-col gap-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-stone-400 uppercase tracking-wider">Destacados</h2>
-            <Link href="/mcps" className="text-sm text-orange-600 hover:text-orange-700 font-medium transition-colors">
-              Ver todos →
-            </Link>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-            {destacados.map((mcp, i) => (
-              <FadeIn key={mcp.id} delay={i * 60} className="h-full">
-                <McpCard mcp={mcp} />
-              </FadeIn>
-            ))}
-          </div>
-        </section>
+        <PublishSection />
       </FadeIn>
 
-      {/* ── Categorías ── */}
+      {/* ── Fire up section ── */}
       <FadeIn>
-        <section className="flex flex-col gap-4">
-          <h2 className="text-sm font-semibold text-stone-400 uppercase tracking-wider">Categorías</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {categorias.slice(0, 8).map((cat, i) => {
-              const meta = CAT_META[cat]
-              return (
-                <FadeIn key={cat} delay={i * 50}>
-                  <Link
-                    href={`/categoria/${cat}`}
-                    className="bg-white rounded-xl p-4 flex items-center gap-3 hover:shadow-md transition-all group"
-                    style={{ border: '1px solid #E8E2D9' }}
-                  >
-                    {meta && (
-                      <span
-                        className="w-9 h-9 rounded-lg flex items-center justify-center text-lg shrink-0"
-                        style={{ background: meta.bg }}
-                      >
-                        {meta.emoji}
-                      </span>
-                    )}
-                    <div className="min-w-0">
-                      <span
-                        className="font-medium text-stone-800 text-sm block group-hover:transition-colors"
-                        style={{ '--hover-color': meta?.accent } as React.CSSProperties}
-                      >
-                        {CATEGORIA_LABELS[cat] || cat}
-                      </span>
-                      <span className="text-xs text-stone-400">Explorar →</span>
-                    </div>
-                  </Link>
-                </FadeIn>
-              )
-            })}
-          </div>
-        </section>
-      </FadeIn>
-
-      {/* ── Todos los MCPs curados ── */}
-      <FadeIn>
-        <section className="flex flex-col gap-4">
-          <h2 className="text-sm font-semibold text-stone-400 uppercase tracking-wider">Todos los servidores MCP</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-            {mcps.filter(m => !m.destacado).map((mcp, i) => (
-              <FadeIn key={mcp.id} delay={i * 40} className="h-full">
-                <McpCard mcp={mcp} />
-              </FadeIn>
-            ))}
-          </div>
-        </section>
-      </FadeIn>
-
-      {/* ── CTA banner ── */}
-      <FadeIn>
-        <section
-          className="rounded-2xl p-10 text-center flex flex-col items-center gap-4 relative overflow-hidden"
-          style={{ background: '#1C1917' }}
-        >
-          {/* Decoración fondo */}
-          <div className="absolute inset-0 opacity-5" style={{
-            backgroundImage: 'radial-gradient(circle at 20% 50%, #EA580C 0%, transparent 50%), radial-gradient(circle at 80% 50%, #EA580C 0%, transparent 50%)'
-          }} />
-          <div className="relative flex flex-col items-center gap-4">
-            <span className="text-3xl">⚡</span>
-            <h2 className="text-2xl font-bold text-white">¿Tu empresa quiere su MCP?</h2>
-            <p className="text-stone-400 max-w-md">
-              Publica tu servidor MCP en SpainMCP. Visibilidad en toda la comunidad hispanohablante de España y LATAM.
-            </p>
-            <div className="flex gap-3 flex-wrap justify-center">
-              <a
-                href="https://github.com/nilly-mima/spainmcp"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="border border-stone-600 text-stone-300 px-4 py-2 rounded-lg hover:bg-stone-800 transition-colors text-sm"
-              >
-                Abrir PR en GitHub
-              </a>
-              <Link
-                href="/submit"
-                className="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-500 transition-colors text-sm font-medium shadow-lg shadow-orange-900/30"
-              >
-                Publicar MCP →
-              </Link>
-            </div>
-          </div>
-        </section>
+        <FireUpSection />
       </FadeIn>
 
     </div>

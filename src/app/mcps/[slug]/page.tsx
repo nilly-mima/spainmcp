@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { getMcpById, getAllMcps, CATEGORIA_LABELS, DIFICULTAD_LABELS } from '@/lib/mcps'
+import CopyButton from '@/components/CopyButton'
 
 export async function generateStaticParams() {
   const mcps = getAllMcps()
@@ -83,7 +84,10 @@ export default async function McpPage({ params }: { params: Promise<{ slug: stri
       <div className="flex flex-col gap-4">
         <h2 className="text-lg font-semibold">Instalación en Claude Code</h2>
         <div className="bg-gray-900 rounded-xl p-4">
-          <p className="text-gray-400 text-xs mb-2">Terminal</p>
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-gray-400 text-xs">Terminal</p>
+            <CopyButton text={mcp.instalacion_claude_code} />
+          </div>
           <code className="text-green-400 text-sm font-mono">{mcp.instalacion_claude_code}</code>
         </div>
 
@@ -102,7 +106,10 @@ export default async function McpPage({ params }: { params: Promise<{ slug: stri
 
         <h2 className="text-lg font-semibold mt-2">Instalación con npx</h2>
         <div className="bg-gray-900 rounded-xl p-4">
-          <p className="text-gray-400 text-xs mb-2">Terminal</p>
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-gray-400 text-xs">Terminal</p>
+            <CopyButton text={mcp.instalacion_npx} />
+          </div>
           <code className="text-green-400 text-sm font-mono">{mcp.instalacion_npx}</code>
         </div>
       </div>

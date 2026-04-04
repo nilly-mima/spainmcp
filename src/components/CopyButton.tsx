@@ -4,21 +4,29 @@ import { useState } from 'react'
 
 export default function CopyButton({ text }: { text: string }) {
   const [copied, setCopied] = useState(false)
+  const [flying, setFlying] = useState(false)
 
   const copy = () => {
     navigator.clipboard.writeText(text)
     setCopied(true)
+    setFlying(true)
     setTimeout(() => setCopied(false), 2000)
+    setTimeout(() => setFlying(false), 450)
   }
 
   return (
     <button
       onClick={copy}
-      title="Copiar"
-      className="text-stone-300 hover:text-stone-500 transition-colors"
+      title={copied ? 'Copiado' : 'Copiar'}
+      className="relative text-stone-300 hover:text-stone-500 transition-colors"
     >
+      {flying && (
+        <span className="animate-fly-up absolute left-1/2 top-0 -translate-x-1/2 text-orange-500 font-mono text-xs font-bold pointer-events-none select-none">
+          $
+        </span>
+      )}
       {copied ? (
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-orange-500">
           <polyline points="20 6 9 17 4 12" />
         </svg>
       ) : (

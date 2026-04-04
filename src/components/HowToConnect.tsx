@@ -28,8 +28,8 @@ function CopyIcon({ onClick }: { onClick: () => void }) {
 function Block({ children, copyText }: { children: React.ReactNode; copyText: string }) {
   return (
     <div
-      className="relative rounded-xl px-5 py-4 font-mono text-sm leading-7"
-      style={{ background: '#F0EBE3', border: '1px solid #E8E2D9' }}
+      className="relative rounded-xl px-5 py-4 font-mono text-sm leading-7 text-stone-800 dark:text-stone-200"
+      style={{ background: 'var(--background)', border: '1px solid var(--border)' }}
     >
       <div className="absolute top-3.5 right-4">
         <CopyIcon onClick={() => navigator.clipboard.writeText(copyText)} />
@@ -51,22 +51,22 @@ export default function HowToConnect() {
   return (
     <section className="flex flex-col items-center gap-10">
       <div className="flex flex-col items-center gap-3 text-center">
-        <h2 className="text-4xl font-black text-stone-900 tracking-tight">Conecta en segundos</h2>
-        <p className="text-stone-500 max-w-md">
+        <h2 className="text-4xl font-black text-stone-900 dark:text-stone-100 tracking-tight">Conecta en segundos</h2>
+        <p className="text-stone-500 dark:text-stone-400 max-w-md">
           Tres comandos. Tu IA conectada a cualquier herramienta del directorio.
         </p>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 p-1 rounded-xl" style={{ background: '#E8E2D9' }}>
+      <div className="flex gap-1 p-1 rounded-xl" style={{ background: 'var(--border)' }}>
         {(['cli', 'typescript'] as Tab[]).map(t => (
           <button
             key={t}
             onClick={() => setTab(t)}
             className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${
               tab === t
-                ? 'bg-white text-stone-900 shadow-sm'
-                : 'text-stone-500 hover:text-stone-700'
+                ? 'bg-white dark:bg-[var(--card)] text-stone-900 dark:text-stone-100 shadow-sm'
+                : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200'
             }`}
           >
             {t === 'cli' ? '>_ CLI' : 'ts TypeScript'}

@@ -2,6 +2,8 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import Header from '@/components/Header'
+import Footer from '@/components/Footer'
+import ThemeProvider from '@/components/ThemeProvider'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -23,15 +25,15 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="es">
+    <html lang="es" suppressHydrationWarning>
       <body className={inter.className}>
-        <Header />
-        <main className="max-w-6xl mx-auto px-6 pt-2 pb-8">
-          {children}
-        </main>
-        <footer className="mt-16 py-8 text-center text-sm text-stone-400" style={{ borderTop: '1px solid #E8E2D9' }}>
-          <p>SpainMCP — El directorio MCP en español · <a href="https://github.com/nilly-mima/spainmcp" className="hover:text-stone-600 transition-colors">GitHub</a></p>
-        </footer>
+        <ThemeProvider>
+          <Header />
+          <main className="max-w-6xl mx-auto px-6 pt-2 pb-8">
+            {children}
+          </main>
+          <Footer />
+        </ThemeProvider>
       </body>
     </html>
   )

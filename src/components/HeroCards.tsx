@@ -1,4 +1,7 @@
+'use client'
+
 import Link from 'next/link'
+import { useEffect, useRef, useState } from 'react'
 
 type Item = { nombre: string; descripcion_en: string; scope: string }
 
@@ -46,8 +49,25 @@ export default function HeroCards({
   row3: Item[]
   total: number
 }) {
+  const ref = useRef<HTMLDivElement>(null)
+  const [visible, setVisible] = useState(false)
+
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setVisible(true); observer.disconnect() } },
+      { threshold: 0.05 }
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+
+  const rows = [row1, row2, row3]
+  const offsets = ['', '-ml-[148px]', '-ml-[74px]']
+
   return (
-    <div className="relative overflow-hidden">
+    <div ref={ref} className="relative overflow-hidden">
       {/* Background decorative lines */}
       <svg
         className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full pointer-events-none"
@@ -67,7 +87,7 @@ export default function HeroCards({
         <path d="M600,380 Q680,260 1120,180 Q1200,140 1200,60" stroke="#EA580C" strokeOpacity="0.11" strokeWidth="1.5"/>
       </svg>
 
-      {/* 3 filas de cards con fade lateral */}
+      {/* 3 filas con stagger al entrar en viewport */}
       <div
         className="relative flex flex-col gap-3"
         style={{
@@ -75,19 +95,32 @@ export default function HeroCards({
           WebkitMaskImage: 'linear-gradient(to right, transparent, black 5%, black 95%, transparent)',
         }}
       >
-        <div className="flex gap-3">
-          {row1.map((item, i) => <Card key={i} item={item} />)}
-        </div>
-        <div className="flex gap-3 -ml-[148px]">
-          {row2.map((item, i) => <Card key={i} item={item} />)}
-        </div>
-        <div className="flex gap-3 -ml-[74px]">
-          {row3.map((item, i) => <Card key={i} item={item} />)}
-        </div>
+        {rows.map((row, rowIdx) => (
+          <div
+            key={rowIdx}
+            className={`flex gap-3 ${offsets[rowIdx]}`}
+            style={{
+              transition: 'opacity 0.65s ease, transform 0.65s cubic-bezier(0.22, 1, 0.36, 1)',
+              transitionDelay: `${rowIdx * 130}ms`,
+              opacity: visible ? 1 : 0,
+              transform: visible ? 'translateY(0)' : 'translateY(28px)',
+            }}
+          >
+            {row.map((item, i) => <Card key={i} item={item} />)}
+          </div>
+        ))}
       </div>
 
-      {/* Botones CTA */}
-      <div className="relative flex justify-center gap-3 mt-8">
+      {/* Botones CTA — entran tras las filas */}
+      <div
+        className="relative flex justify-center gap-3 mt-8"
+        style={{
+          transition: 'opacity 0.65s ease, transform 0.65s cubic-bezier(0.22, 1, 0.36, 1)',
+          transitionDelay: '390ms',
+          opacity: visible ? 1 : 0,
+          transform: visible ? 'translateY(0)' : 'translateY(16px)',
+        }}
+      >
         <Link
           href="/mcps"
           className="bg-orange-600 text-white px-6 py-2.5 rounded-xl font-semibold text-sm hover:bg-orange-700 transition-colors shadow-sm"

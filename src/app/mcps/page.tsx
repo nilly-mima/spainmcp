@@ -8,11 +8,51 @@ export const metadata = {
   description: 'Más de 1800 servidores MCP con guías en español. El directorio MCP más completo para España y LATAM.',
 }
 
+const IMPORTED_CAT_LABELS: Record<string, string> = {
+  'desarrollo': 'Desarrollo',
+  'otros': 'Otros',
+  'finanzas': 'Finanzas',
+  'productividad': 'Productividad',
+  'busqueda': 'Búsqueda',
+  'bases-de-datos': 'Bases de datos',
+  'seguridad': 'Seguridad',
+  'datos': 'Datos',
+  'comunicacion': 'Comunicación',
+  'cloud': 'Cloud',
+  'agregadores': 'Agregadores',
+  'automatizacion': 'Automatización',
+  'arte': 'Arte y cultura',
+  'gaming': 'Gaming',
+  'archivos': 'Archivos',
+  'multimedia': 'Multimedia',
+  'infraestructura': 'Infraestructura',
+  'lenguaje': 'Lenguaje',
+  'legal': 'Legal',
+  'marketing': 'Marketing',
+  'noticias': 'Noticias',
+  'scraping': 'Scraping',
+  'salud': 'Salud',
+  'viajes': 'Viajes',
+  'educacion': 'Educación',
+  'entretenimiento': 'Entretenimiento',
+  'redes-sociales': 'Redes sociales',
+}
+
 export default function DirectorioPage() {
   const curados = getAllMcps()
   const importados = getImportedMcps()
   const totalImportados = getImportedTotal()
   const categorias = getAllCategorias()
+
+  // Agrupar por categoría y ordenar alfabéticamente dentro de cada grupo
+  const grupos = importados.reduce<Record<string, typeof importados>>((acc, mcp) => {
+    const cat = mcp.categoria || 'otros'
+    if (!acc[cat]) acc[cat] = []
+    acc[cat].push(mcp)
+    return acc
+  }, {})
+  Object.values(grupos).forEach(g => g.sort((a, b) => a.nombre.localeCompare(b.nombre)))
+  const gruposOrdenados = Object.entries(grupos).sort(([a], [b]) => a.localeCompare(b))
 
   return (
     <div className="flex flex-col gap-10">
@@ -58,8 +98,8 @@ export default function DirectorioPage() {
         </div>
       </section>
 
-      {/* Importados de awesome-mcp-servers */}
-      <section className="flex flex-col gap-4">
+      {/* Importados agrupados por categoría */}
+      <section className="flex flex-col gap-8">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <h2 className="text-sm font-semibold text-stone-400 uppercase tracking-wider">
@@ -81,14 +121,25 @@ export default function DirectorioPage() {
             Fuente: GitHub →
           </a>
         </div>
-        <div
-          className="bg-white rounded-xl divide-y"
-          style={{ border: '1px solid #E8E2D9' }}
-        >
-          {importados.map(mcp => (
-            <ImportedMcpRow key={mcp.id + mcp.github_url} mcp={mcp} />
-          ))}
-        </div>
+
+        {gruposOrdenados.map(([cat, mcps]) => (
+          <div key={cat} className="flex flex-col gap-2">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-stone-500 uppercase tracking-wider">
+                {IMPORTED_CAT_LABELS[cat] || cat}
+              </span>
+              <span className="text-xs text-stone-300">{mcps.length}</span>
+            </div>
+            <div
+              className="bg-white rounded-xl divide-y"
+              style={{ border: '1px solid #E8E2D9' }}
+            >
+              {mcps.map(mcp => (
+                <ImportedMcpRow key={mcp.id + mcp.github_url} mcp={mcp} />
+              ))}
+            </div>
+          </div>
+        ))}
       </section>
 
     </div>

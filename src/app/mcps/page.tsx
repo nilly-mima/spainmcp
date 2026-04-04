@@ -1,5 +1,6 @@
 import McpCard from '@/components/McpCard'
-import ImportedMcpRow from '@/components/ImportedMcpRow'
+import CuradosGrid from '@/components/CuradosGrid'
+import ImportedCategoryGroup from '@/components/ImportedCategoryGroup'
 import { getAllMcps, getAllCategorias, getImportedMcps, getImportedTotal, CATEGORIA_LABELS } from '@/lib/mcps'
 import Link from 'next/link'
 
@@ -91,11 +92,11 @@ export default function DirectorioPage() {
             {curados.length} MCPs
           </span>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+        <CuradosGrid>
           {curados.map(mcp => (
             <McpCard key={mcp.id} mcp={mcp} />
           ))}
-        </div>
+        </CuradosGrid>
       </section>
 
       {/* Importados agrupados por categoría */}
@@ -123,22 +124,11 @@ export default function DirectorioPage() {
         </div>
 
         {gruposOrdenados.map(([cat, mcps]) => (
-          <div key={cat} className="flex flex-col gap-2">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold text-stone-500 uppercase tracking-wider">
-                {IMPORTED_CAT_LABELS[cat] || cat}
-              </span>
-              <span className="text-xs text-stone-300">{mcps.length}</span>
-            </div>
-            <div
-              className="bg-white rounded-xl divide-y"
-              style={{ border: '1px solid #E8E2D9' }}
-            >
-              {mcps.map(mcp => (
-                <ImportedMcpRow key={mcp.id + mcp.github_url} mcp={mcp} />
-              ))}
-            </div>
-          </div>
+          <ImportedCategoryGroup
+            key={cat}
+            label={IMPORTED_CAT_LABELS[cat] || cat}
+            mcps={mcps}
+          />
         ))}
       </section>
 

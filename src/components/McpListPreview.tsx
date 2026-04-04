@@ -51,44 +51,47 @@ function MascotSvg() {
   return (
     <svg viewBox="0 0 280 420" fill="none" className="w-full">
 
-      {/* ── Colina cálida (hill) ── */}
+      {/* Colina cálida */}
       <path d="M-20,372 Q140,308 300,372 L300,420 L-20,420 Z"
         fill="#EDB99A" fillOpacity="0.55"/>
 
-      {/* ── Sombra del personaje ── */}
+      {/* Sombra */}
       <ellipse cx="140" cy="372" rx="57" ry="14"
-        fill="#292524" fillOpacity="0.65"/>
+        fill="#1C1917" fillOpacity="0.65"/>
 
-      {/* ── Piernas (dos píldoras blancas) ── */}
+      {/* Piernas */}
       <rect x="108" y="332" width="26" height="44" rx="13" fill="white"/>
       <rect x="146" y="332" width="26" height="44" rx="13" fill="white"/>
 
-      {/* ── Cuerpo principal (círculo naranja) ── */}
+      {/* Cuerpo */}
       <circle cx="140" cy="234" r="84" fill="#EA580C"/>
 
-      {/* ── Llama (mismo naranja — se fusiona con el cuerpo)
-           Lóbulo izquierdo alto + curva derecha secundaria ── */}
+      {/* Llama — ASIMÉTRICA: borde izquierdo sube alto,
+          cruza por arriba y forma un curl a la derecha */}
       <path d="
-        M 102,160
-        C 78,122  76,70  106,44
-        C 120,30  142,40  138,66
-        C 153,28  180,44  177,80
-        C 174,110  157,134  166,160
+        M 100,158
+        C 76,118  80,62  112,36
+        C 140,10  200,52  194,88
+        C 190,116  174,140  168,158
         Z
       " fill="#EA580C"/>
 
-      {/* ── Barriga amarilla ── */}
-      <ellipse cx="140" cy="265" rx="51" ry="44" fill="#FCD34D"/>
+      {/* Barriga */}
+      <ellipse cx="140" cy="268" rx="48" ry="41" fill="#FCD34D"/>
 
-      {/* ── Cara: ceja (preocupada — arco descendente) ── */}
-      <path d="M 110,204 Q 127,192 146,202"
-        stroke="#1C1917" strokeWidth="4.5" fill="none" strokeLinecap="round"/>
+      {/* Ceja principal (arco largo, grueso) */}
+      <path d="M 103,202 Q 122,188 148,198"
+        stroke="#1C1917" strokeWidth="5.5" fill="none" strokeLinecap="round"/>
 
-      {/* ── Ojo ── */}
-      <circle cx="124" cy="220" r="5.5" fill="#1C1917"/>
+      {/* Segunda línea bajo ceja (fruncido — más corta) */}
+      <path d="M 106,212 L 130,210"
+        stroke="#1C1917" strokeWidth="4" fill="none" strokeLinecap="round"/>
 
-      {/* ── Boca (O pequeña, sorprendida/preocupada) ── */}
-      <ellipse cx="135" cy="246" rx="8" ry="7" fill="#1C1917"/>
+      {/* Ojo — óvalo pequeño entre las dos líneas */}
+      <ellipse cx="127" cy="221" rx="5" ry="4.5" fill="#1C1917"/>
+
+      {/* Boca — rectángulo redondeado (boca abierta, grimace) */}
+      <rect x="112" y="238" width="20" height="15" rx="4.5" fill="#1C1917"/>
 
     </svg>
   )

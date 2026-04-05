@@ -39,7 +39,7 @@ export default function PublishDropdown() {
           style={{ border: '1px solid var(--border)' }}
         >
           <Link
-            href="/login"
+            href="/publish/mcp"
             onClick={() => setOpen(false)}
             className="flex items-center px-4 py-2.5 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800/60 transition-colors"
           >

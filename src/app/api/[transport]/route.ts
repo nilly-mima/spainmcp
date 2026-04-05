@@ -95,6 +95,41 @@ const handler = createMcpHandler(
         return { content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }] }
       }
     )
+
+    // --- TOOL 5: AEMET — Tiempo en España ---
+    server.registerTool(
+      "tiempo_aemet",
+      {
+        title: "Tiempo AEMET",
+        description:
+          "Obtiene la predicción meteorológica de AEMET para un municipio español. " +
+          "Usa el código INE del municipio (5 dígitos), p.ej. '28079' para Madrid, '08019' para Barcelona, '46250' para Valencia.",
+        inputSchema: {
+          municipio: z.string().describe("Código INE del municipio (5 dígitos). Madrid=28079, Barcelona=08019, Valencia=46250, Sevilla=41091, Zaragoza=50297"),
+        },
+        annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: false, openWorldHint: true },
+      },
+      async ({ municipio }) => {
+        const apiKey = process.env.AEMET_API_KEY
+        if (!apiKey) return { isError: true, content: [{ type: "text" as const, text: "AEMET_API_KEY no configurada en el servidor" }] }
+
+        // AEMET usa un patrón de dos pasos: primero obtiene la URL de datos, luego los datos
+        const metaRes = await fetch(
+          `https://opendata.aemet.es/opendata/api/prediccion/especifica/municipio/diaria/${municipio}`,
+          { headers: { api_key: apiKey, Accept: "application/json" } }
+        )
+        if (!metaRes.ok) return { isError: true, content: [{ type: "text" as const, text: `Error AEMET: ${metaRes.status} — verifica que el código de municipio es correcto` }] }
+
+        const meta = await metaRes.json() as { datos?: string; estado?: number; descripcion?: string }
+        if (!meta.datos) return { isError: true, content: [{ type: "text" as const, text: `AEMET no devolvió datos: ${meta.descripcion ?? "sin descripción"}` }] }
+
+        const dataRes = await fetch(meta.datos)
+        if (!dataRes.ok) return { isError: true, content: [{ type: "text" as const, text: `Error obteniendo datos AEMET: ${dataRes.status}` }] }
+
+        const data = await dataRes.json()
+        return { content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }] }
+      }
+    )
   },
   {},
   { basePath: "/api", maxDuration: 60 }

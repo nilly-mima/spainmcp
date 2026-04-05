@@ -1,16 +1,16 @@
 'use client'
 
 import { useEffect } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { supabaseBrowser } from '@/lib/supabase-client'
 
 export default function AuthCallback() {
   const router = useRouter()
-  const searchParams = useSearchParams()
 
   useEffect(() => {
-    const code = searchParams.get('code')
-    const next = searchParams.get('next') ?? '/'
+    const params = new URLSearchParams(window.location.search)
+    const code = params.get('code')
+    const next = params.get('next') ?? '/'
 
     if (code) {
       // OAuth code flow (Google, GitHub)
@@ -22,7 +22,7 @@ export default function AuthCallback() {
       // Magic link — sesión extraída automáticamente del hash por supabase-js
       supabaseBrowser.auth.getSession().then(() => router.replace(next))
     }
-  }, [router, searchParams])
+  }, [router])
 
   return (
     <div className="min-h-screen flex items-center justify-center">

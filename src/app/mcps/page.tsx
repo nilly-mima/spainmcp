@@ -15,7 +15,7 @@ export default function McpsPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100">MCPs</h1>
         <p className="text-sm text-stone-400 dark:text-stone-500 mt-1">
-          {total.toLocaleString()} servidores · awesome-mcp-servers
+          {total.toLocaleString('es-ES')} servidores · awesome-mcp-servers
         </p>
       </div>
       <ImportedDirectory mcps={mcps} />

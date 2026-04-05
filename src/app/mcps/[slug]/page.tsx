@@ -27,20 +27,20 @@ export default async function McpPage({ params }: { params: Promise<{ slug: stri
     <div className="max-w-3xl mx-auto flex flex-col gap-8">
 
       {/* Breadcrumb */}
-      <nav className="text-sm text-gray-400 flex items-center gap-2">
-        <Link href="/" className="hover:text-gray-600">Inicio</Link>
+      <nav className="text-sm text-[var(--muted)] flex items-center gap-2">
+        <Link href="/" className="hover:text-[var(--foreground)]">Inicio</Link>
         <span>/</span>
-        <Link href="/mcps" className="hover:text-gray-600">Directorio</Link>
+        <Link href="/mcps" className="hover:text-[var(--foreground)]">Directorio</Link>
         <span>/</span>
-        <span className="text-gray-600">{mcp.nombre}</span>
+        <span className="text-[var(--foreground)]">{mcp.nombre}</span>
       </nav>
 
       {/* Header */}
-      <div className="bg-white border border-gray-200 rounded-2xl p-6 flex flex-col gap-4">
+      <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 flex flex-col gap-4">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">{mcp.nombre}</h1>
-            <p className="text-gray-500 mt-1">por {mcp.creador}</p>
+            <h1 className="text-2xl font-bold text-[var(--foreground)]">{mcp.nombre}</h1>
+            <p className="text-[var(--muted)] mt-1">por {mcp.creador}</p>
           </div>
           <div className="flex flex-wrap gap-2 justify-end">
             {mcp.verificado && (
@@ -59,21 +59,21 @@ export default async function McpPage({ params }: { params: Promise<{ slug: stri
           </div>
         </div>
 
-        <p className="text-gray-700 leading-relaxed">{mcp.descripcion_es}</p>
+        <p className="text-[var(--foreground)] leading-relaxed">{mcp.descripcion_es}</p>
 
         <div className="flex flex-wrap gap-2">
           {mcp.categoria.map(cat => (
             <Link
               key={cat}
               href={`/categoria/${cat}`}
-              className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full text-xs hover:bg-orange-50 hover:text-orange-600 transition-colors"
+              className="bg-[var(--border)] text-[var(--muted)] px-2 py-0.5 rounded-full text-xs hover:bg-orange-50 hover:text-orange-600 transition-colors"
             >
               {CATEGORIA_LABELS[cat] || cat}
             </Link>
           ))}
         </div>
 
-        <div className="flex gap-4 text-sm text-gray-500 pt-2 border-t border-gray-100">
+        <div className="flex gap-4 text-sm text-[var(--muted)] pt-2 border-t border-[var(--border)]">
           <span>{mcp.num_tools} tools disponibles</span>
           <span>Dificultad: {DIFICULTAD_LABELS[mcp.dificultad_instalacion]}</span>
           <span>Verificado: {mcp.fecha_verificado}</span>
@@ -131,9 +131,9 @@ export default async function McpPage({ params }: { params: Promise<{ slug: stri
         <h2 className="text-lg font-semibold">Casos de uso</h2>
         <ul className="flex flex-col gap-2">
           {mcp.casos_uso_es.map((caso, i) => (
-            <li key={i} className="flex items-start gap-3 bg-white border border-gray-200 rounded-xl p-4">
+            <li key={i} className="flex items-start gap-3 bg-[var(--card)] border border-[var(--border)] rounded-xl p-4">
               <span className="text-orange-500 mt-0.5">→</span>
-              <span className="text-gray-700">{caso}</span>
+              <span className="text-[var(--foreground)]">{caso}</span>
             </li>
           ))}
         </ul>
@@ -142,7 +142,7 @@ export default async function McpPage({ params }: { params: Promise<{ slug: stri
       {/* Tags */}
       <div className="flex flex-wrap gap-2">
         {mcp.tags.map(tag => (
-          <span key={tag} className="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded">
+          <span key={tag} className="text-xs text-[var(--muted)] bg-[var(--border)] px-2 py-1 rounded">
             #{tag}
           </span>
         ))}
@@ -154,7 +154,7 @@ export default async function McpPage({ params }: { params: Promise<{ slug: stri
           href={mcp.github_url}
           target="_blank"
           rel="noopener noreferrer"
-          className="border border-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors text-sm"
+          className="border border-[var(--border)] text-[var(--foreground)] px-4 py-2 rounded-lg hover:bg-[var(--card)] transition-colors text-sm"
         >
           Ver en GitHub →
         </a>

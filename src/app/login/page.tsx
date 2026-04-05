@@ -1,7 +1,6 @@
 'use client'
 
-import { useState } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useState, useEffect } from 'react'
 import { supabaseBrowser } from '@/lib/supabase-client'
 
 type State = 'idle' | 'loading' | 'sent' | 'error'
@@ -29,9 +28,13 @@ function GoogleIcon() {
 }
 
 export default function LoginPage() {
-  const searchParams = useSearchParams()
-  const next = searchParams.get('next') ?? '/'
+  const [next, setNext] = useState('/')
   const [email, setEmail] = useState('')
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    setNext(params.get('next') ?? '/')
+  }, [])
   const [state, setState] = useState<State>('idle')
   const [errorMsg, setErrorMsg] = useState('')
 

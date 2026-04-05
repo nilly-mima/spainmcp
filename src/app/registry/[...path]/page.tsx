@@ -4,10 +4,12 @@ import { createClient } from '@supabase/supabase-js'
 import CopyButton from '@/components/CopyButton'
 import OwnerSection from './OwnerSection'
 
-const supabase = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+function getSupabase() {
+  return createClient(
+    process.env.SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+}
 
 type McpServer = {
   namespace: string
@@ -37,7 +39,7 @@ function timeSince(dateStr: string | null): string {
 export async function generateMetadata({ params }: { params: Promise<{ path: string[] }> }) {
   const { path } = await params
   const namespace = decodeURIComponent(path.join('/'))
-  const { data } = await supabase
+  const { data } = await getSupabase()
     .from('mcp_servers')
     .select('display_name, description')
     .eq('namespace', namespace)
@@ -55,7 +57,7 @@ export default async function RegistryPage({ params }: { params: Promise<{ path:
   // decodeURIComponent por si '@' llega como '%40' en algunos proxies
   const namespace = decodeURIComponent(path.join('/'))
 
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from('mcp_servers')
     .select('*')
     .eq('namespace', namespace)

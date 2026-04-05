@@ -67,10 +67,7 @@ export default async function RegistryPage({ params }: { params: Promise<{ path:
     .eq('is_active', true)
     .single()
 
-  if (error || !data) {
-    // DEBUG TEMPORAL — revertir después
-    return <pre style={{padding:'2rem',color:'red',whiteSpace:'pre-wrap'}}>{JSON.stringify({namespace,error,data},null,2)}</pre>
-  }
+  if (error || !data) notFound()
 
   const mcp = data as McpServer
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://spainmcp-fngo.vercel.app'

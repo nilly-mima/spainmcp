@@ -4,6 +4,9 @@ import { createClient } from '@supabase/supabase-js'
 import CopyButton from '@/components/CopyButton'
 import OwnerSection from './OwnerSection'
 
+// Forzar renderizado dinámico — la query a Supabase usa env vars de runtime
+export const dynamic = 'force-dynamic'
+
 function getSupabase() {
   return createClient(
     process.env.SUPABASE_URL!,

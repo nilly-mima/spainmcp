@@ -36,7 +36,7 @@ function timeSince(dateStr: string | null): string {
 
 export async function generateMetadata({ params }: { params: Promise<{ path: string[] }> }) {
   const { path } = await params
-  const namespace = path.join('/')
+  const namespace = decodeURIComponent(path.join('/'))
   const { data } = await supabase
     .from('mcp_servers')
     .select('display_name, description')
@@ -51,8 +51,9 @@ export async function generateMetadata({ params }: { params: Promise<{ path: str
 
 export default async function RegistryPage({ params }: { params: Promise<{ path: string[] }> }) {
   const { path } = await params
-  // path = ['@miempresa', 'boe-pro'] → namespace = '@miempresa/boe-pro'
-  const namespace = path.join('/')
+  // path = ['@miempresa', 'boe-pro'] → '@miempresa/boe-pro'
+  // decodeURIComponent por si '@' llega como '%40' en algunos proxies
+  const namespace = decodeURIComponent(path.join('/'))
 
   const { data, error } = await supabase
     .from('mcp_servers')

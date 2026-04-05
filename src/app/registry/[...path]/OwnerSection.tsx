@@ -30,7 +30,7 @@ export default function OwnerSection({ namespace, ownerEmail }: { namespace: str
       >
         <p className="text-sm text-[var(--muted)]">¿Eres el creador de este MCP?</p>
         <Link
-          href={`/login?next=/registry/${namespace}`}
+          href={`/login?next=/registry/${namespace.replace('@', '')}`}
           className="text-sm text-orange-600 hover:underline font-medium shrink-0"
         >
           Entrar para ver tu dashboard →

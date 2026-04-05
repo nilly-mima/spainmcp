@@ -1,0 +1,42 @@
+{
+  "name": "@spainmcp/cli",
+  "version": "0.1.0",
+  "description": "Conecta SpainMCP a Claude Desktop, Cursor, VS Code y más",
+  "type": "module",
+  "bin": {
+    "spainmcp": "./dist/index.js"
+  },
+  "main": "./dist/index.js",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "commander": "^12.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.5.0"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "mcp",
+    "spain",
+    "boe",
+    "ine",
+    "claude",
+    "cursor",
+    "ai"
+  ],
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nilly-mima/spainmcp"
+  }
+}

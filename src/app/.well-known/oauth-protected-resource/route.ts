@@ -4,10 +4,15 @@
 export async function GET() {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "https://mcp.lat"
 
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://xjumlmtepbzebuxbhksu.supabase.co"
+
   return Response.json(
     {
       resource: `${baseUrl}/api/mcp`,
-      authorization_servers: [],
+      // Apunta al OAuth 2.1 server de Supabase — descubrimiento automático para MCP clients
+      authorization_servers: [
+        `${supabaseUrl}/.well-known/oauth-authorization-server/auth/v1`,
+      ],
       bearer_methods_supported: ["header"],
       resource_documentation: `${baseUrl}/docs`,
     },

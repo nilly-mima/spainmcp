@@ -3,13 +3,26 @@
   "nombre": "PostgreSQL MCP",
   "descripcion_es": "Conecta Claude directamente a tu base de datos PostgreSQL. Ejecuta consultas, analiza datos, genera informes y explora tu esquema de base de datos en lenguaje natural.",
   "descripcion_corta": "Consulta tu base de datos PostgreSQL desde Claude",
-  "categoria": ["datos", "desarrollo", "bases-de-datos"],
-  "tags": ["postgresql", "postgres", "sql", "base-de-datos", "datos", "consultas"],
+  "categoria": [
+    "dev-tools"
+  ],
+  "tags": [
+    "postgresql",
+    "postgres",
+    "sql",
+    "base-de-datos",
+    "datos",
+    "consultas"
+  ],
   "instalacion_npx": "npx @modelcontextprotocol/server-postgres",
   "instalacion_claude_code": "claude mcp add postgres -- npx -y @modelcontextprotocol/server-postgres postgresql://usuario:password@localhost/midb",
   "variables_entorno": [],
   "github_url": "https://github.com/modelcontextprotocol/servers/tree/main/src/postgres",
-  "compatible_con": ["claude-desktop", "claude-code", "cursor"],
+  "compatible_con": [
+    "claude-desktop",
+    "claude-code",
+    "cursor"
+  ],
   "verificado": true,
   "destacado": false,
   "gratuito": true,

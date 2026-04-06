@@ -3,13 +3,24 @@
   "nombre": "YouTube MCP",
   "descripcion_es": "Busca vídeos, obtiene transcripciones completas, analiza canales y extrae comentarios de YouTube directamente desde Claude. Ideal para investigación de contenido y análisis de competidores.",
   "descripcion_corta": "Transcripciones y búsqueda en YouTube desde Claude",
-  "categoria": ["contenido", "investigacion", "productividad"],
-  "tags": ["youtube", "video", "transcripciones", "contenido", "canales"],
+  "categoria": [
+    "academic-research"
+  ],
+  "tags": [
+    "youtube",
+    "video",
+    "transcripciones",
+    "contenido",
+    "canales"
+  ],
   "instalacion_npx": "npx youtube-mcp-server",
   "instalacion_claude_code": "claude mcp add youtube -- npx -y youtube-mcp-server",
   "variables_entorno": [],
   "github_url": "https://github.com/anaisbetts/mcp-youtube",
-  "compatible_con": ["claude-desktop", "claude-code"],
+  "compatible_con": [
+    "claude-desktop",
+    "claude-code"
+  ],
   "verificado": true,
   "destacado": false,
   "gratuito": true,

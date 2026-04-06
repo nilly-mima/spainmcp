@@ -29,7 +29,7 @@ export default function RootLayout({
       <body className={inter.className} suppressHydrationWarning>
         <ThemeProvider>
           <Header />
-          <main className="max-w-6xl mx-auto px-6 pt-2 pb-8">
+          <main className="max-w-screen-xl mx-auto px-4 pt-2 pb-8">
             {children}
           </main>
           <Footer />

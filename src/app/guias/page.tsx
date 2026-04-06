@@ -6,13 +6,18 @@ export const metadata = {
   description: 'Directorio de skills para Claude en español. Encuentra y conecta skills de Anthropic, GitHub y la comunidad.',
 }
 
-export default function SkillsPage() {
+export default async function SkillsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>
+}) {
+  const { q } = await searchParams
   const skills = getAllSkills()
   const total  = getSkillsTotal()
 
   return (
     <div className="flex flex-col gap-6">
-      <SkillsDirectory skills={skills} total={total} />
+      <SkillsDirectory key={q ?? ''} skills={skills} total={total} initialSearch={q ?? ''} />
     </div>
   )
 }

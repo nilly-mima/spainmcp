@@ -6,9 +6,21 @@ export const metadata = {
   description: 'Servidores MCP verificados, con guías en español para España y LATAM.',
 }
 
-export default function McpsPage() {
+export default async function McpsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>
+}) {
+  const { q } = await searchParams
   const mcps = getAllMcps()
   const categorias = getAllCategorias()
 
-  return <McpsPageClient mcps={mcps} categorias={categorias} />
+  return (
+    <McpsPageClient
+      key={q ?? ''}
+      mcps={mcps}
+      categorias={categorias}
+      initialQuery={q ?? ''}
+    />
+  )
 }

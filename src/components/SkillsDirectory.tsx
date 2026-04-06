@@ -176,8 +176,8 @@ function Pagination({ page, totalPages, onPage }: { page: number; totalPages: nu
 }
 
 /* ── Main component ── */
-export default function SkillsDirectory({ skills, total }: { skills: Skill[]; total: number }) {
-  const [search, setSearch]       = useState('')
+export default function SkillsDirectory({ skills, total, initialSearch = '' }: { skills: Skill[]; total: number; initialSearch?: string }) {
+  const [search, setSearch]       = useState(initialSearch)
   const [selectedCat, setSelectedCat] = useState<string | null>(null)
   const [page, setPage]           = useState(1)
 
@@ -210,22 +210,6 @@ export default function SkillsDirectory({ skills, total }: { skills: Skill[]; to
 
   return (
     <div className="flex flex-col gap-5">
-
-      {/* Search bar */}
-      <div className="relative">
-        <svg className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400 dark:text-stone-500 pointer-events-none"
-          width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-        </svg>
-        <input
-          type="text"
-          placeholder="Buscar skills..."
-          value={search}
-          onChange={e => handleSearch(e.target.value)}
-          className="w-full pl-11 pr-4 py-3 rounded-xl bg-white dark:bg-[var(--card)] text-stone-800 dark:text-stone-200 placeholder-stone-400 dark:placeholder-stone-500 outline-none focus:ring-2 focus:ring-orange-300 dark:focus:ring-orange-800 text-sm"
-          style={{ border: '1px solid var(--border)' }}
-        />
-      </div>
 
       {/* Layout: sidebar + contenido */}
       <div className="flex gap-8 items-start">

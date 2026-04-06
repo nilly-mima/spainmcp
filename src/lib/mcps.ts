@@ -25,6 +25,8 @@ export interface Mcp {
   dificultad_instalacion: 'facil' | 'media' | 'avanzada'
   especifico_espana?: boolean
   nota_es?: string
+  tools_list?: { name: string; description: string; parameters?: { name: string; type: string; required?: boolean; description?: string }[] }[]
+  logo_url?: string
 }
 
 const DATA_DIR = path.join(process.cwd(), 'src/data/mcps')

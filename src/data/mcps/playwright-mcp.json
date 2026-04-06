@@ -3,13 +3,26 @@
   "nombre": "Playwright MCP",
   "descripcion_es": "Permite a Claude navegar por cualquier página web, hacer clic, rellenar formularios y extraer información en tiempo real. Ideal para automatizar tareas repetitivas en el navegador o hacer scraping de datos.",
   "descripcion_corta": "Navega y automatiza cualquier web desde Claude",
-  "categoria": ["automatizacion", "scraping", "productividad"],
-  "tags": ["playwright", "browser", "web", "scraping", "automatizacion", "formularios"],
+  "categoria": [
+    "browser-automation"
+  ],
+  "tags": [
+    "playwright",
+    "browser",
+    "web",
+    "scraping",
+    "automatizacion",
+    "formularios"
+  ],
   "instalacion_npx": "npx @playwright/mcp",
   "instalacion_claude_code": "claude mcp add playwright -- npx -y @playwright/mcp",
   "variables_entorno": [],
   "github_url": "https://github.com/microsoft/playwright-mcp",
-  "compatible_con": ["claude-desktop", "claude-code", "cursor"],
+  "compatible_con": [
+    "claude-desktop",
+    "claude-code",
+    "cursor"
+  ],
   "verificado": true,
   "destacado": true,
   "gratuito": true,

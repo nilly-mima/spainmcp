@@ -1,0 +1,52 @@
+{
+  "name": "@spainmcp/ai-provider",
+  "version": "0.1.0",
+  "description": "SpainMCP tools para Vercel AI SDK — BOE, BORME, INE, AEMET con Stripe billing y ZDR",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "@ai-sdk/mcp": "^1",
+    "ai": "^6"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.5.0"
+  },
+  "peerDependencies": {
+    "ai": "^6"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "mcp",
+    "spain",
+    "boe",
+    "ine",
+    "aemet",
+    "borme",
+    "vercel",
+    "ai-sdk",
+    "stripe",
+    "gdpr"
+  ],
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nilly-mima/spainmcp"
+  }
+}

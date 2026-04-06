@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import PublishDropdown from './PublishDropdown'
+import UserMenu from './UserMenu'
 
 async function getGitHubStars(): Promise<number> {
   try {
@@ -62,12 +63,7 @@ export default async function Header() {
           >
             Obtener key
           </Link>
-          <Link
-            href="/login"
-            className="px-3 py-1.5 rounded-md text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-200/50 dark:hover:bg-stone-800/50 transition-colors"
-          >
-            Entrar
-          </Link>
+          <UserMenu />
         </nav>
 
       </div>

@@ -57,12 +57,6 @@ export default async function Header() {
           <div className="w-px h-4 bg-stone-300 dark:bg-stone-700 mx-2" />
 
           <PublishDropdown />
-          <Link
-            href="/get-key"
-            className="px-3 py-1.5 rounded-md bg-orange-600 hover:bg-orange-700 text-white text-sm font-medium transition-colors"
-          >
-            Obtener key
-          </Link>
           <UserMenu />
         </nav>
 

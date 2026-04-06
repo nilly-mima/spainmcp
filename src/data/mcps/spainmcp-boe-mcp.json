@@ -1,0 +1,29 @@
+{
+  "id": "spainmcp-boe-mcp",
+  "nombre": "BOE — Boletín Oficial del Estado",
+  "descripcion_es": "Accede al Boletín Oficial del Estado directamente desde Claude. Consulta las leyes, decretos y resoluciones publicadas hoy sin salir de tu flujo de trabajo.",
+  "descripcion_corta": "Legislación española del día en Claude",
+  "categoria": ["espana", "legal", "gobierno", "informacion"],
+  "tags": ["boe", "legislacion", "espana", "leyes", "decretos", "normativa", "oficial"],
+  "instalacion_npx": "npx -y mcp-remote https://mcp.lat/api/mcp --header \"Authorization: Bearer TU_API_KEY\"",
+  "instalacion_claude_code": "claude mcp add spainmcp -- npx -y mcp-remote https://mcp.lat/api/mcp --header \"Authorization: Bearer TU_API_KEY\"",
+  "variables_entorno": ["SPAINMCP_API_KEY"],
+  "github_url": "https://github.com/nilly-mima/spainmcp",
+  "web_oficial": "https://mcp.lat",
+  "compatible_con": ["claude-desktop", "claude-code", "cursor", "windsurf", "cline"],
+  "verificado": true,
+  "destacado": true,
+  "gratuito": true,
+  "creador": "SpainMCP",
+  "num_tools": 1,
+  "casos_uso_es": [
+    "Ver qué leyes o decretos se han publicado hoy en el BOE",
+    "Consultar normativa fiscal o laboral reciente",
+    "Verificar si una ley específica fue publicada esta semana",
+    "Resumir las resoluciones del día para un despacho de abogados"
+  ],
+  "fecha_verificado": "2026-04-07",
+  "dificultad_instalacion": "facil",
+  "especifico_espana": true,
+  "nota_es": "Requiere API key gratuita. Consíguela en mcp.lat/get-key"
+}

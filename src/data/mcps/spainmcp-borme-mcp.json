@@ -1,0 +1,29 @@
+{
+  "id": "spainmcp-borme-mcp",
+  "nombre": "BORME — Registro Mercantil",
+  "descripcion_es": "Consulta las altas, bajas y modificaciones de empresas en el Boletín Oficial del Registro Mercantil. Ideal para due diligence, prospección comercial o monitorizar competidores.",
+  "descripcion_corta": "Movimientos de empresas españolas en tiempo real",
+  "categoria": ["espana", "empresas", "gobierno", "informacion"],
+  "tags": ["borme", "registro-mercantil", "empresas", "espana", "due-diligence", "sociedades"],
+  "instalacion_npx": "npx -y mcp-remote https://mcp.lat/api/mcp --header \"Authorization: Bearer TU_API_KEY\"",
+  "instalacion_claude_code": "claude mcp add spainmcp -- npx -y mcp-remote https://mcp.lat/api/mcp --header \"Authorization: Bearer TU_API_KEY\"",
+  "variables_entorno": ["SPAINMCP_API_KEY"],
+  "github_url": "https://github.com/nilly-mima/spainmcp",
+  "web_oficial": "https://mcp.lat",
+  "compatible_con": ["claude-desktop", "claude-code", "cursor", "windsurf", "cline"],
+  "verificado": true,
+  "destacado": true,
+  "gratuito": true,
+  "creador": "SpainMCP",
+  "num_tools": 1,
+  "casos_uso_es": [
+    "Comprobar si una empresa se ha dado de alta o baja hoy",
+    "Due diligence rápido antes de firmar un contrato",
+    "Monitorizar nuevas empresas en un sector",
+    "Buscar cambios de administradores o denominación social"
+  ],
+  "fecha_verificado": "2026-04-07",
+  "dificultad_instalacion": "facil",
+  "especifico_espana": true,
+  "nota_es": "Requiere API key gratuita. Consíguela en mcp.lat/get-key"
+}

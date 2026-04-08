@@ -31,7 +31,7 @@ export async function authenticateRequest(req: Request): Promise<AuthResult | nu
   if (token.startsWith('sk-spainmcp-')) {
     const { data, error } = await supabase
       .from('api_keys')
-      .select('id, user_id, email, is_active')
+      .select('id, email, is_active')
       .eq('key_hash', hash)
       .eq('is_active', true)
       .single()
@@ -39,7 +39,7 @@ export async function authenticateRequest(req: Request): Promise<AuthResult | nu
     if (error || !data) return null
 
     return {
-      userId: data.user_id ?? data.email,
+      userId: data.email,
       type: 'api_key',
       email: data.email,
     }
@@ -48,7 +48,7 @@ export async function authenticateRequest(req: Request): Promise<AuthResult | nu
   if (token.startsWith('smc_tk_')) {
     const { data, error } = await supabase
       .from('scoped_tokens')
-      .select('id, user_id, policy, expires_at, is_active')
+      .select('id, owner_id, policy, expires_at, is_active')
       .eq('token_hash', hash)
       .eq('is_active', true)
       .single()
@@ -60,7 +60,7 @@ export async function authenticateRequest(req: Request): Promise<AuthResult | nu
     }
 
     return {
-      userId: data.user_id,
+      userId: data.owner_id,
       type: 'scoped_token',
       policy: data.policy,
     }

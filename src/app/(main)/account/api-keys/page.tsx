@@ -66,8 +66,16 @@ export default function ApiKeysPage() {
 
   async function handleDelete(id: string) {
     if (!confirm('Estas seguro? Esta accion no se puede deshacer.')) return
-    // TODO: wire to delete API
-    setKeys(k => k.filter(key => key.id !== id))
+    const res = await fetch(`/api/account/keys?email=${encodeURIComponent(email)}`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id }),
+    })
+    if (res.ok) {
+      setKeys(k => k.filter(key => key.id !== id))
+    } else {
+      alert('Error al eliminar la key')
+    }
   }
 
   function handleEditStart(key: ApiKey) {
@@ -75,12 +83,20 @@ export default function ApiKeysPage() {
     setEditName(key.name)
   }
 
-  function handleEditSave() {
+  async function handleEditSave() {
     if (editingId) {
-      setKeys(k => k.map(key => key.id === editingId ? { ...key, name: editName } : key))
+      const res = await fetch(`/api/account/keys?email=${encodeURIComponent(email)}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: editingId, name: editName }),
+      })
+      if (res.ok) {
+        setKeys(k => k.map(key => key.id === editingId ? { ...key, name: editName } : key))
+      } else {
+        alert('Error al actualizar el nombre')
+      }
     }
     setEditingId(null)
-    // TODO: wire to update API
   }
 
   function handleEditCancel() {

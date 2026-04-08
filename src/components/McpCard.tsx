@@ -1,4 +1,7 @@
+"use client"
+
 import Link from 'next/link'
+import { useState } from 'react'
 import { Mcp } from '@/lib/mcps'
 
 function McpIcon({ nombre, id }: { nombre: string; id: string }) {
@@ -58,6 +61,40 @@ function StatsIcon() {
   )
 }
 
+function InstallButton({ mcpId }: { mcpId: string }) {
+  const [copied, setCopied] = useState(false)
+
+  function handleInstall(e: React.MouseEvent) {
+    e.preventDefault()
+    e.stopPropagation()
+    const installUrl = `/open?server=${encodeURIComponent(mcpId)}&client=claude`
+    navigator.clipboard.writeText(`${window.location.origin}${installUrl}`).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    })
+    window.open(installUrl, '_blank', 'noopener')
+  }
+
+  return (
+    <button
+      onClick={handleInstall}
+      title="Instalacion rapida"
+      className={`flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border transition-colors font-medium ${
+        copied
+          ? 'text-green-600 dark:text-green-400 border-green-300 dark:border-green-600 bg-green-50 dark:bg-green-900/20'
+          : 'text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-700 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40'
+      }`}
+    >
+      {copied ? (
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+      ) : (
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      )}
+      {copied ? 'OK' : 'Instalar'}
+    </button>
+  )
+}
+
 export default function McpCard({ mcp }: { mcp: Mcp }) {
   const isRemote = !mcp.instalacion_npx?.includes('localhost')
 
@@ -97,10 +134,13 @@ export default function McpCard({ mcp }: { mcp: Mcp }) {
             <GlobeIcon />
             {isRemote ? 'Remoto' : 'Local'}
           </span>
-          <span className="text-xs text-stone-400 flex items-center gap-1">
-            <StatsIcon />
-            {mcp.num_tools} tool{mcp.num_tools !== 1 ? 's' : ''}
-          </span>
+          <div className="flex items-center gap-2">
+            <InstallButton mcpId={mcp.id} />
+            <span className="text-xs text-stone-400 flex items-center gap-1">
+              <StatsIcon />
+              {mcp.num_tools} tool{mcp.num_tools !== 1 ? 's' : ''}
+            </span>
+          </div>
         </div>
       </div>
     </Link>

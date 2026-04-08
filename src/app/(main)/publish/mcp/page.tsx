@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import type { CredentialMapping } from "@/lib/types"
 
 type State = "idle" | "loading" | "success" | "error"
 type Param = { name: string; type: "string" | "number" | "boolean"; from: "query" | "header"; required: boolean; description: string; defaultValue: string }
@@ -211,6 +212,17 @@ export default function PublishMcpPage() {
   const removeParam = (i: number) => setParams(p => p.filter((_, idx) => idx !== i))
   const updateParam = (i: number, field: keyof Param, value: string | boolean) => setParams(p => p.map((item, idx) => idx === i ? { ...item, [field]: value } : item))
 
+  const [credMappings, setCredMappings] = useState<CredentialMapping[]>([])
+  const addCredMapping = () => setCredMappings(m => [...m, {
+    name: "",
+    required: true,
+    from: { type: "header", key: "Authorization" },
+    to: { type: "header", key: "X-API-Key", transform: "raw" },
+  }])
+  const removeCredMapping = (i: number) => setCredMappings(m => m.filter((_, idx) => idx !== i))
+  const updateCredMapping = (i: number, patch: Partial<CredentialMapping>) =>
+    setCredMappings(m => m.map((item, idx) => idx === i ? { ...item, ...patch } : item))
+
   function handleStep1(e: React.FormEvent) {
     e.preventDefault()
     setStep(2)
@@ -219,6 +231,7 @@ export default function PublishMcpPage() {
   async function handlePublish() {
     setState("loading")
     try {
+      const validMappings = credMappings.filter(m => m.name && m.from.key && m.to.key)
       const res = await fetch("/api/servers/publish", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -227,6 +240,7 @@ export default function PublishMcpPage() {
           display_name: serverId,
           description: "",
           upstream_url: upstreamUrl,
+          config_schema: validMappings.length ? { credentials: validMappings } : undefined,
         }),
       })
       const data = await res.json()
@@ -479,16 +493,108 @@ export default function PublishMcpPage() {
           )}
         </div>
 
+        {/* Credential remapping section */}
+        <div className="border border-stone-200 dark:border-stone-700 rounded-xl p-6 bg-white dark:bg-stone-900 mb-6">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <p className="text-sm font-semibold text-stone-800 dark:text-stone-100">Credenciales</p>
+              <p className="text-xs text-stone-400 mt-0.5">Define cómo el proxy reenvía credenciales a tu servidor.</p>
+            </div>
+            <button type="button" onClick={addCredMapping}
+              className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-stone-300 dark:border-stone-600 text-stone-600 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Añadir mapeo
+            </button>
+          </div>
+          {credMappings.length === 0 ? (
+            <p className="text-xs text-stone-400 text-center py-3">Sin mapeos de credenciales. Opcional.</p>
+          ) : (
+            <div className="space-y-4">
+              {credMappings.map((m, i) => (
+                <div key={i} className="border border-dashed border-stone-200 dark:border-stone-700 rounded-lg p-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <input type="text" value={m.name} onChange={e => updateCredMapping(i, { name: e.target.value })}
+                      placeholder="Nombre (ej. API Key)"
+                      className="flex-1 border-b border-stone-300 dark:border-stone-600 bg-transparent text-sm text-stone-800 dark:text-stone-200 py-1 focus:outline-none focus:border-blue-500 placeholder-stone-400" />
+                    <button type="button" onClick={() => removeCredMapping(i)}
+                      className="w-7 h-7 rounded border border-stone-300 dark:border-stone-600 flex items-center justify-center text-stone-400 hover:text-red-500 hover:border-red-300 transition-colors">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3 text-xs">
+                    <div>
+                      <p className="text-stone-400 mb-1 font-medium uppercase tracking-wide text-[10px]">Origen (from)</p>
+                      <div className="flex gap-1.5">
+                        <select value={m.from.type}
+                          onChange={e => updateCredMapping(i, { from: { ...m.from, type: e.target.value as CredentialMapping['from']['type'] } })}
+                          className="flex-1 border border-stone-300 dark:border-stone-600 rounded px-2 py-1 bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-300">
+                          <option value="header">header</option>
+                          <option value="query">query</option>
+                          <option value="vault">vault</option>
+                          <option value="env">env</option>
+                        </select>
+                        <input type="text" value={m.from.key}
+                          onChange={e => updateCredMapping(i, { from: { ...m.from, key: e.target.value } })}
+                          placeholder="Authorization"
+                          className="flex-1 border border-stone-300 dark:border-stone-600 rounded px-2 py-1 bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-300 placeholder-stone-400 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-stone-400 mb-1 font-medium uppercase tracking-wide text-[10px]">Destino (to)</p>
+                      <div className="flex gap-1.5">
+                        <select value={m.to.type}
+                          onChange={e => updateCredMapping(i, { to: { ...m.to, type: e.target.value as CredentialMapping['to']['type'] } })}
+                          className="flex-1 border border-stone-300 dark:border-stone-600 rounded px-2 py-1 bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-300">
+                          <option value="header">header</option>
+                          <option value="query">query</option>
+                          <option value="body">body</option>
+                        </select>
+                        <input type="text" value={m.to.key}
+                          onChange={e => updateCredMapping(i, { to: { ...m.to, key: e.target.value } })}
+                          placeholder="X-API-Key"
+                          className="flex-1 border border-stone-300 dark:border-stone-600 rounded px-2 py-1 bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-300 placeholder-stone-400 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 mt-3">
+                    <div>
+                      <p className="text-[10px] text-stone-400 uppercase tracking-wide mb-1">Transform</p>
+                      <select value={m.to.transform ?? 'raw'}
+                        onChange={e => updateCredMapping(i, { to: { ...m.to, transform: e.target.value as CredentialMapping['to']['transform'] } })}
+                        className="text-xs border border-stone-300 dark:border-stone-600 rounded px-2 py-1 bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-300">
+                        <option value="raw">raw</option>
+                        <option value="bearer">bearer</option>
+                        <option value="basic">basic</option>
+                      </select>
+                    </div>
+                    <div className="flex items-center gap-1.5 mt-4">
+                      <button type="button" onClick={() => updateCredMapping(i, { required: !m.required })}
+                        className={`w-8 h-5 rounded-full relative transition-colors ${m.required ? 'bg-blue-500' : 'bg-stone-300 dark:bg-stone-600'}`}>
+                        <div className={`w-3.5 h-3.5 rounded-full bg-white absolute top-[3px] transition-transform ${m.required ? 'translate-x-[18px]' : 'translate-x-[3px]'}`}/>
+                      </button>
+                      <span className="text-xs text-stone-500">Requerida</span>
+                    </div>
+                  </div>
+                  <input type="text" value={m.description ?? ""}
+                    onChange={e => updateCredMapping(i, { description: e.target.value })}
+                    placeholder="Descripción para el usuario (opcional)"
+                    className="mt-3 w-full text-xs border border-dashed border-stone-300 dark:border-stone-600 rounded px-2 py-1.5 bg-transparent text-stone-700 dark:text-stone-300 placeholder-stone-400 focus:outline-none focus:border-blue-500" />
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
         {state === "error" && <p className="text-sm text-red-500 mb-4">{errorMsg}</p>}
 
         <div className="flex items-center gap-3">
           <button onClick={() => setStep(1)}
             className="px-5 py-2.5 rounded-lg border border-stone-300 dark:border-stone-700 text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800 text-sm font-medium transition-colors">
-            Back
+            Atrás
           </button>
           <button onClick={() => { setScanValues(Object.fromEntries(params.map(p => [p.name, p.defaultValue]))); setStep(3) }}
             className="px-6 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm transition-colors">
-            Continue
+            Continuar
           </button>
         </div>
       </div>

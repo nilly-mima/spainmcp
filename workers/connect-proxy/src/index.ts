@@ -412,7 +412,7 @@ app.post('/proxy/:namespace/:connectionId/mcp', async (c) => {
   if (!ns) return c.json({ error: 'Namespace not found' }, 404)
 
   const { data: conn } = await sb.from('connections')
-    .select('id, mcp_url, status, headers_encrypted')
+    .select('id, mcp_url, status, headers_encrypted, config_schema')
     .eq('namespace_id', ns.id).eq('connection_id', connectionId).single()
 
   if (!conn) return c.json({ error: 'Connection not found' }, 404)
@@ -435,10 +435,55 @@ app.post('/proxy/:namespace/:connectionId/mcp', async (c) => {
     } catch { /* ignore */ }
   }
 
+  // Apply config_schema credential remapping
+  let upstreamUrl = conn.mcp_url
+  const configSchema = (conn as { config_schema?: { credentials?: { name: string; required: boolean; from: { type: string; key: string }; to: { type: string; key: string; transform?: string } }[] } }).config_schema
+  if (configSchema?.credentials?.length) {
+    const requestHeaders = Object.fromEntries(c.req.raw.headers.entries())
+    const urlObj = new URL(upstreamUrl)
+
+    for (const mapping of configSchema.credentials) {
+      let value: string | undefined
+
+      // Read from source
+      if (mapping.from.type === 'header') {
+        value = requestHeaders[mapping.from.key.toLowerCase()]
+      } else if (mapping.from.type === 'query') {
+        value = new URL(c.req.url).searchParams.get(mapping.from.key) ?? undefined
+      } else if (mapping.from.type === 'vault' || mapping.from.type === 'env') {
+        // Vault/env: read from headers_encrypted map under the key name
+        try {
+          const stored = conn.headers_encrypted ? JSON.parse(conn.headers_encrypted) : {}
+          value = stored[mapping.from.key]
+        } catch { /* ignore */ }
+      }
+
+      if (!value) continue
+
+      // Apply transform
+      let finalValue = value
+      if (mapping.to.transform === 'bearer') finalValue = `Bearer ${value}`
+      else if (mapping.to.transform === 'basic') finalValue = `Basic ${btoa(value)}`
+
+      // Inject into target
+      if (mapping.to.type === 'header') {
+        upstreamHeaders[mapping.to.key] = finalValue
+      } else if (mapping.to.type === 'query') {
+        urlObj.searchParams.set(mapping.to.key, finalValue)
+      } else if (mapping.to.type === 'body') {
+        // Body injection is handled below by merging into the JSON body
+        // Store for later use — body remapping is applied to the body object
+        ;(body as Record<string, unknown>)[`__remap_${mapping.to.key}`] = finalValue
+      }
+    }
+
+    upstreamUrl = urlObj.toString()
+  }
+
   // Forward to upstream
   let upstreamRes: Response
   try {
-    upstreamRes = await fetch(conn.mcp_url, {
+    upstreamRes = await fetch(upstreamUrl, {
       method: 'POST',
       headers: upstreamHeaders,
       body: JSON.stringify(body),

@@ -1,0 +1,6 @@
+{
+  "protocol_handlers": [{
+    "protocol": "web+spainmcp",
+    "url": "/open?uri=%s"
+  }]
+}

@@ -5,6 +5,7 @@ import { registerAuthCommands } from "./commands/auth.js"
 import { registerMcpCommands } from "./commands/mcp.js"
 import { registerToolCommands } from "./commands/tool.js"
 import { registerNamespaceCommands } from "./commands/namespace.js"
+import { registerTunnelCommands } from "./commands/tunnel.js"
 import { CLIENTS } from "./clients.js"
 
 const program = new Command()
@@ -26,7 +27,10 @@ registerToolCommands(program)
 // ── Group 4: namespace ────────────────────────────────────────────────────────
 registerNamespaceCommands(program)
 
-// ── Group 5: connect (backwards compat) ───────────────────────────────────────
+// ── Group 5: tunnel ───────────────────────────────────────────────────────────
+registerTunnelCommands(program)
+
+// ── Group 6: connect (backwards compat) ───────────────────────────────────────
 program
   .command("connect")
   .description("Configure SpainMCP in Claude Desktop, Cursor, VS Code or others")

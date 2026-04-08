@@ -43,6 +43,7 @@ export async function POST(req: Request) {
     upstream_url?: string
     email?: string
     api_key?: string
+    config_schema?: { credentials: unknown[] }
   }
   try {
     body = await req.json()
@@ -50,7 +51,7 @@ export async function POST(req: Request) {
     return Response.json({ error: "Body inválido" }, { status: 400 })
   }
 
-  const { namespace, display_name, description, upstream_url, email, api_key } = body
+  const { namespace, display_name, description, upstream_url, email, api_key, config_schema } = body
 
   // 2. Validar campos obligatorios
   if (!namespace || !display_name || !upstream_url) {
@@ -91,6 +92,7 @@ export async function POST(req: Request) {
         upstream_url,
         owner_email: email ?? "",
         is_active: true,
+        ...(config_schema ? { config_schema } : {}),
       },
       { onConflict: "namespace" }
     )

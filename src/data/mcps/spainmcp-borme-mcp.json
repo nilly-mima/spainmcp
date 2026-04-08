@@ -44,7 +44,14 @@
   "especifico_espana": true,
   "nota_es": "Requiere API key gratuita. Consíguela en mcp.lat/get-key",
   "tools_list": [
-    { "name": "borme_del_dia", "description": "Obtiene los registros mercantiles publicados hoy: altas, bajas, modificaciones y cambios de administradores de sociedades españolas." },
-    { "name": "ping", "description": "Comprueba que la conexión con el servidor SpainMCP está activa." }
-  ]
+    {
+      "name": "borme_del_dia",
+      "description": "Obtiene los registros mercantiles publicados hoy: altas, bajas, modificaciones y cambios de administradores de sociedades españolas."
+    },
+    {
+      "name": "ping",
+      "description": "Comprueba que la conexión con el servidor SpainMCP está activa."
+    }
+  ],
+  "logo_url": "/logos/borme.svg"
 }

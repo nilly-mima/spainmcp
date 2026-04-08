@@ -1,0 +1,57 @@
+---
+title: Reanudar un release
+icon: POST
+description: Reanuda un release pausado (p.ej. despues de completar la autenticacion OAuth).
+---
+
+```
+POST /servers/{qualifiedName}/releases/{releaseId}/resume
+```
+
+### Autorizaciones
+
+| Parámetro | Tipo | Ubicación | Requerido | Descripción |
+| --- | --- | --- | --- | --- |
+| `Authorization` | string | header | sí | API key de SpainMCP como Bearer token |
+
+### Parámetros de Ruta
+
+| Parámetro | Tipo | Requerido | Descripción |
+| --- | --- | --- | --- |
+| `qualifiedName` | string | sí | Nombre cualificado del servidor (p.ej. 'namespace/server' o 'namespace' para servidores solo-namespace). Usa %2F para codificar la barra. |
+| `releaseId` | string | sí | Identificador único del release pausado |
+
+### Respuesta
+
+**200** — `application/json` — Release reanudado
+
+| Campo | Tipo | Requerido |
+| --- | --- | --- |
+| `success` | boolean | sí |
+| `releaseId` | string | sí |
+
+```json
+{
+  "success": true,
+  "releaseId": "3c90c3cc-0d44-4b50-8888-8dd25736052a"
+}
+```
+
+**404** — Release no encontrado
+
+### Ejemplo
+
+```typescript
+import SpainMCP from '@spainmcp/api';
+
+const client = new SpainMCP({
+  apiKey: process.env['SPAINMCP_API_KEY'],
+});
+
+const result = await client.servers.releases.resume(
+  'qualifiedName',
+  'releaseId',
+);
+
+console.log(result.success);
+```

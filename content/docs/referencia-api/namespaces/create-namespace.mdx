@@ -1,0 +1,58 @@
+---
+title: Crear un namespace
+icon: POST
+description: Crea un nuevo namespace con nombre personalizado.
+---
+
+```
+POST /namespaces
+```
+
+### Autorizaciones
+
+| Parámetro | Tipo | Ubicación | Requerido | Descripción |
+| --- | --- | --- | --- | --- |
+| `Authorization` | string | header | sí | API key de SpainMCP como Bearer token |
+
+### Body
+
+`application/json`
+
+| Campo | Tipo | Requerido | Descripción |
+| --- | --- | --- | --- |
+| `name` | string | sí | Nombre del namespace. Debe ser único, alfanumérico con guiones. |
+
+### Respuesta
+
+**201** — `application/json` — Namespace creado
+
+| Campo | Tipo | Requerido | Ejemplo |
+| --- | --- | --- | --- |
+| `name` | string | sí | `"mi-empresa"` |
+| `createdAt` | string | sí | `"2026-01-10T08:00:00Z"` |
+
+```json
+{
+  "name": "mi-empresa",
+  "createdAt": "2026-01-10T08:00:00Z"
+}
+```
+
+**409** — Namespace ya existe
+
+### Ejemplo
+
+```typescript
+import SpainMCP from '@spainmcp/api';
+
+const client = new SpainMCP({
+  apiKey: process.env['SPAINMCP_API_KEY'],
+});
+
+const ns = await client.namespaces.create({
+  name: 'mi-empresa',
+});
+
+console.log(ns.name);
+console.log(ns.createdAt);
+```

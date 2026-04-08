@@ -1,0 +1,76 @@
+---
+title: Obtener un servidor
+icon: GET
+description: Recupera los detalles del servidor incluyendo conexiones, herramientas y estado de seguridad.
+---
+
+```
+GET /servers/{qualifiedName}
+```
+
+### Autorizaciones
+
+| Parámetro | Tipo | Ubicación | Requerido | Descripción |
+| --- | --- | --- | --- | --- |
+| `Authorization` | string | header | sí | API key de SpainMCP como Bearer token |
+
+### Parámetros de Ruta
+
+| Parámetro | Tipo | Requerido | Descripción |
+| --- | --- | --- | --- |
+| `qualifiedName` | string | sí | Nombre cualificado del servidor (p.ej. 'namespace/server' o 'namespace' para servidores solo-namespace). Usa %2F para codificar la barra. |
+
+### Respuesta
+
+**200** — `application/json` — Servidor encontrado
+
+| Campo | Tipo | Requerido | Ejemplo |
+| --- | --- | --- | --- |
+| `qualifiedName` | string | sí | `"spainmcp/hello-world"` |
+| `displayName` | string | sí | `"Hello World"` |
+| `description` | string | sí | `"A simple hello world server"` |
+| `iconUrl` | string \| null | sí | `"https://example.com/icon.png"` |
+| `remote` | boolean | sí | `true` |
+| `deploymentUrl` | string \| null | sí | `"https://api.example.com"` |
+| `connections` | object[] | sí | |
+| `security` | object | sí | |
+| `tools` | object[] \| null | sí | |
+| `resources` | object[] \| null | sí | |
+| `prompts` | object[] \| null | sí | |
+
+```json
+{
+  "qualifiedName": "spainmcp/hello-world",
+  "displayName": "Hello World",
+  "description": "A simple hello world server",
+  "iconUrl": "https://example.com/icon.png",
+  "remote": true,
+  "deploymentUrl": "https://api.example.com",
+  "connections": [
+    {
+      "type": "<string>",
+      "url": "<string>"
+    }
+  ],
+  "security": {},
+  "tools": [],
+  "resources": [],
+  "prompts": []
+}
+```
+
+**404** — Servidor no encontrado
+
+### Ejemplo
+
+```typescript
+import SpainMCP from '@spainmcp/api';
+
+const client = new SpainMCP({
+  apiKey: process.env['SPAINMCP_API_KEY'],
+});
+
+const server = await client.servers.get('qualifiedName');
+
+console.log(server.connections);
+```

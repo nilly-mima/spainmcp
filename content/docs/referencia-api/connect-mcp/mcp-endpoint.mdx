@@ -1,0 +1,91 @@
+---
+title: Endpoint MCP
+icon: POST
+description: Envia peticiones JSON-RPC MCP a traves de una conexion gestionada.
+---
+
+```
+POST /connections/{namespace}/{connectionId}/mcp
+```
+
+### Autorizaciones
+
+| Parámetro | Tipo | Ubicación | Requerido | Descripción |
+| --- | --- | --- | --- | --- |
+| `Authorization` | string | header | sí | API key de SpainMCP como Bearer token |
+
+### Parámetros de Ruta
+
+| Parámetro | Tipo | Requerido | Descripción |
+| --- | --- | --- | --- |
+| `namespace` | string | sí | Namespace de la conexión |
+| `connectionId` | string | sí | Identificador de la conexión |
+
+### Body
+
+`application/json`
+
+| Campo | Tipo | Requerido | Descripción |
+| --- | --- | --- | --- |
+| `method` | string | sí | Método MCP a invocar (p.ej. `"tools/list"`, `"tools/call"`) |
+| `params` | object | no | Parámetros del método MCP |
+
+### Respuesta
+
+**200** — `application/json` — Respuesta JSON-RPC del servidor MCP
+
+| Campo | Tipo | Requerido | Descripción |
+| --- | --- | --- | --- |
+| `jsonrpc` | string | sí | Versión del protocolo (`"2.0"`) |
+| `id` | number | sí | Identificador de la petición |
+| `result` | object | no | Resultado de la llamada (presente si éxito) |
+| `error` | object | no | Error de la llamada (presente si fallo) |
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "tools": [
+      {
+        "name": "buscar",
+        "description": "Busca información",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "query": { "type": "string" }
+          }
+        }
+      }
+    ]
+  }
+}
+```
+
+### Ejemplo
+
+```typescript
+import SpainMCP from '@spainmcp/api';
+
+const client = new SpainMCP({
+  apiKey: process.env['SPAINMCP_API_KEY'],
+});
+
+// Listar herramientas disponibles
+const toolsList = await client.connections.mcp('myorg', 'my-connection', {
+  method: 'tools/list',
+});
+
+console.log(toolsList.result.tools);
+
+// Llamar a una herramienta
+const result = await client.connections.mcp('myorg', 'my-connection', {
+  method: 'tools/call',
+  params: {
+    name: 'buscar',
+    arguments: { query: 'clima Madrid' },
+  },
+});
+
+console.log(result.result);
+```

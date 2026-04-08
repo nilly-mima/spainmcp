@@ -102,7 +102,7 @@ function Pagination({
             onClick={() => onPage(item as number)}
             className={`${btnBase} font-medium ${
               item === page
-                ? 'bg-orange-600 text-white shadow-sm'
+                ? 'bg-blue-600 text-white shadow-sm'
                 : 'text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800'
             }`}
           >
@@ -177,7 +177,7 @@ export default function ImportedDirectory({ mcps }: { mcps: ImportedMcp[]; catLa
           placeholder="Buscar MCPs..."
           value={search}
           onChange={e => handleSearch(e.target.value)}
-          className="w-full pl-11 pr-4 py-3 rounded-xl bg-white dark:bg-[var(--card)] text-stone-800 dark:text-stone-200 placeholder-stone-400 dark:placeholder-stone-500 outline-none focus:ring-2 focus:ring-orange-300 dark:focus:ring-orange-800 text-sm"
+          className="w-full pl-11 pr-4 py-3 rounded-xl bg-white dark:bg-[var(--card)] text-stone-800 dark:text-stone-200 placeholder-stone-400 dark:placeholder-stone-500 outline-none focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-800 text-sm"
           style={{ border: '1px solid var(--border)' }}
         />
       </div>
@@ -201,7 +201,7 @@ export default function ImportedDirectory({ mcps }: { mcps: ImportedMcp[]; catLa
                   onClick={() => handleLocation(location === opt.value ? 'all' : opt.value)}
                   className={`flex items-center gap-2 px-2 py-1.5 rounded-lg text-sm transition-colors text-left w-full ${
                     location === opt.value
-                      ? 'text-orange-600 dark:text-orange-500 bg-orange-50 dark:bg-orange-950/30'
+                      ? 'text-blue-600 dark:text-blue-500 bg-blue-50 dark:bg-blue-950/30'
                       : 'text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-800/50'
                   }`}
                 >
@@ -229,7 +229,7 @@ export default function ImportedDirectory({ mcps }: { mcps: ImportedMcp[]; catLa
                 onClick={() => handleCat(null)}
                 className={`flex items-center gap-2 px-2 py-1.5 rounded-lg text-sm transition-colors text-left w-full ${
                   selectedCat === null
-                    ? 'text-orange-600 dark:text-orange-500 bg-orange-50 dark:bg-orange-950/30 font-medium'
+                    ? 'text-blue-600 dark:text-blue-500 bg-blue-50 dark:bg-blue-950/30 font-medium'
                     : 'text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-800/50'
                 }`}
               >
@@ -245,7 +245,7 @@ export default function ImportedDirectory({ mcps }: { mcps: ImportedMcp[]; catLa
                   onClick={() => handleCat(selectedCat === cat ? null : cat)}
                   className={`px-2 py-1.5 rounded-lg text-sm transition-colors text-left w-full truncate ${
                     selectedCat === cat
-                      ? 'text-orange-600 dark:text-orange-500 bg-orange-50 dark:bg-orange-950/30 font-medium'
+                      ? 'text-blue-600 dark:text-blue-500 bg-blue-50 dark:bg-blue-950/30 font-medium'
                       : 'text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-800/50'
                   }`}
                 >

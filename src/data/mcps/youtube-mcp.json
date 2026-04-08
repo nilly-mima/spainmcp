@@ -33,5 +33,6 @@
     "Extraer ideas clave de charlas y conferencias"
   ],
   "fecha_verificado": "2026-04-04",
-  "dificultad_instalacion": "facil"
+  "dificultad_instalacion": "facil",
+  "logo_url": "https://logos.composio.dev/api/youtube"
 }

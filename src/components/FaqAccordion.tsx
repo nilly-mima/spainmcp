@@ -1,10 +1,11 @@
 'use client'
 
 import { useState } from 'react'
+import type { ReactNode } from 'react'
 
 interface FaqItem {
   q: string
-  a: string
+  a: ReactNode
 }
 
 function ChevronIcon({ open }: { open: boolean }) {

@@ -1,0 +1,77 @@
+---
+title: Listar conexiones
+icon: GET
+description: Lista las conexiones de un namespace, con filtrado opcional por metadata.
+---
+
+```
+GET /connections/{namespace}
+```
+
+### Autorizaciones
+
+| Parametro | Tipo | Ubicacion | Requerido | Descripcion |
+| --- | --- | --- | --- | --- |
+| `Authorization` | string | header | si | API key de SpainMCP como Bearer token |
+
+### Parametros de Ruta
+
+| Parametro | Tipo | Requerido | Descripcion |
+| --- | --- | --- | --- |
+| `namespace` | string | si | Namespace del que listar conexiones (p.ej. 'myorg') |
+
+### Parametros de Query
+
+| Parametro | Tipo | Default | Descripcion |
+| --- | --- | --- | --- |
+| `metadata` | string | — | Filtro de metadata codificado como JSON (p.ej. `{"env":"production"}`) |
+| `page` | integer | 1 | Pagina de resultados |
+| `pageSize` | integer | 20 | Resultados por pagina (1 a 100) |
+
+### Respuesta
+
+**200** — `application/json` — Lista paginada de conexiones
+
+| Campo | Tipo | Requerido |
+| --- | --- | --- |
+| `data` | object[] | si |
+| `pagination` | object | si |
+
+```json
+{
+  "data": [
+    {
+      "connectionId": "my-connection",
+      "status": "connected",
+      "mcpUrl": "https://mcp.example.com/sse",
+      "name": "Mi servidor MCP",
+      "metadata": { "env": "production" },
+      "createdAt": "2026-01-15T10:30:00.000Z",
+      "updatedAt": "2026-01-15T10:30:00.000Z"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "pageSize": 20,
+    "totalPages": 1,
+    "totalItems": 1
+  }
+}
+```
+
+### Ejemplo
+
+```typescript
+import SpainMCP from '@spainmcp/api';
+
+const client = new SpainMCP({
+  apiKey: process.env['SPAINMCP_API_KEY'],
+});
+
+// Obtiene paginas automaticamente segun sea necesario
+for await (const connection of client.connections.list('myorg', {
+  metadata: { env: 'production' },
+})) {
+  console.log(connection.connectionId, connection.status);
+}
+```

@@ -1,0 +1,49 @@
+---
+title: ¿Qué es MCP?
+icon: HelpCircle
+description: ¿Qué es MCP? ¿Cómo funciona? ¿Qué hace SpainMCP con MCP?
+---
+
+## Introduccion al protocolo MCP
+
+MCP (Model Context Protocol) es un protocolo estandarizado y abierto que posibilita la conexion entre modelos de lenguaje (LLMs) y herramientas o fuentes de contexto externas. Para que esta conexion funcione, tanto el LLM como la herramienta deben ser compatibles con el protocolo.
+
+## Para que sirve
+
+De forma resumida, MCP resulta util en cualquier escenario donde necesites que tu modelo de lenguaje interactue con el mundo real, ya sea consultando datos o ejecutando acciones por ti:
+
+- **Contexto**: Se refiere a informacion externa que el modelo puede aprovechar y que posiblemente no forme parte de su entrenamiento original. Un ejemplo tipico seria la busqueda en internet o la consulta de bases de datos corporativas internas.
+- **Herramientas**: Son funciones invocables por el modelo. Algunos ejemplos concretos: "crear un pull request desde una rama hacia main" o "mandar un correo electronico a un destinatario especifico".
+
+## Arquitectura: Servidores, Clientes y Transportes
+
+Al igual que HTTP, MCP se organiza en un modelo cliente-servidor. El **cliente** corresponde al LLM, mientras que el **servidor** pone a disposicion del modelo un conjunto de herramientas. La comunicacion entre ambos se establece mediante un **transporte**, que puede operar de forma local o a traves de internet.
+
+- **Servidores**: proporcionan herramientas accesibles para el cliente.
+- **Clientes**: invocan las herramientas disponibles en un servidor.
+- **Transportes**: definen el canal de comunicacion entre cliente y servidor. Las opciones incluyen ejecucion local (STDIO), conexion remota (HTTP) o un transporte a medida.
+
+<ConceptCard
+  title="Lee la documentación oficial de MCP"
+  description="Aprende más sobre MCP desde la web de Model Context Protocol (modelcontextprotocol.io)"
+  href="https://modelcontextprotocol.io"
+/>
+
+## El papel de SpainMCP
+
+SpainMCP funciona como una plataforma que actua de puente entre los servidores MCP y las personas que los necesitan. Por un lado, facilitamos que los usuarios descubran el servidor MCP que mejor se ajusta a lo que buscan. Por otro, ofrecemos a los desarrolladores un canal para publicar y distribuir sus servidores MCP.
+
+Nuestro catalogo incluye una variedad amplia de servidores, tanto de ejecucion local (STDIO) como remota (HTTP). Estos son algunos de los mas utilizados:
+
+- **Desktop Commander** (Local, STDIO): Permite a apps como Claude Desktop ejecutar comandos de terminal en tu ordenador.
+- **Exa** (Remoto, HTTP): Accede a resultados de búsqueda web en vivo. Haz Deep Research, obtén perfiles de LinkedIn y más.
+- **Context7** (Remoto, HTTP): Permite a tu agente IDE como Cursor Composer acceder a documentación de tus librerías y SDKs favoritos.
+- **Browserbase** (Remoto, HTTP): Usa Claude Desktop/Cursor para controlar un navegador web remoto.
+
+Ademas, tienes la posibilidad de publicar tus propios servidores MCP directamente en SpainMCP.
+
+<ConceptCard
+  title="Publica tu servidor MCP en SpainMCP"
+  description="Aprende cómo publicar tu servidor MCP en SpainMCP para distribución y observabilidad"
+  href="/docs/servers/publish"
+/>

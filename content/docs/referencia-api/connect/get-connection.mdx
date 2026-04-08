@@ -1,0 +1,71 @@
+---
+title: Obtener conexion
+icon: GET
+description: Recupera los detalles de una conexion MCP gestionada.
+---
+
+```
+GET /connections/{namespace}/{connectionId}
+```
+
+### Autorizaciones
+
+| Parametro | Tipo | Ubicacion | Requerido | Descripcion |
+| --- | --- | --- | --- | --- |
+| `Authorization` | string | header | si | API key de SpainMCP como Bearer token |
+
+### Parametros de Ruta
+
+| Parametro | Tipo | Requerido | Descripcion |
+| --- | --- | --- | --- |
+| `namespace` | string | si | Namespace de la conexion (p.ej. 'myorg') |
+| `connectionId` | string | si | Identificador unico de la conexion |
+
+### Respuesta
+
+**200** — `application/json` — Conexion encontrada
+
+| Campo | Tipo | Requerido | Ejemplo |
+| --- | --- | --- | --- |
+| `connectionId` | string | si | `"my-connection"` |
+| `status` | string | si | `"connected"` |
+| `mcpUrl` | string | si | `"https://mcp.example.com/sse"` |
+| `name` | string | si | `"Mi servidor MCP"` |
+| `metadata` | object | si | `{ "env": "production" }` |
+| `serverInfo` | object \| null | si | |
+| `createdAt` | string | si | `"2026-01-15T10:30:00.000Z"` |
+| `updatedAt` | string | si | `"2026-01-15T10:30:00.000Z"` |
+
+```json
+{
+  "connectionId": "my-connection",
+  "status": "connected",
+  "mcpUrl": "https://mcp.example.com/sse",
+  "name": "Mi servidor MCP",
+  "metadata": { "env": "production" },
+  "serverInfo": {
+    "name": "Mi servidor MCP",
+    "version": "1.0.0",
+    "tools": ["buscar", "consultar"]
+  },
+  "createdAt": "2026-01-15T10:30:00.000Z",
+  "updatedAt": "2026-01-15T10:30:00.000Z"
+}
+```
+
+**404** — Conexion no encontrada
+
+### Ejemplo
+
+```typescript
+import SpainMCP from '@spainmcp/api';
+
+const client = new SpainMCP({
+  apiKey: process.env['SPAINMCP_API_KEY'],
+});
+
+const connection = await client.connections.get('myorg', 'my-connection');
+
+console.log(connection.status);
+console.log(connection.serverInfo);
+```

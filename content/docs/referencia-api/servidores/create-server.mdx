@@ -1,0 +1,69 @@
+---
+title: Crear un servidor
+icon: PUT
+description: Crea un nuevo servidor. Idempotente — devuelve éxito si el servidor ya existe y es propiedad del llamante.
+---
+
+```
+PUT /servers/{qualifiedName}
+```
+
+### Autorizaciones
+
+| Parámetro | Tipo | Ubicación | Requerido | Descripción |
+| --- | --- | --- | --- | --- |
+| `Authorization` | string | header | sí | API key de SpainMCP como Bearer token |
+
+### Parámetros de Ruta
+
+| Parámetro | Tipo | Requerido | Descripción |
+| --- | --- | --- | --- |
+| `qualifiedName` | string | sí | Nombre cualificado del servidor (p.ej. 'namespace/server' o 'namespace' para servidores solo-namespace). Usa %2F para codificar la barra. |
+
+### Body
+
+`application/json`
+
+| Campo | Tipo | Requerido | Ejemplo |
+| --- | --- | --- | --- |
+| `displayName` | string | no | `"My Server"` |
+| `description` | string | no | `"A simple server"` |
+
+### Respuesta
+
+**201** — `application/json` — Servidor creado correctamente
+
+| Campo | Tipo | Requerido | Ejemplo |
+| --- | --- | --- | --- |
+| `namespace` | string | sí | `"myorg"` |
+| `server` | string | sí | `""` |
+| `displayName` | string | sí | `"My Server"` |
+| `description` | string | sí | `"A simple server"` |
+| `createdAt` | string | sí | `"2024-01-01T00:00:00.000Z"` |
+
+```json
+{
+  "namespace": "myorg",
+  "server": "",
+  "displayName": "My Server",
+  "description": "A simple server",
+  "createdAt": "2024-01-01T00:00:00.000Z"
+}
+```
+
+### Ejemplo
+
+```typescript
+import SpainMCP from '@spainmcp/api';
+
+const client = new SpainMCP({
+  apiKey: process.env['SPAINMCP_API_KEY'],
+});
+
+const server = await client.servers.create('myorg/my-server', {
+  displayName: 'My Server',
+  description: 'A simple server',
+});
+
+console.log(server.createdAt);
+```

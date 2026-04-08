@@ -1,0 +1,10 @@
+{
+  "title": "Skills",
+  "pages": [
+    "list-skills",
+    "create-skill",
+    "get-skill",
+    "update-skill",
+    "delete-skill"
+  ]
+}

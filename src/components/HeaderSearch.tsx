@@ -9,7 +9,7 @@ interface Props {
 }
 
 function NsAvatar({ name }: { name: string }) {
-  const colors = ['#EA580C','#2563EB','#16A34A','#9333EA','#0284C7','#DC2626']
+  const colors = ['#2563EB','#2563EB','#16A34A','#9333EA','#0284C7','#DC2626']
   const bg = colors[name.charCodeAt(0) % colors.length]
   return (
     <div className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0" style={{ background: bg }}>
@@ -130,8 +130,8 @@ export default function HeaderSearch({ stars, namespaces }: Props) {
           value={value}
           onChange={e => handleChange(e.target.value)}
           onFocus={() => { if (isNamespace) setShowDrop(true) }}
-          className="w-full pl-10 pr-8 py-2 rounded-xl text-sm text-stone-700 dark:text-stone-200 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-orange-400 transition"
-          style={{ background: '#FFFFFF', border: '1px solid #E8E2D9' }}
+          className="w-full pl-10 pr-8 py-2 rounded-xl text-sm text-stone-700 dark:text-stone-200 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
+          style={{ background: '#FFFFFF', border: '1px solid var(--border)' }}
         />
         {value && (
           <button onClick={handleClear} className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 transition text-xs">
@@ -143,7 +143,7 @@ export default function HeaderSearch({ stars, namespaces }: Props) {
         {showDrop && filteredNs.length > 0 && (
           <div
             className="absolute top-full mt-2 left-0 right-0 bg-white dark:bg-stone-900 rounded-xl shadow-lg z-50 py-2 overflow-hidden"
-            style={{ border: '1px solid #E8E2D9' }}
+            style={{ border: '1px solid var(--border)' }}
           >
             <p className="text-xs font-semibold text-stone-400 uppercase tracking-widest px-4 pb-2 pt-1">
               Namespaces

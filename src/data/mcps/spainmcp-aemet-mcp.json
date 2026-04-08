@@ -49,9 +49,18 @@
       "name": "tiempo_aemet",
       "description": "Obtiene la predicción meteorológica oficial para cualquier municipio español: temperatura, lluvia, viento y estado del cielo.",
       "parameters": [
-        { "name": "municipio", "type": "string", "required": true, "description": "Nombre del municipio español (ej: \"Madrid\", \"Sevilla\", \"Barcelona\")" }
+        {
+          "name": "municipio",
+          "type": "string",
+          "required": true,
+          "description": "Nombre del municipio español (ej: \"Madrid\", \"Sevilla\", \"Barcelona\")"
+        }
       ]
     },
-    { "name": "ping", "description": "Comprueba que la conexión con el servidor SpainMCP está activa." }
-  ]
+    {
+      "name": "ping",
+      "description": "Comprueba que la conexión con el servidor SpainMCP está activa."
+    }
+  ],
+  "logo_url": "/logos/aemet.svg"
 }

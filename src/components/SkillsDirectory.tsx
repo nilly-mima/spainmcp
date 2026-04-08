@@ -1,24 +1,25 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import Link from 'next/link'
 import { Skill } from '@/lib/skills'
 
 const PAGE_SIZE = 15
 
 const CATS = [
-  { id: null,            label: 'All' },
-  { id: 'Research',      label: 'Research' },
-  { id: 'Coding',        label: 'Coding' },
-  { id: 'Writing',       label: 'Writing' },
-  { id: 'Data & Analytics', label: 'Data & Analytics' },
-  { id: 'Design',        label: 'Design' },
-  { id: 'Planning',      label: 'Planning' },
-  { id: 'Communication', label: 'Communication' },
-  { id: 'Productivity',  label: 'Productivity' },
+  { id: null,            label: 'Todos' },
+  { id: 'Research',      label: 'Investigación' },
+  { id: 'Coding',        label: 'Programación' },
+  { id: 'Writing',       label: 'Escritura' },
+  { id: 'Data & Analytics', label: 'Datos y Análisis' },
+  { id: 'Design',        label: 'Diseño' },
+  { id: 'Planning',      label: 'Planificación' },
+  { id: 'Communication', label: 'Comunicación' },
+  { id: 'Productivity',  label: 'Productividad' },
   { id: 'DevOps',        label: 'DevOps' },
-  { id: 'AI & ML',       label: 'AI & ML' },
-  { id: 'Security',      label: 'Security' },
-  { id: 'Business',      label: 'Business' },
+  { id: 'AI & ML',       label: 'IA y ML' },
+  { id: 'Security',      label: 'Seguridad' },
+  { id: 'Business',      label: 'Negocio' },
 ]
 
 /* ── Icons ── */
@@ -63,7 +64,7 @@ function GridIcon() {
 }
 function VerifiedIcon() {
   return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="text-orange-500 shrink-0">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="text-blue-500 shrink-0">
       <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
       <polyline points="9 12 11 14 15 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
@@ -108,7 +109,7 @@ const CAT_ICONS: Record<string, React.ReactNode> = {
 const CREATOR_COLORS: Record<string, string> = {
   'anthropics':  '#1a1a2e',
   'github':      '#24292f',
-  'smithery-ai': '#EA580C',
+  'smithery-ai': '#2563EB',
 }
 
 function CreatorIcon({ creator }: { creator: string }) {
@@ -162,7 +163,7 @@ function Pagination({ page, totalPages, onPage }: { page: number; totalPages: nu
           <span key={`d${i}`} className="text-stone-400 px-1">…</span>
         ) : (
           <button key={item} onClick={() => onPage(item as number)}
-            className={`${btn} font-medium ${item === page ? 'bg-orange-600 text-white shadow-sm' : 'text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800'}`}>
+            className={`${btn} font-medium ${item === page ? 'bg-blue-600 text-white shadow-sm' : 'text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800'}`}>
             {item}
           </button>
         )
@@ -177,9 +178,12 @@ function Pagination({ page, totalPages, onPage }: { page: number; totalPages: nu
 
 /* ── Main component ── */
 export default function SkillsDirectory({ skills, total, initialSearch = '' }: { skills: Skill[]; total: number; initialSearch?: string }) {
-  const [search, setSearch]       = useState(initialSearch)
+  const isOwnerMe = initialSearch.toLowerCase().trim() === 'owner:me'
+  const [search, setSearch]       = useState(isOwnerMe ? '' : initialSearch)
   const [selectedCat, setSelectedCat] = useState<string | null>(null)
   const [page, setPage]           = useState(1)
+  const [ms, setMs]               = useState<number | null>(null)
+  const [ownerFilter, setOwnerFilter] = useState(isOwnerMe)
 
   const filtered = useMemo(() => {
     let result = skills
@@ -200,55 +204,62 @@ export default function SkillsDirectory({ skills, total, initialSearch = '' }: {
   const visible    = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE)
 
   const reset = () => setPage(1)
-  const handleSearch = (v: string) => { setSearch(v); reset() }
-  const handleCat    = (v: string | null) => { setSelectedCat(v); reset() }
+  const handleSearch = (v: string) => { setSearch(v); reset(); const t = performance.now(); setTimeout(() => setMs(Math.round(performance.now() - t)), 0) }
+  const handleCat    = (v: string | null) => { setSelectedCat(v); reset(); const t = performance.now(); setTimeout(() => setMs(Math.round(performance.now() - t)), 0) }
 
-  const sideLabel = 'text-xs font-semibold text-stone-400 dark:text-stone-500 uppercase tracking-widest mb-2'
+  const sideLabel = 'text-xs font-bold text-stone-600 dark:text-stone-400 uppercase tracking-widest mb-2'
   const sideBtn   = 'flex items-center gap-2 px-2 py-1.5 rounded-lg text-sm transition-colors text-left w-full'
   const sideBtnInactive = 'text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-800/50'
-  const sideBtnActive   = 'text-orange-600 dark:text-orange-500 bg-orange-50 dark:bg-orange-950/30 font-medium'
+  const sideBtnActive   = 'text-blue-600 dark:text-blue-500 bg-blue-50 dark:bg-blue-950/30 font-medium'
+  const divider = <div className="h-px bg-stone-200 dark:bg-stone-700 my-1" />
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="py-6 flex flex-col gap-5">
 
       {/* Layout: sidebar + contenido */}
       <div className="flex gap-8 items-start">
 
         {/* ── Sidebar ── */}
-        <div className="w-52 shrink-0 flex flex-col gap-6">
+        <div className="w-52 shrink-0 flex flex-col pl-10">
 
-          {/* Status */}
-          <div>
-            <p className={sideLabel}>Status</p>
+          {/* Estado */}
+          <div className="py-4">
+            <p className={sideLabel}>Estado</p>
             <button className={`${sideBtn} ${sideBtnInactive} opacity-50 cursor-not-allowed`}>
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/>
               </svg>
-              <span>Verified</span>
+              <span>Verificado</span>
             </button>
           </div>
 
-          {/* Ownership */}
-          <div>
-            <p className={sideLabel}>Ownership</p>
-            <button className={`${sideBtn} ${sideBtnInactive} opacity-50 cursor-not-allowed`}>
+          {divider}
+
+          {/* Propiedad */}
+          <div className="py-4">
+            <p className={sideLabel}>Propiedad</p>
+            <button onClick={() => { setOwnerFilter((v: boolean) => !v); setPage(1) }} className={`${sideBtn} ${ownerFilter ? sideBtnActive : sideBtnInactive}`}>
               <PersonIcon />
-              <span>My Skills</span>
+              <span>Mis Skills</span>
             </button>
           </div>
 
-          {/* Advanced */}
-          <div>
-            <p className={sideLabel}>Advanced</p>
+          {divider}
+
+          {/* Avanzado */}
+          <div className="py-4">
+            <p className={sideLabel}>Avanzado</p>
             <button className={`${sideBtn} ${sideBtnInactive} opacity-50 cursor-not-allowed`}>
               <PlusCircleIcon />
-              <span>Namespace</span>
+              <span>Espacio de nombres</span>
             </button>
           </div>
 
-          {/* Categories */}
-          <div>
-            <p className={sideLabel}>Categories</p>
+          {divider}
+
+          {/* Categorías */}
+          <div className="py-4">
+            <p className={sideLabel}>Categorías</p>
             <div className="flex flex-col gap-0.5">
               {CATS.map(cat => (
                 <button
@@ -268,11 +279,11 @@ export default function SkillsDirectory({ skills, total, initialSearch = '' }: {
         </div>
 
         {/* ── Contenido principal ── */}
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 pr-10">
 
           {/* Conteo */}
           <p className="text-sm text-stone-400 dark:text-stone-500 mb-4">
-            <span className="text-stone-700 dark:text-stone-300 font-medium">{fmtNum(total)}</span> skills encontradas
+            <span className="text-stone-700 dark:text-stone-300 font-medium">{fmtNum(filtered.length)}</span> skills encontradas{ms !== null && <span className="ml-1">({ms}ms)</span>}
           </p>
 
           {/* Lista */}
@@ -281,12 +292,11 @@ export default function SkillsDirectory({ skills, total, initialSearch = '' }: {
               Sin resultados para &ldquo;{search}&rdquo;
             </p>
           ) : (
-            <div className="flex flex-col" style={{ border: '1px solid var(--border)', borderRadius: '12px', overflow: 'hidden' }}>
+            <div className="flex flex-col gap-3">
               {visible.map((skill, i) => (
                 <div
                   key={skill.id}
-                  className="flex items-start gap-4 px-5 py-4 bg-white dark:bg-[var(--card)] hover:bg-stone-50 dark:hover:bg-stone-800/30 transition-colors"
-                  style={i > 0 ? { borderTop: '1px solid var(--border)' } : undefined}
+                  className="flex items-start gap-4 px-5 py-4 rounded-xl border border-gray-200 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
                 >
                   {/* Creator icon */}
                   <CreatorIcon creator={skill.creator} />
@@ -296,9 +306,9 @@ export default function SkillsDirectory({ skills, total, initialSearch = '' }: {
                     {/* Top row: name + stars */}
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex items-center gap-1.5 min-w-0 flex-wrap">
-                        <span className="text-orange-600 dark:text-orange-500 font-semibold text-sm">
+                        <Link href={`/guias/${skill.id}`} className="text-blue-600 dark:text-white font-semibold text-sm hover:underline">
                           {skill.creator}/{skill.nombre}
-                        </span>
+                        </Link>
                         {skill.verified && <VerifiedIcon />}
                       </div>
                       <div className="flex items-center gap-1 text-stone-400 dark:text-stone-500 text-xs shrink-0">

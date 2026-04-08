@@ -41,5 +41,6 @@
   "fecha_verificado": "2026-04-04",
   "dificultad_instalacion": "media",
   "especifico_espana": true,
-  "nota_es": "MCP no publicado aún — oportunidad de crearlo para LibreBOR"
+  "nota_es": "MCP no publicado aún — oportunidad de crearlo para LibreBOR",
+  "logo_url": "/logos/librebor.svg"
 }

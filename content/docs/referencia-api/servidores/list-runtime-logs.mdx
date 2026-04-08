@@ -1,0 +1,68 @@
+---
+title: Listar logs de ejecucion
+icon: GET
+description: Lista los logs de ejecucion en tiempo de servicio de un servidor.
+---
+
+```
+GET /servers/{qualifiedName}/logs
+```
+
+### Autorizaciones
+
+| Parámetro | Tipo | Ubicación | Requerido | Descripción |
+| --- | --- | --- | --- | --- |
+| `Authorization` | string | header | sí | API key de SpainMCP como Bearer token |
+
+### Parámetros de Ruta
+
+| Parámetro | Tipo | Requerido | Descripción |
+| --- | --- | --- | --- |
+| `qualifiedName` | string | sí | Nombre cualificado del servidor (p.ej. 'namespace/server' o 'namespace' para servidores solo-namespace). Usa %2F para codificar la barra. |
+
+### Parámetros de Query
+
+| Parámetro | Tipo | Default | Descripción |
+| --- | --- | --- | --- |
+| `limit` | integer | 100 | Número máximo de logs a devolver (1 a 1000) |
+| `startTime` | string | — | Timestamp ISO para el inicio del rango |
+| `endTime` | string | — | Timestamp ISO para el fin del rango |
+
+### Respuesta
+
+**200** — `application/json` — Lista de logs de ejecución
+
+| Campo | Tipo | Requerido |
+| --- | --- | --- |
+| `logs` | object[] | sí |
+
+```json
+{
+  "logs": [
+    {
+      "timestamp": "2024-01-01T00:00:00.000Z",
+      "level": "info",
+      "message": "Server started successfully"
+    }
+  ]
+}
+```
+
+**404** — Servidor no encontrado
+
+### Ejemplo
+
+```typescript
+import SpainMCP from '@spainmcp/api';
+
+const client = new SpainMCP({
+  apiKey: process.env['SPAINMCP_API_KEY'],
+});
+
+const response = await client.servers.logs.list('qualifiedName', {
+  limit: 50,
+  startTime: '2024-01-01T00:00:00.000Z',
+});
+
+console.log(response.logs);
+```

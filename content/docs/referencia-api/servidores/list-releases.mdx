@@ -1,0 +1,76 @@
+---
+title: Listar releases
+icon: GET
+description: Lista releases ordenados por más reciente primero. Los logs se omiten — obtén una release específica para ver los logs.
+---
+
+```
+GET /servers/{qualifiedName}/releases
+```
+
+### Autorizaciones
+
+| Parámetro | Tipo | Ubicación | Requerido | Descripción |
+| --- | --- | --- | --- | --- |
+| `Authorization` | string | header | sí | API key de SpainMCP como Bearer token |
+
+### Parámetros de Ruta
+
+| Parámetro | Tipo | Requerido | Descripción |
+| --- | --- | --- | --- |
+| `qualifiedName` | string | sí | Nombre cualificado del servidor (p.ej. 'namespace/server' o 'namespace' para servidores solo-namespace). Usa %2F para codificar la barra. |
+
+### Parámetros de Query
+
+| Parámetro | Tipo | Default | Rango |
+| --- | --- | --- | --- |
+| `page` | integer | 1 | 1 a 9007199254740991 |
+| `pageSize` | integer | 20 | 1 a 100 |
+
+### Respuesta
+
+**200** — `application/json` — Lista paginada de releases
+
+| Campo | Tipo | Requerido |
+| --- | --- | --- |
+| `releases` | object[] | sí |
+| `pagination` | object | sí |
+
+```json
+{
+  "releases": [
+    {
+      "id": "3c90c3cc-0d44-4b50-8888-8dd25736052a",
+      "status": "<string>",
+      "type": "<string>",
+      "createdAt": "<string>",
+      "updatedAt": "<string>",
+      "commit": "<string>",
+      "commitMessage": "<string>"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "pageSize": 20,
+    "totalPages": 1,
+    "totalItems": 1
+  }
+}
+```
+
+**404** — Servidor no encontrado
+
+### Ejemplo
+
+```typescript
+import SpainMCP from '@spainmcp/api';
+
+const client = new SpainMCP({
+  apiKey: process.env['SPAINMCP_API_KEY'],
+});
+
+// Obtiene páginas automáticamente según sea necesario
+for await (const release of client.servers.releases.list('qualifiedName')) {
+  console.log(release.id);
+}
+```

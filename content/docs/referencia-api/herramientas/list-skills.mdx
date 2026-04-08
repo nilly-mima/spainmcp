@@ -1,0 +1,65 @@
+---
+title: Listar o buscar skills
+icon: GET
+description: Lista o busca skills disponibles en el registro.
+---
+
+```
+GET /skills
+```
+
+### Autorizaciones
+
+| Parámetro | Tipo | Ubicación | Requerido | Descripción |
+| --- | --- | --- | --- | --- |
+| `Authorization` | string | header | sí | API key de SpainMCP como Bearer token |
+
+### Parámetros de Query
+
+| Parámetro | Tipo | Default | Descripción |
+| --- | --- | --- | --- |
+| `q` | string | — | Consulta de búsqueda para filtrar skills |
+| `page` | integer | 1 | Página de resultados |
+| `pageSize` | integer | 20 | Resultados por página (1 a 100) |
+
+### Respuesta
+
+**200** — `application/json` — Lista paginada de skills
+
+| Campo | Tipo | Requerido |
+| --- | --- | --- |
+| `skills` | object[] | sí |
+| `pagination` | object | sí |
+
+```json
+{
+  "skills": [
+    {
+      "qualifiedName": "spainmcp/resumen-boe",
+      "displayName": "Resumen BOE",
+      "description": "Resume las publicaciones del BOE del día"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "pageSize": 20,
+    "totalPages": 1,
+    "totalItems": 1
+  }
+}
+```
+
+### Ejemplo
+
+```typescript
+import SpainMCP from '@spainmcp/api';
+
+const client = new SpainMCP({
+  apiKey: process.env['SPAINMCP_API_KEY'],
+});
+
+// Obtiene páginas automáticamente según sea necesario
+for await (const skill of client.skills.list({ q: 'boe' })) {
+  console.log(skill.qualifiedName);
+}
+```

@@ -1,0 +1,74 @@
+---
+title: Crear un service token
+icon: POST
+description: Crea un service token con scope limitado para uso en navegador, móvil o agentes.
+---
+
+```
+POST /auth/token
+```
+
+### Autorizaciones
+
+| Parámetro | Tipo | Ubicación | Requerido | Descripción |
+| --- | --- | --- | --- | --- |
+| `Authorization` | string | header | sí | API key de SpainMCP como Bearer token |
+
+### Body
+
+`application/json`
+
+| Campo | Tipo | Requerido | Descripción |
+| --- | --- | --- | --- |
+| `policy` | object[] | sí | Array de reglas de acceso que definen el scope del token |
+
+Cada objeto en `policy` puede contener:
+
+| Campo | Tipo | Descripción |
+| --- | --- | --- |
+| `namespaces` | string[] | Namespaces permitidos |
+| `resources` | string[] | Recursos permitidos (p.ej. `"servers/*"`, `"connections/*"`) |
+| `operations` | string[] | Operaciones permitidas (p.ej. `"read"`, `"write"`, `"admin"`) |
+| `metadata` | object | Metadatos adicionales de la política |
+| `rpcReqMatch` | object | Filtro de métodos JSON-RPC permitidos |
+| `ttl` | string | Tiempo de vida del token (p.ej. `"1h"`, `"7d"`) |
+
+### Respuesta
+
+**200** — `application/json` — Token creado
+
+| Campo | Tipo | Requerido | Ejemplo |
+| --- | --- | --- | --- |
+| `token` | string | sí | `"smc_tk_abc123..."` |
+| `expiresAt` | string | sí | `"2026-01-11T08:00:00Z"` |
+
+```json
+{
+  "token": "smc_tk_abc123...",
+  "expiresAt": "2026-01-11T08:00:00Z"
+}
+```
+
+### Ejemplo
+
+```typescript
+import SpainMCP from '@spainmcp/api';
+
+const client = new SpainMCP({
+  apiKey: process.env['SPAINMCP_API_KEY'],
+});
+
+const { token, expiresAt } = await client.auth.createToken({
+  policy: [
+    {
+      namespaces: ['mi-empresa'],
+      resources: ['connections/*'],
+      operations: ['read'],
+      ttl: '24h',
+    },
+  ],
+});
+
+console.log('Token:', token);
+console.log('Expira:', expiresAt);
+```

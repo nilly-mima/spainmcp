@@ -1,0 +1,44 @@
+---
+title: Descargar bundle del servidor
+icon: GET
+description: Descarga el bundle MCPB para la última release stdio exitosa.
+---
+
+```
+GET /servers/{qualifiedName}/download
+```
+
+### Autorizaciones
+
+| Parámetro | Tipo | Ubicación | Requerido | Descripción |
+| --- | --- | --- | --- | --- |
+| `Authorization` | string | header | sí | API key de SpainMCP como Bearer token |
+
+### Parámetros de Ruta
+
+| Parámetro | Tipo | Requerido | Descripción |
+| --- | --- | --- | --- |
+| `qualifiedName` | string | sí | Nombre cualificado del servidor (p.ej. 'namespace/server' o 'namespace' para servidores solo-namespace). Usa %2F para codificar la barra. |
+
+### Respuesta
+
+**200** — `application/zip` — Archivo bundle
+
+La respuesta es de tipo `file`.
+
+**404** — Servidor no encontrado
+
+### Ejemplo
+
+```typescript
+import SpainMCP from '@spainmcp/api';
+
+const client = new SpainMCP({
+  apiKey: process.env['SPAINMCP_API_KEY'],
+});
+
+const response = await client.servers.download('qualifiedName');
+
+const content = await response.blob();
+console.log(content);
+```

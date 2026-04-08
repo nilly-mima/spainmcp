@@ -1,11 +1,13 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { supabaseBrowser } from '@/lib/supabase-client'
 
 export default function PublishDropdown() {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
+  const router = useRouter()
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -17,11 +19,21 @@ export default function PublishDropdown() {
     return () => document.removeEventListener('mousedown', handleClick)
   }, [])
 
+  async function handlePublishClick(path: string) {
+    setOpen(false)
+    const { data } = await supabaseBrowser.auth.getSession()
+    if (data.session) {
+      router.push(path)
+    } else {
+      router.push(`/login?redirect=${encodeURIComponent(path)}`)
+    }
+  }
+
   return (
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(v => !v)}
-        className="flex items-center gap-1 border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-300 px-3 py-1.5 rounded-lg hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors font-medium text-sm"
+        className="flex items-center gap-1 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 px-3 py-1.5 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors font-medium text-sm"
       >
         Publicar
         <svg
@@ -38,20 +50,18 @@ export default function PublishDropdown() {
           className="absolute right-0 top-full mt-1.5 w-36 rounded-xl bg-white dark:bg-[var(--card)] shadow-lg z-50 py-1 overflow-hidden"
           style={{ border: '1px solid var(--border)' }}
         >
-          <Link
-            href="/publish/mcp"
-            onClick={() => setOpen(false)}
-            className="flex items-center px-4 py-2.5 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800/60 transition-colors"
+          <button
+            onClick={() => handlePublishClick('/publish/mcp')}
+            className="w-full flex items-center px-4 py-2.5 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800/60 transition-colors text-left"
           >
             MCP
-          </Link>
-          <Link
-            href="/login"
-            onClick={() => setOpen(false)}
-            className="flex items-center px-4 py-2.5 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800/60 transition-colors"
+          </button>
+          <button
+            onClick={() => handlePublishClick('/publish/skill')}
+            className="w-full flex items-center px-4 py-2.5 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800/60 transition-colors text-left"
           >
             Skill
-          </Link>
+          </button>
         </div>
       )}
     </div>

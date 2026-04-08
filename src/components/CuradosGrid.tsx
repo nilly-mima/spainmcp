@@ -18,8 +18,7 @@ export default function CuradosGrid({ children }: { children: React.ReactNode })
       {hasMore && (
         <button
           onClick={() => setExpanded(!expanded)}
-          className="text-sm text-stone-400 hover:text-orange-600 transition-colors text-center py-2 rounded-lg"
-          style={{ border: '1px solid #E8E2D9', background: '#FAFAF9' }}
+          className="text-sm text-stone-400 hover:text-blue-600 transition-colors text-center py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900"
         >
           {expanded ? '↑ Ver menos' : `↓ Ver ${all.length - LIMIT} más`}
         </button>

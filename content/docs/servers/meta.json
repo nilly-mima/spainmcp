@@ -1,0 +1,5 @@
+{
+  "title": "Servers",
+  "collapsible": false,
+  "pages": ["overview", "publish", "session-config"]
+}

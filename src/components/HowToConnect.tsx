@@ -12,7 +12,7 @@ function CopyIcon({ onClick }: { onClick: () => void }) {
     setTimeout(() => setDone(false), 2000)
   }
   return (
-    <button onClick={handle} className="text-stone-400 hover:text-stone-600 transition-colors shrink-0" title="Copiar">
+    <button onClick={handle} className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:text-gray-400 transition-colors shrink-0" title="Copiar">
       {done ? (
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
       ) : (
@@ -28,7 +28,7 @@ function CopyIcon({ onClick }: { onClick: () => void }) {
 function Block({ children, copyText }: { children: React.ReactNode; copyText: string }) {
   return (
     <div
-      className="relative rounded-xl px-5 py-4 font-mono text-sm leading-7 text-stone-800 dark:text-stone-200"
+      className="relative rounded-xl px-5 py-4 font-mono text-sm leading-7 text-gray-800 dark:text-gray-200"
       style={{ background: 'var(--background)', border: '1px solid var(--border)' }}
     >
       <div className="absolute top-3.5 right-4">
@@ -39,9 +39,9 @@ function Block({ children, copyText }: { children: React.ReactNode; copyText: st
   )
 }
 
-const g  = (t: string) => <span className="text-stone-400 italic">{t}</span>
+const g  = (t: string) => <span className="text-gray-400 dark:text-gray-500 italic">{t}</span>
 const b  = (t: string) => <span className="text-blue-600">{t}</span>
-const or = (t: string) => <span className="text-orange-600 font-medium">{t}</span>
+const or = (t: string) => <span className="text-blue-600 font-medium">{t}</span>
 const gr = (t: string) => <span className="text-emerald-600 italic">{t}</span>
 const am = (t: string) => <span className="text-amber-700">{t}</span>
 
@@ -51,8 +51,8 @@ export default function HowToConnect() {
   return (
     <section className="flex flex-col items-center gap-10">
       <div className="flex flex-col items-center gap-3 text-center">
-        <h2 className="text-4xl font-black text-stone-900 dark:text-stone-100 tracking-tight">Conecta en segundos</h2>
-        <p className="text-stone-500 dark:text-stone-400 max-w-md">
+        <h2 className="text-4xl font-black text-gray-900 dark:text-gray-100 tracking-tight">Conecta en segundos</h2>
+        <p className="text-gray-500 dark:text-gray-400 max-w-md">
           Tres comandos. Tu IA conectada a cualquier herramienta del directorio.
         </p>
       </div>
@@ -65,8 +65,8 @@ export default function HowToConnect() {
             onClick={() => setTab(t)}
             className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${
               tab === t
-                ? 'bg-white dark:bg-[var(--card)] text-stone-900 dark:text-stone-100 shadow-sm'
-                : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200'
+                ? 'bg-white dark:bg-[var(--card)] text-gray-900 dark:text-gray-100 shadow-sm'
+                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-stone-200'
             }`}
           >
             {t === 'cli' ? '>_ CLI' : 'ts TypeScript'}
@@ -97,13 +97,13 @@ export default function HowToConnect() {
         ) : (
           <>
             <Block copyText={`import Anthropic from "@anthropic-ai/sdk";\n\nconst client = new Anthropic();`}>
-              <div>{b('import')} Anthropic {b('from')} {am('"@anthropic-ai/sdk"')}<span className="text-stone-700">;</span></div>
+              <div>{b('import')} Anthropic {b('from')} {am('"@anthropic-ai/sdk"')}<span className="text-gray-700 dark:text-gray-300">;</span></div>
               <div>&nbsp;</div>
-              <div><span className="text-blue-600">const</span> client = <span className="text-blue-600">new</span> <span className="text-stone-700">Anthropic()</span><span className="text-stone-700">;</span></div>
+              <div><span className="text-blue-600">const</span> client = <span className="text-blue-600">new</span> <span className="text-gray-700 dark:text-gray-300">Anthropic()</span><span className="text-gray-700 dark:text-gray-300">;</span></div>
             </Block>
 
             <Block copyText={`const response = await client.messages.create({\n  model: "claude-opus-4-5",\n  max_tokens: 1024,\n  mcp_servers: [{ type: "url", url: "https://mcp.github.com" }],\n  messages: [{ role: "user", content: "Lista mis repositorios" }],\n});`}>
-              <div><span className="text-blue-600">const</span> response = <span className="text-blue-600">await</span> client.messages.<span className="text-orange-600">create</span>({'({'}</div>
+              <div><span className="text-blue-600">const</span> response = <span className="text-blue-600">await</span> client.messages.<span className="text-blue-600">create</span>({'({'}</div>
               <div>&nbsp; model: {am('"claude-opus-4-5"')},</div>
               <div>&nbsp; max_tokens: <span className="text-teal-600">1024</span>,</div>
               <div>&nbsp; mcp_servers: [{'{'} type: {am('"url"')}, url: {am('"https://mcp.github.com"')} {'}'}],</div>

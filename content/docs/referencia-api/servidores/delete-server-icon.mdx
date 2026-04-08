@@ -1,0 +1,51 @@
+---
+title: Eliminar icono del servidor
+icon: DELETE
+description: Elimina el icono del servidor.
+---
+
+```
+DELETE /servers/{qualifiedName}/icon
+```
+
+### Autorizaciones
+
+| Parámetro | Tipo | Ubicación | Requerido | Descripción |
+| --- | --- | --- | --- | --- |
+| `Authorization` | string | header | sí | API key de SpainMCP como Bearer token |
+
+### Parámetros de Ruta
+
+| Parámetro | Tipo | Requerido | Descripción |
+| --- | --- | --- | --- |
+| `qualifiedName` | string | sí | Nombre cualificado del servidor (p.ej. 'namespace/server' o 'namespace' para servidores solo-namespace). Usa %2F para codificar la barra. |
+
+### Respuesta
+
+**200** — `application/json` — Icono eliminado
+
+| Campo | Tipo | Requerido |
+| --- | --- | --- |
+| `success` | boolean | sí |
+
+```json
+{
+  "success": true
+}
+```
+
+**404** — Servidor o icono no encontrado
+
+### Ejemplo
+
+```typescript
+import SpainMCP from '@spainmcp/api';
+
+const client = new SpainMCP({
+  apiKey: process.env['SPAINMCP_API_KEY'],
+});
+
+const result = await client.servers.icon.delete('qualifiedName');
+
+console.log(result.success);
+```

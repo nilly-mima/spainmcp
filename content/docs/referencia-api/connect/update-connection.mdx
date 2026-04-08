@@ -1,0 +1,77 @@
+---
+title: Crear o actualizar conexion
+icon: PUT
+description: Crea o actualiza (upsert) una conexion MCP gestionada.
+---
+
+```
+PUT /connections/{namespace}/{connectionId}
+```
+
+### Autorizaciones
+
+| Parametro | Tipo | Ubicacion | Requerido | Descripcion |
+| --- | --- | --- | --- | --- |
+| `Authorization` | string | header | si | API key de SpainMCP como Bearer token |
+
+### Parametros de Ruta
+
+| Parametro | Tipo | Requerido | Descripcion |
+| --- | --- | --- | --- |
+| `namespace` | string | si | Namespace de la conexion (p.ej. 'myorg') |
+| `connectionId` | string | si | Identificador unico de la conexion |
+
+### Body
+
+`application/json`
+
+| Campo | Tipo | Requerido | Ejemplo |
+| --- | --- | --- | --- |
+| `mcpUrl` | string | si | `"https://mcp.example.com/sse"` |
+| `name` | string | no | `"Mi servidor MCP"` |
+| `metadata` | object | no | `{ "env": "production" }` |
+| `headers` | object | no | `{ "X-Custom": "value" }` |
+
+### Respuesta
+
+**200** — `application/json` — Conexion creada o actualizada correctamente
+
+| Campo | Tipo | Requerido | Ejemplo |
+| --- | --- | --- | --- |
+| `connectionId` | string | si | `"my-connection"` |
+| `status` | string | si | `"connected"` |
+| `authorizationUrl` | string \| null | si | `null` |
+| `serverInfo` | object \| null | si | |
+
+El campo `status` puede tomar los valores `"connected"`, `"auth_required"` o `"error"`.
+
+```json
+{
+  "connectionId": "my-connection",
+  "status": "connected",
+  "authorizationUrl": null,
+  "serverInfo": {
+    "name": "Mi servidor MCP",
+    "version": "1.0.0",
+    "tools": ["buscar", "consultar"]
+  }
+}
+```
+
+### Ejemplo
+
+```typescript
+import SpainMCP from '@spainmcp/api';
+
+const client = new SpainMCP({
+  apiKey: process.env['SPAINMCP_API_KEY'],
+});
+
+const connection = await client.connections.update('myorg', 'my-connection', {
+  mcpUrl: 'https://mcp.example.com/sse',
+  name: 'Mi servidor MCP actualizado',
+  metadata: { env: 'staging' },
+});
+
+console.log(connection.status);
+```

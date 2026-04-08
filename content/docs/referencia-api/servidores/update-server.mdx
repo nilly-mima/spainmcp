@@ -1,0 +1,73 @@
+---
+title: Actualizar un servidor
+icon: PATCH
+description: Actualiza metadata del servidor como nombre, descripción, icono o visibilidad.
+---
+
+```
+PATCH /servers/{qualifiedName}
+```
+
+### Autorizaciones
+
+| Parámetro | Tipo | Ubicación | Requerido | Descripción |
+| --- | --- | --- | --- | --- |
+| `Authorization` | string | header | sí | API key de SpainMCP como Bearer token |
+
+### Parámetros de Ruta
+
+| Parámetro | Tipo | Requerido | Descripción |
+| --- | --- | --- | --- |
+| `qualifiedName` | string | sí | Nombre cualificado del servidor (p.ej. 'namespace/server' o 'namespace' para servidores solo-namespace). Usa %2F para codificar la barra. |
+
+### Body
+
+`application/json`
+
+| Campo | Tipo | Requerido |
+| --- | --- | --- |
+| `displayName` | string | no |
+| `description` | string | no |
+| `homepage` | string \| null | no |
+| `license` | string \| null | no |
+| `iconUrl` | string \| null | no |
+| `unlisted` | boolean | no |
+
+### Respuesta
+
+**200** — `application/json` — Servidor actualizado
+
+| Campo | Tipo | Requerido |
+| --- | --- | --- |
+| `success` | boolean | sí |
+| `namespace` | string | sí |
+| `server` | string | sí |
+
+```json
+{
+  "success": true,
+  "namespace": "<string>",
+  "server": "<string>"
+}
+```
+
+**400** — Petición inválida
+**403** — No autorizado
+**404** — Servidor no encontrado
+
+### Ejemplo
+
+```typescript
+import SpainMCP from '@spainmcp/api';
+
+const client = new SpainMCP({
+  apiKey: process.env['SPAINMCP_API_KEY'],
+});
+
+const server = await client.servers.update('qualifiedName', {
+  displayName: 'Updated Name',
+  description: 'Updated description',
+});
+
+console.log(server.namespace);
+```

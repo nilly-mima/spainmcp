@@ -1,0 +1,83 @@
+---
+title: Crear conexion
+icon: POST
+description: Crea una nueva conexion MCP gestionada en el namespace indicado.
+---
+
+```
+POST /connections/{namespace}
+```
+
+### Autorizaciones
+
+| Parametro | Tipo | Ubicacion | Requerido | Descripcion |
+| --- | --- | --- | --- | --- |
+| `Authorization` | string | header | si | API key de SpainMCP como Bearer token |
+
+### Parametros de Ruta
+
+| Parametro | Tipo | Requerido | Descripcion |
+| --- | --- | --- | --- |
+| `namespace` | string | si | Namespace donde crear la conexion (p.ej. 'myorg') |
+
+### Body
+
+`application/json`
+
+| Campo | Tipo | Requerido | Ejemplo |
+| --- | --- | --- | --- |
+| `connectionId` | string | no | `"my-connection"` |
+| `mcpUrl` | string | si | `"https://mcp.example.com/sse"` |
+| `name` | string | no | `"Mi servidor MCP"` |
+| `metadata` | object | no | `{ "env": "production" }` |
+| `headers` | object | no | `{ "X-Custom": "value" }` |
+
+### Respuesta
+
+**201** — `application/json` — Conexion creada correctamente
+
+| Campo | Tipo | Requerido | Ejemplo |
+| --- | --- | --- | --- |
+| `connectionId` | string | si | `"my-connection"` |
+| `status` | string | si | `"connected"` |
+| `authorizationUrl` | string \| null | si | `null` |
+| `serverInfo` | object \| null | si | |
+
+El campo `status` puede tomar los valores `"connected"`, `"auth_required"` o `"error"`.
+Si `status` es `"auth_required"`, el campo `authorizationUrl` contiene la URL donde el usuario debe completar la autorizacion OAuth.
+
+```json
+{
+  "connectionId": "my-connection",
+  "status": "connected",
+  "authorizationUrl": null,
+  "serverInfo": {
+    "name": "Mi servidor MCP",
+    "version": "1.0.0",
+    "tools": ["buscar", "consultar"]
+  }
+}
+```
+
+### Ejemplo
+
+```typescript
+import SpainMCP from '@spainmcp/api';
+
+const client = new SpainMCP({
+  apiKey: process.env['SPAINMCP_API_KEY'],
+});
+
+const connection = await client.connections.create('myorg', {
+  connectionId: 'my-connection',
+  mcpUrl: 'https://mcp.example.com/sse',
+  name: 'Mi servidor MCP',
+  metadata: { env: 'production' },
+});
+
+if (connection.status === 'auth_required') {
+  console.log('Autorizar en:', connection.authorizationUrl);
+} else {
+  console.log('Conectado:', connection.connectionId);
+}
+```

@@ -1,0 +1,448 @@
+---
+title: Conexión con servidores MCP
+icon: Share2
+description: Integra servidores MCP mediante una API REST sencilla — autenticación OAuth, tokens y sesiones bajo control total.
+---
+
+**SpainMCP Connect** es la solución gestionada de SpainMCP que simplifica la conexión con servidores MCP. Te ahorra tener que implementar el protocolo MCP por tu cuenta, lidiar con flujos OAuth o almacenar credenciales manualmente: todo se resuelve a través de una interfaz REST unificada.
+
+## ¿Qué ofrece SpainMCP Connect?
+
+Con SpainMCP Connect puedes incorporar integraciones MCP en tu aplicación sin asumir la complejidad del protocolo:
+
+- **OAuth resuelto de serie** — Olvídate de URIs de redirección, client IDs o secrets. SpainMCP administra las apps OAuth de las integraciones más utilizadas.
+- **Tokens siempre vigentes** — La renovación de tokens ocurre de forma automática antes de que caduquen. Si alguna renovación falla, el estado de la conexión pasa a `auth_required`.
+- **Credenciales cifradas** — Todas las credenciales se almacenan cifradas y con acceso de solo escritura. Pueden utilizarse para ejecutar peticiones, pero jamás se exponen en texto plano.
+- **Cero gestión de estado** — SpainMCP Connect se encarga del ciclo de vida completo de la conexión. Realiza peticiones sin preocuparte por reconexiones, keepalives ni sesiones.
+- **Service tokens con alcance limitado** — Emite tokens de corta duración para clientes web o móviles que necesiten invocar herramientas directamente, restringidos a usuarios y namespaces concretos.
+
+## Inicio Rápido
+
+<Tabs items={['CLI', 'AI SDK', 'MCP TypeScript SDK']}>
+  <Tab value="CLI">
+    ```bash
+    # 1. Autenticarse en SpainMCP
+    spainmcp auth login
+
+    # 2. Conectar al servidor de búsqueda Exa
+    spainmcp mcp add https://server.spainmcp.com/exa --id exa
+
+    # 3. Listar herramientas disponibles
+    spainmcp tool list exa
+
+    # 4. Llamar a una herramienta
+    spainmcp tool call exa search '{"query": "últimas noticias sobre MCP"}'
+    ```
+  </Tab>
+  <Tab value="AI SDK">
+    ```bash
+    npm install @spainmcp/api @ai-sdk/mcp ai @ai-sdk/anthropic
+    ```
+
+    ```typescript
+    import { createMCPClient } from '@ai-sdk/mcp';
+    import { generateText } from 'ai';
+    import { anthropic } from '@ai-sdk/anthropic';
+    import { createConnection } from '@spainmcp/api/mcp';
+
+    const { transport } = await createConnection({
+      mcpUrl: 'https://exa.run.tools',
+    });
+
+    const mcpClient = await createMCPClient({ transport });
+    const tools = await mcpClient.tools();
+
+    const { text } = await generateText({
+      model: anthropic('claude-sonnet-4-6'),
+      tools,
+      prompt: '¿Qué se publicó en el BOE hoy?',
+    });
+
+    await mcpClient.close();
+    ```
+  </Tab>
+  <Tab value="MCP TypeScript SDK">
+    ```bash
+    npm install @spainmcp/api @modelcontextprotocol/sdk
+    ```
+
+    ```typescript
+    import { Client } from '@modelcontextprotocol/sdk/client/index.js';
+    import { createConnection } from '@spainmcp/api/mcp';
+
+    const { transport } = await createConnection({
+      mcpUrl: 'https://exa.run.tools',
+    });
+
+    // Conectar usando el cliente del MCP SDK
+    const mcpClient = new Client({ name: 'mi-app', version: '1.0.0' });
+    await mcpClient.connect(transport);
+
+    // Usar la API ergonómica del MCP SDK
+    const { tools } = await mcpClient.listTools();
+    const result = await mcpClient.callTool({
+      name: 'search',
+      arguments: { query: 'mcp' },
+    });
+    ```
+  </Tab>
+</Tabs>
+
+## Servidores que requieren configuración
+
+Determinados servidores MCP necesitan datos adicionales como API keys o identificadores de proyecto. La forma en que se envía cada valor depende del esquema del servidor: algunos campos se transmiten como `headers` (generalmente API keys), mientras que otros se incluyen como parámetros de consulta en la URL del MCP.
+
+Revisa la ficha del servidor en [spainmcp.com](https://spainmcp.com) para conocer qué configuración exige y cómo debe proporcionarse cada valor.
+
+<Tabs items={['CLI', 'TypeScript', 'cURL']}>
+  <Tab value="CLI">
+    ```bash
+    # Añadir un servidor con config (API key como header, project ID como query param)
+    spainmcp mcp add \
+      '@browserbasehq/mcp-browserbase?browserbaseProjectId=tu-project-id' \
+      --id mi-browserbase \
+      --headers '{"browserbaseApiKey": "tu-browserbase-api-key"}'
+    ```
+  </Tab>
+  <Tab value="TypeScript">
+    ```typescript
+    import SpainMCP from '@spainmcp/api';
+
+    const spainmcp = new SpainMCP();
+
+    const conn = await spainmcp.connections.set('mi-browserbase', {
+      namespace: 'mi-app',
+      mcpUrl: 'https://server.spainmcp.com/@browserbasehq/mcp-browserbase',
+      config: {
+        browserbaseProjectId: 'tu-project-id',
+      },
+      headers: {
+        browserbaseApiKey: 'tu-browserbase-api-key',
+      },
+    });
+    ```
+  </Tab>
+  <Tab value="cURL">
+    ```bash
+    curl -X POST "https://api.spainmcp.com/v1/connections/mi-app/mi-browserbase" \
+      -H "Authorization: Bearer $SPAINMCP_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "mcpUrl": "...",
+        "headers": { "browserbaseApiKey": "tu-api-key" }
+      }'
+    ```
+  </Tab>
+</Tabs>
+
+Los servidores configurados mediante API keys quedan en estado `connected` de inmediato, a diferencia de los basados en OAuth que pueden devolver `auth_required`.
+
+<Callout type="info">
+  El esquema de configuración de cada servidor especifica si un campo se pasa como header o parámetro de consulta mediante los metadatos `x-from`. Consulta la Configuración de Sesión para más detalles sobre cómo los servidores declaran su transporte de configuración.
+</Callout>
+
+## Gestión Multi-Usuario
+
+Si tu agente atiende a varios usuarios, necesitas asociar cada conexión con su propietario. Utiliza el campo `metadata` para vincular conexiones a tus usuarios y luego filtra por esos metadatos para obtener las conexiones de un usuario determinado.
+
+### 1. Crear una conexión asociada a un usuario
+
+Cuando un usuario desea activar una integración (por ejemplo, GitHub), genera la conexión incluyendo su `userId` en los metadatos:
+
+<Tabs items={['CLI', 'TypeScript']}>
+  <Tab value="CLI">
+    ```bash
+    spainmcp mcp add https://server.spainmcp.com/github \
+      --id usuario-123-github \
+      --name "GitHub" \
+      --metadata '{"userId": "usuario-123"}'
+
+    # Si se requiere OAuth, la CLI muestra la URL de autenticación:
+    # → auth_required
+    # → https://auth.spainmcp.com/...
+    # Visita la URL para autorizar
+    ```
+  </Tab>
+  <Tab value="TypeScript">
+    ```typescript
+    const conn = await spainmcp.connections.set('usuario-123-github', {
+      namespace: 'mi-app',
+      mcpUrl: 'https://server.spainmcp.com/github',
+      name: 'GitHub',
+      metadata: { userId: 'usuario-123' },
+    });
+
+    if (conn.status === 'auth_required') {
+      redirect(conn.authorizationUrl);
+    }
+    ```
+  </Tab>
+</Tabs>
+
+### 2. Consultar las conexiones de un usuario
+
+Para que tu agente sepa qué herramientas tiene disponibles un usuario, recupera sus conexiones:
+
+<Tabs items={['CLI', 'TypeScript']}>
+  <Tab value="CLI">
+    ```bash
+    spainmcp mcp list --metadata '{"userId": "usuario-123"}'
+    ```
+  </Tab>
+  <Tab value="TypeScript">
+    ```typescript
+    const connections = await spainmcp.connections.list('mi-app', {
+      metadata: { userId: 'usuario-123' },
+    });
+    ```
+  </Tab>
+</Tabs>
+
+### 3. Invocar herramientas de varias conexiones
+
+Instancia clientes MCP para cada conexión y combina sus herramientas:
+
+<Tabs items={['CLI', 'TypeScript']}>
+  <Tab value="CLI">
+    ```bash
+    # Listar herramientas de una conexión
+    spainmcp tool list usuario-123-github
+
+    # Llamar a una herramienta
+    spainmcp tool call usuario-123-github search_repositories \
+      '{"query": "mcp"}'
+    ```
+  </Tab>
+  <Tab value="TypeScript">
+    ```typescript
+    const connections = await spainmcp.connections.list('mi-app', {
+      metadata: { userId: 'usuario-123' },
+    });
+
+    const clients = await Promise.all(
+      connections.data.map(async (conn) => {
+        const { transport } = await createConnection({
+          client: spainmcp,
+          namespace: 'mi-app',
+          connectionId: conn.connectionId,
+        });
+        return createMCPClient({ transport });
+      })
+    );
+
+    const allTools = (await Promise.all(clients.map((c) => c.tools())))
+      .flatMap((t) => Object.entries(t))
+      .reduce((acc, [k, v]) => ({ ...acc, [k]: v }), {});
+    ```
+  </Tab>
+</Tabs>
+
+## Conceptos Fundamentales
+
+### Namespaces
+
+Un namespace es un identificador global que agrupa tus conexiones. Lo habitual es crear uno por aplicación o entorno (por ejemplo, `mi-app`, `mi-app-staging`). Cuando no indicas un namespace, el SDK recurre al primero existente o genera uno de forma automática.
+
+### Conexiones
+
+Una conexión representa una sesión persistente con un servidor MCP que se mantiene activa hasta que la finalices explícitamente. Cada conexión:
+
+- Posee un `connectionId` (definido por ti o generado automáticamente)
+- Guarda credenciales de forma segura (solo escritura: las credenciales nunca pueden leerse, solo emplearse para ejecutar peticiones)
+- Admite `metadata` personalizado para realizar filtrados (por ejemplo, `userId` para vincular conexiones con tus usuarios)
+- Retorna `serverInfo` con el nombre y la versión del servidor MCP
+
+### Estado de la conexión
+
+Al crear o recuperar una conexión, esta incluye un campo `status`:
+
+| Estado | Descripción |
+| --- | --- |
+| `connected` | La conexión está lista para usar |
+| `auth_required` | Se necesita autorización OAuth. Incluye `authorizationUrl` para redirigir al usuario |
+| `error` | La conexión falló. Incluye el `message` de error |
+
+### Autenticación
+
+SpainMCP Connect soporta dos mecanismos de autenticación:
+
+| Token | Caso de Uso | Acceso |
+| --- | --- | --- |
+| API Key | Solo backend | Acceso completo al namespace |
+| Service Token | Navegador, móvil, agentes | Acceso con scope a conexiones específicas |
+
+Genera tu API key en [spainmcp.com/account/api-keys](https://spainmcp.com/account/api-keys).
+
+<Callout type="warn">
+  Nunca expongas tu API key a clientes o agentes no confiables. Usa service tokens con scope para apps de navegador y móvil.
+</Callout>
+
+### Flujo OAuth
+
+Cuando un servidor MCP necesita autenticación OAuth, el proceso es el siguiente:
+
+1. Creas una conexión y la respuesta llega con estado `auth_required` junto a una `authorizationUrl`
+2. Rediriges al usuario a esa `authorizationUrl`
+3. El usuario se autentica con el proveedor externo (por ejemplo, GitHub)
+4. Tras completar la autorización, el usuario vuelve a tu aplicación
+5. A partir de ese momento la conexión funciona y las peticiones se ejecutan correctamente
+
+No hace falta registrar apps OAuth, definir URIs de redirección ni implementar el intercambio de tokens. SpainMCP se encarga de toda la relación OAuth con los proveedores y almacena las credenciales de forma segura por ti.
+
+### Manejo de autorización
+
+Al utilizar el SDK, `createConnection()` lanza un `SpainMCPAuthorizationError` cuando el servidor MCP requiere OAuth. Este error contiene la URL de autorización a la que redirigir al usuario, junto con el ID de conexión necesario para reintentar una vez completado el proceso.
+
+<Tabs items={['CLI', 'TypeScript']}>
+  <Tab value="CLI">
+    ```bash
+    # Conectar a un servidor que requiere OAuth
+    spainmcp mcp add https://server.spainmcp.com/github
+
+    # Si se requiere auth, la CLI muestra la URL de autorización:
+    # → auth_required
+    # → https://auth.spainmcp.com/...
+    # → connection_id: abc-123-github
+    # Visita la URL para autorizar y luego reintenta
+    ```
+  </Tab>
+  <Tab value="TypeScript">
+    ```typescript
+    import { SpainMCPAuthorizationError } from '@spainmcp/api';
+
+    try {
+      const { transport } = await createConnection({
+        client: spainmcp,
+        namespace: 'mi-app',
+        connectionId: 'usuario-123-github',
+      });
+    } catch (e) {
+      if (e instanceof SpainMCPAuthorizationError) {
+        // Guardar connectionId y redirigir al usuario
+        redirect(e.authorizationUrl);
+      }
+    }
+    ```
+  </Tab>
+</Tabs>
+
+Una vez que el usuario completa la autorización y regresa a tu aplicación, vuelve a conectar utilizando el `connectionId` almacenado previamente:
+
+<Tabs items={['CLI', 'TypeScript']}>
+  <Tab value="CLI">
+    ```bash
+    # Después de la autorización, la conexión está lista
+    spainmcp tool list abc-123-github
+    ```
+  </Tab>
+  <Tab value="TypeScript">
+    ```typescript
+    // Reintentar con el connectionId guardado
+    const { transport } = await createConnection({
+      client: spainmcp,
+      namespace: 'mi-app',
+      connectionId: savedConnectionId,
+    });
+    ```
+  </Tab>
+</Tabs>
+
+## Service Tokens
+
+Los service tokens permiten consumir SpainMCP Connect de manera segura desde navegadores, aplicaciones móviles y agentes de IA sin revelar tu API key. Tu backend genera un token con alcance limitado y el cliente lo utiliza para invocar herramientas directamente.
+
+<Tabs items={['CLI', 'TypeScript', 'cURL']}>
+  <Tab value="CLI">
+    ```bash
+    spainmcp auth token --policy '[{
+      "namespaces": "mi-app",
+      "resources": "connections",
+      "operations": ["read", "execute"],
+      "metadata": { "userId": "usuario-123" },
+      "ttl": "1h"
+    }]'
+    ```
+  </Tab>
+  <Tab value="TypeScript">
+    ```typescript
+    const token = await spainmcp.auth.token({
+      policy: [{
+        namespaces: 'mi-app',
+        resources: 'connections',
+        operations: ['read', 'execute'],
+        metadata: { userId: 'usuario-123' },
+        ttl: '1h',
+      }],
+    });
+    ```
+  </Tab>
+  <Tab value="cURL">
+    ```bash
+    curl -X POST "https://api.spainmcp.com/v1/auth/token" \
+      -H "Authorization: Bearer $SPAINMCP_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{"policy": [{"namespaces": "mi-app", "resources": "connections", "operations": ["read", "execute"], "metadata": {"userId": "usuario-123"}, "ttl": "1h"}]}'
+    ```
+  </Tab>
+</Tabs>
+
+El token resultante solo tiene acceso a conexiones del namespace `mi-app` cuyo `metadata.userId` sea `usuario-123`. Para usarlo, inicializa el cliente con ese token:
+
+<Tabs items={['CLI', 'TypeScript']}>
+  <Tab value="CLI">
+    ```bash
+    # Usar el token con scope para llamar herramientas
+    SPAINMCP_API_KEY=$TOKEN spainmcp tool list usuario-123-github
+    ```
+  </Tab>
+  <Tab value="TypeScript">
+    ```typescript
+    const clientWithToken = new SpainMCP({ apiKey: token });
+    ```
+  </Tab>
+</Tabs>
+
+<Callout type="info">
+  ¿Necesitas scope a nivel de workspace, tokens de solo lectura o reducción de tokens? Consulta [Token Scoping](/docs/clientes/token-scoping) para la guía completa.
+</Callout>
+
+## Uso Avanzado
+
+Para consultar la documentación completa de la API, visita la [Referencia de SpainMCP Connect](/docs/referencia-api/introduccion/health-check).
+
+### Invocaciones MCP directas
+
+Ejecuta llamadas MCP directamente a través del endpoint HTTP streamable:
+
+<Tabs items={['CLI', 'TypeScript', 'cURL']}>
+  <Tab value="CLI">
+    ```bash
+    # Listar herramientas disponibles
+    spainmcp tool list usuario-123-github
+
+    # Llamar a una herramienta
+    spainmcp tool call usuario-123-github search_repositories \
+      '{"query": "mcp"}'
+    ```
+  </Tab>
+  <Tab value="TypeScript">
+    ```typescript
+    const { transport } = await createConnection({
+      client: spainmcp,
+      namespace: 'mi-app',
+      connectionId: 'usuario-123-github',
+    });
+
+    const mcpClient = await createMCPClient({ transport });
+    const tools = await mcpClient.tools();
+    ```
+  </Tab>
+  <Tab value="cURL">
+    ```bash
+    curl -X POST "https://api.spainmcp.com/v1/connections/mi-app/usuario-123-github/mcp" \
+      -H "Authorization: Bearer $SPAINMCP_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{"method": "tools/list", "params": {}}'
+    ```
+  </Tab>
+</Tabs>

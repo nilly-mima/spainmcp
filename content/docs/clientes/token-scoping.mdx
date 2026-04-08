@@ -1,0 +1,526 @@
+---
+title: Scoping de Tokens
+icon: Shield
+description: Define con precisión qué conexiones y operaciones están disponibles para cada token, ya sea por usuario, workspace o cualquier criterio personalizado.
+---
+
+<Callout type="warn">
+  **Vista previa** — El Scoping de Tokens está en preview. La superficie de la API puede cambiar. [Únete a nuestro Discord](https://discord.gg/spainmcp) para soporte y feedback.
+</Callout>
+
+Los tokens de servicio hacen posible que SpainMCP se integre de forma segura en navegadores, aplicaciones móviles y agentes de IA, todo ello sin necesidad de exponer tu API key. Cada token incorpora **restricciones** que determinan exactamente qué namespaces, recursos, operaciones y metadata son accesibles.
+
+Si necesitas información sobre la configuración general, visita [SpainMCP Connect](/docs/clientes/conectar-mcps).
+
+## Restringir un Token a un Usuario Concreto
+
+En aplicaciones multiusuario, lo habitual es que cada token solo tenga visibilidad sobre las conexiones de su propietario. El mecanismo es sencillo: al crear una conexión, asígnale `metadata` (por ejemplo, `{ userId: "user-123" }`). Después, genera un token con esa misma restricción de metadata. De esta forma, el token únicamente podrá interactuar con las conexiones cuya metadata sea coincidente.
+
+<Tabs items={['CLI', 'TypeScript', 'cURL']}>
+  <Tab value="CLI">
+    ```bash
+    spainmcp auth token --policy '[{
+      "namespaces": "my-app",
+      "resources": "connections",
+      "operations": ["read", "execute"],
+      "metadata": { "userId": "user-123" },
+      "ttl": "1h"
+    }]'
+    ```
+  </Tab>
+  <Tab value="TypeScript">
+    ```typescript
+    const { token } = await spainmcp.tokens.create({
+      policy: [
+        {
+          namespaces: 'my-app',
+          resources: 'connections',
+          operations: ['read', 'execute'],
+          metadata: { userId: 'user-123' },
+          ttl: '1h',
+        },
+      ],
+    })
+    ```
+  </Tab>
+  <Tab value="cURL">
+    ```bash
+    curl -X POST "https://api.spainmcp.com/v1/auth/token" \
+      -H "Authorization: Bearer $SPAINMCP_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{"policy":[{"namespaces":"my-app","resources":"connections","operations":["read","execute"],"metadata":{"userId":"user-123"},"ttl":"1h"}]}'
+    ```
+  </Tab>
+</Tabs>
+
+Con este token es posible listar y ejecutar herramientas en las conexiones de `my-app` que tengan `metadata.userId` igual a `user-123`, y nada fuera de ese alcance. Cualquier intento de acceder a la conexión de otro usuario resultara en una peticion rechazada.
+
+Tambien es posible filtrar por varios campos de metadata simultaneamente. Dentro de un mismo objeto de metadata, los campos se combinan con logica AND, de modo que el siguiente token solo coincide con conexiones donde `userId` y `tier` se cumplan a la vez:
+
+<Tabs items={['CLI', 'TypeScript', 'cURL']}>
+  <Tab value="CLI">
+    ```bash
+    spainmcp auth token --policy '[{
+      "namespaces": "my-app",
+      "resources": "connections",
+      "operations": ["read", "execute"],
+      "metadata": { "userId": "user-123", "tier": "pro" },
+      "ttl": "1h"
+    }]'
+    ```
+  </Tab>
+  <Tab value="TypeScript">
+    ```typescript
+    const { token } = await spainmcp.tokens.create({
+      policy: [
+        {
+          namespaces: 'my-app',
+          resources: 'connections',
+          operations: ['read', 'execute'],
+          metadata: { userId: 'user-123', tier: 'pro' },
+          ttl: '1h',
+        },
+      ],
+    })
+    ```
+  </Tab>
+  <Tab value="cURL">
+    ```bash
+    curl -X POST "https://api.spainmcp.com/v1/auth/token" \
+      -H "Authorization: Bearer $SPAINMCP_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{"policy":[{"namespaces":"my-app","resources":"connections","operations":["read","execute"],"metadata":{"userId":"user-123","tier":"pro"},"ttl":"1h"}]}'
+    ```
+  </Tab>
+</Tabs>
+
+## Acceso Jerárquico (Workspace / Organización)
+
+En aplicaciones reales es frecuente que existan varios niveles de acceso. Un usuario típico necesitaría ver:
+
+- Las conexiones que le pertenecen
+- Las conexiones compartidas dentro de su workspace
+- Las conexiones globales definidas por un administrador
+
+Para lograrlo, incluye **varias restricciones** en el array `policy`. Cada restricción funciona como un permiso independiente: el token obtiene acceso a todo lo que encaje con **al menos una** de ellas.
+
+<Tabs items={['CLI', 'TypeScript', 'cURL']}>
+  <Tab value="CLI">
+    ```bash
+    spainmcp auth token --policy '[
+      {
+        "namespaces": "my-app",
+        "resources": "connections",
+        "operations": ["read", "execute"],
+        "metadata": { "userId": "user-123" },
+        "ttl": "1h"
+      },
+      {
+        "namespaces": "my-app",
+        "resources": "connections",
+        "operations": ["read", "execute"],
+        "metadata": { "workspaceId": "ws-acme" },
+        "ttl": "1h"
+      },
+      {
+        "namespaces": "my-app",
+        "resources": "connections",
+        "operations": ["read", "execute"],
+        "metadata": { "scope": "global" },
+        "ttl": "1h"
+      }
+    ]'
+    ```
+  </Tab>
+  <Tab value="TypeScript">
+    ```typescript
+    const { token } = await spainmcp.tokens.create({
+      policy: [
+        { namespaces: 'my-app', resources: 'connections', operations: ['read', 'execute'], metadata: { userId: 'user-123' }, ttl: '1h' },
+        { namespaces: 'my-app', resources: 'connections', operations: ['read', 'execute'], metadata: { workspaceId: 'ws-acme' }, ttl: '1h' },
+        { namespaces: 'my-app', resources: 'connections', operations: ['read', 'execute'], metadata: { scope: 'global' }, ttl: '1h' },
+      ],
+    })
+    ```
+  </Tab>
+  <Tab value="cURL">
+    ```bash
+    curl -X POST "https://api.spainmcp.com/v1/auth/token" \
+      -H "Authorization: Bearer $SPAINMCP_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{"policy":[{"namespaces":"my-app","resources":"connections","operations":["read","execute"],"metadata":{"userId":"user-123"},"ttl":"1h"},{"namespaces":"my-app","resources":"connections","operations":["read","execute"],"metadata":{"workspaceId":"ws-acme"},"ttl":"1h"},{"namespaces":"my-app","resources":"connections","operations":["read","execute"],"metadata":{"scope":"global"},"ttl":"1h"}]}'
+    ```
+  </Tab>
+</Tabs>
+
+Quien posea este token podrá ver las conexiones que coincidan con cualquiera de los tres permisos definidos, sin necesidad de gestionar tokens separados para cada nivel de acceso.
+
+<Callout>
+  Para que esto funcione, etiqueta tus conexiones con la metadata correcta al crearlas:
+  - Conexiones de usuario: `metadata: { userId: 'user-123' }`
+  - Conexiones de workspace: `metadata: { workspaceId: 'ws-acme' }`
+  - Conexiones globales: `metadata: { scope: 'global' }`
+</Callout>
+
+## Reducir el Alcance de un Token
+
+Es posible derivar un token con permisos mas limitados a partir de un token de servicio existente. El token resultante solo puede tener un alcance **igual o inferior** al del token original; nunca puede exceder los permisos del padre.
+
+Este patron resulta especialmente util cuando tu backend dispone de un token amplio y necesita emitir tokens mas acotados para cada peticion individual. Por ejemplo, partiendo del token multi-nivel descrito en la seccion anterior:
+
+<Tabs items={['CLI', 'TypeScript', 'cURL']}>
+  <Tab value="CLI">
+    ```bash
+    # Estrechar el token amplio a las conexiones de un solo usuario
+    SPAINMCP_API_KEY=$BROAD_SERVICE_TOKEN spainmcp auth token \
+      --policy '[{
+        "resources": "connections",
+        "operations": "read",
+        "metadata": { "userId": "user-123" },
+        "ttl": "20m"
+      }]'
+    ```
+  </Tab>
+  <Tab value="TypeScript">
+    ```typescript
+    const spainmcpWithBroadToken = new SpainMCP({ apiKey: broadToken })
+
+    const { token: userToken } = await spainmcpWithBroadToken.tokens.create({
+      policy: [
+        {
+          resources: 'connections',
+          operations: 'read',
+          metadata: { userId: 'user-123' },
+          ttl: '20m',
+        },
+      ],
+    })
+    ```
+  </Tab>
+  <Tab value="cURL">
+    ```bash
+    curl -X POST "https://api.spainmcp.com/v1/auth/token" \
+      -H "Authorization: Bearer $BROAD_SERVICE_TOKEN" \
+      -H "Content-Type: application/json" \
+      -d '{"policy":[{"resources":"connections","operations":"read","metadata":{"userId":"user-123"},"ttl":"20m"}]}'
+    ```
+  </Tab>
+</Tabs>
+
+**Caso de uso habitual:** Tu backend genera un token amplio durante el arranque (por ejemplo, con acceso a todas las conexiones de un namespace). En cada peticion entrante, reduce ese token al usuario o contexto concreto antes de enviarlo al codigo del lado del cliente.
+
+## Control de Operaciones por Recurso
+
+Permite definir con granularidad que acciones puede realizar un token sobre cada tipo de recurso.
+
+| Recurso | Operaciones | Descripción |
+| --- | --- | --- |
+| `connections` | `read` | Listar y obtener conexiones |
+| `connections` | `write` | Crear y eliminar conexiones |
+| `connections` | `execute` | Llamar herramientas MCP a través de una conexión |
+| `servers` | `read`, `write` | Metadata y configuración del servidor |
+| `namespaces` | `read`, `write` | Gestión de namespaces |
+
+### Token de Solo Lectura (Dashboard)
+
+<Tabs items={['CLI', 'TypeScript', 'cURL']}>
+  <Tab value="CLI">
+    ```bash
+    spainmcp auth token --policy '[{
+      "namespaces": "my-app",
+      "resources": "connections",
+      "operations": "read",
+      "ttl": "1h"
+    }]'
+    ```
+  </Tab>
+  <Tab value="TypeScript">
+    ```typescript
+    const { token } = await spainmcp.tokens.create({
+      policy: [{ namespaces: 'my-app', resources: 'connections', operations: 'read', ttl: '1h' }],
+    })
+    ```
+  </Tab>
+  <Tab value="cURL">
+    ```bash
+    curl -X POST "https://api.spainmcp.com/v1/auth/token" \
+      -H "Authorization: Bearer $SPAINMCP_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{"policy":[{"namespaces":"my-app","resources":"connections","operations":"read","ttl":"1h"}]}'
+    ```
+  </Tab>
+</Tabs>
+
+### Token de Solo Ejecución (Agente)
+
+<Tabs items={['CLI', 'TypeScript', 'cURL']}>
+  <Tab value="CLI">
+    ```bash
+    spainmcp auth token --policy '[{
+      "namespaces": "my-app",
+      "resources": "connections",
+      "operations": "execute",
+      "metadata": { "userId": "user-123" },
+      "ttl": "30m"
+    }]'
+    ```
+  </Tab>
+  <Tab value="TypeScript">
+    ```typescript
+    const { token } = await spainmcp.tokens.create({
+      policy: [{ namespaces: 'my-app', resources: 'connections', operations: 'execute', metadata: { userId: 'user-123' }, ttl: '30m' }],
+    })
+    ```
+  </Tab>
+  <Tab value="cURL">
+    ```bash
+    curl -X POST "https://api.spainmcp.com/v1/auth/token" \
+      -H "Authorization: Bearer $SPAINMCP_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{"policy":[{"namespaces":"my-app","resources":"connections","operations":"execute","metadata":{"userId":"user-123"},"ttl":"30m"}]}'
+    ```
+  </Tab>
+</Tabs>
+
+### Token Multi-Recurso
+
+Con un solo token puedes otorgar acceso a varios tipos de recursos. Basta con incluir varias restricciones en el array `policy`:
+
+<Tabs items={['CLI', 'TypeScript', 'cURL']}>
+  <Tab value="CLI">
+    ```bash
+    spainmcp auth token --policy '[
+      {
+        "namespaces": "my-app",
+        "resources": "connections",
+        "operations": ["read", "execute"],
+        "metadata": { "userId": "user-123" },
+        "ttl": "1h"
+      },
+      {
+        "namespaces": "my-app",
+        "resources": "servers",
+        "operations": "read",
+        "ttl": "1h"
+      }
+    ]'
+    ```
+  </Tab>
+  <Tab value="TypeScript">
+    ```typescript
+    const { token } = await spainmcp.tokens.create({
+      policy: [
+        { namespaces: 'my-app', resources: 'connections', operations: ['read', 'execute'], metadata: { userId: 'user-123' }, ttl: '1h' },
+        { namespaces: 'my-app', resources: 'servers', operations: 'read', ttl: '1h' },
+      ],
+    })
+    ```
+  </Tab>
+  <Tab value="cURL">
+    ```bash
+    curl -X POST "https://api.spainmcp.com/v1/auth/token" \
+      -H "Authorization: Bearer $SPAINMCP_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{"policy":[{"namespaces":"my-app","resources":"connections","operations":["read","execute"],"metadata":{"userId":"user-123"},"ttl":"1h"},{"namespaces":"my-app","resources":"servers","operations":"read","ttl":"1h"}]}'
+    ```
+  </Tab>
+</Tabs>
+
+## Filtrado de Peticiones MCP (Experimental)
+
+<Callout type="warn">
+  **Inestable** — La coincidencia de peticiones MCP es experimental. La forma del campo `rpcReqMatch` puede cambiar en versiones futuras.
+</Callout>
+
+De forma predeterminada, un token con permiso `connections:execute` puede invocar **cualquier** herramienta disponible en una conexion. Mediante el campo `rpcReqMatch`, es posible acotar exactamente *que* llamadas JSON-RPC puede realizar el token, proporcionando control a nivel de cada peticion individual.
+
+Las reglas de filtrado analizan el cuerpo JSON-RPC de la peticion. Las claves se expresan como dot-paths (por ejemplo, `params.name` apunta al nombre de la herramienta en una llamada `tools/call`). Los valores son **patrones regex**. Cuando una restriccion contiene multiples entradas, todas deben cumplirse (logica AND).
+
+### Permitir Solo Herramientas Específicas
+
+<Tabs items={['TypeScript', 'cURL']}>
+  <Tab value="TypeScript">
+    ```typescript
+    const { token } = await spainmcp.tokens.create({
+      policy: [
+        {
+          namespaces: 'my-app',
+          resources: 'connections',
+          operations: 'execute',
+          metadata: { userId: 'user-123' },
+          rpcReqMatch: { 'params.name': '^(search|get_page)$' },
+          ttl: '1h',
+        },
+      ],
+    })
+
+    // Este token solo puede llamar las herramientas "search" y "get_page" — nada más
+    ```
+  </Tab>
+  <Tab value="cURL">
+    ```bash
+    curl -X POST "https://api.spainmcp.com/v1/auth/token" \
+      -H "Authorization: Bearer $SPAINMCP_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{"policy":[{"namespaces":"my-app","resources":"connections","operations":"execute","metadata":{"userId":"user-123"},"rpcReqMatch":{"params.name":"^(search|get_page)$"},"ttl":"1h"}]}'
+    ```
+  </Tab>
+</Tabs>
+
+### Permisos Combinados: Lectura Libre + Ejecución Selectiva
+
+Si necesitas un token que pueda listar conexiones sin restricciones pero que solo ejecute herramientas concretas, hay que definir dos restricciones separadas: una para el acceso de lectura general y otra para la ejecucion limitada:
+
+<Tabs items={['TypeScript', 'cURL']}>
+  <Tab value="TypeScript">
+    ```typescript
+    const { token } = await spainmcp.tokens.create({
+      policy: [
+        // Permiso 1: listar conexiones (sin restricción rpcReqMatch)
+        {
+          namespaces: 'my-app',
+          resources: 'connections',
+          operations: 'read',
+          metadata: { userId: 'user-123' },
+          ttl: '1h',
+        },
+        // Permiso 2: ejecutar solo la herramienta "search"
+        {
+          namespaces: 'my-app',
+          resources: 'connections',
+          operations: 'execute',
+          metadata: { userId: 'user-123' },
+          rpcReqMatch: { 'params.name': '^search$' },
+          ttl: '1h',
+        },
+      ],
+    })
+    ```
+  </Tab>
+  <Tab value="cURL">
+    ```bash
+    curl -X POST "https://api.spainmcp.com/v1/auth/token" \
+      -H "Authorization: Bearer $SPAINMCP_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{"policy":[{"namespaces":"my-app","resources":"connections","operations":"read","metadata":{"userId":"user-123"},"ttl":"1h"},{"namespaces":"my-app","resources":"connections","operations":"execute","metadata":{"userId":"user-123"},"rpcReqMatch":{"params.name":"^search$"},"ttl":"1h"}]}'
+    ```
+  </Tab>
+</Tabs>
+
+### Patrones de Coincidencia
+
+Los valores de filtrado son **patrones regex**. Utiliza anclas (`^...$`) cuando necesites coincidencia exacta:
+
+| Patrón | Valores de ejemplo | Significado |
+| --- | --- | --- |
+| `"^search$"` | `"search"` | Coincidencia exacta |
+| `"^(search\|get_page)$"` | `"search"`, `"get_page"` | Uno de varios valores |
+| `"^create_"` | `"create_issue"`, `"create_user"` | Coincidencia por prefijo |
+| `".*"` | cualquier cosa | Coincide todo |
+
+Dentro de una misma restriccion, las entradas de coincidencia se combinan con logica AND. Si defines varias claves en `rpcReqMatch`, la peticion debe satisfacer todas simultaneamente:
+
+```typescript
+rpcReqMatch: {
+  'params.name': '^create_issue$',
+  'params.arguments.repo': '^my-org/my-repo$',
+}
+// Solo permite tools/call donde name es "create_issue" Y repo es "my-org/my-repo"
+```
+
+<Callout>
+  Los paths separados por puntos coinciden en el cuerpo de la petición JSON-RPC. Para una petición `tools/call` como `{"method":"tools/call","params":{"name":"search","arguments":{"query":"test"}}}`, el path `params.name` coincide con `"search"` y `params.arguments.query` coincide con `"test"`.
+</Callout>
+
+## Referencia de Restricciones
+
+El array `policy` esta compuesto por **restricciones**, donde cada una representa un permiso autocontenido que especifica a que tiene acceso el token.
+
+```typescript
+interface Constraint {
+  namespaces?: string | string[]
+  resources?: 'connections' | 'servers' | 'namespaces' | 'skills'
+    | ('connections' | 'servers' | 'namespaces' | 'skills')[]
+  operations?: 'read' | 'write' | 'execute'
+    | ('read' | 'write' | 'execute')[]
+  metadata?: Record<string, string>
+    | Record<string, string>[]
+  rpcReqMatch?: Record<string, string>  // experimental — patrones regex para coincidencia de peticiones MCP
+  ttl?: string | number  // p.ej., "1h", "30m", "20s", 3600
+}
+```
+
+Cada restriccion se rige por dos principios fundamentales:
+
+- **Agregar un campo reduce el alcance** (AND). Cada campo introduce una condicion adicional. A mas campos, mas restrictivo sera el permiso.
+- **Agregar elementos a una lista amplia el alcance** (OR). Cada elemento de la lista representa una alternativa valida. A mas elementos, mas permisivo resulta.
+
+```typescript
+// Añadir campos estrecha el permiso
+{ resources: 'connections' }
+// → cualquier operación en connections
+
+{ resources: 'connections', operations: 'read' }
+// → solo leer connections
+
+{ resources: 'connections', operations: 'read', metadata: { userId: 'user-123' } }
+// → solo leer las connections de user-123
+
+// Añadir a una lista amplía el permiso
+{ operations: ['read', 'write'] }
+// → read OR write
+
+{ metadata: [{ userId: 'user-123' }, { workspaceId: 'ws-acme' }] }
+// → userId=user-123 OR workspaceId=ws-acme
+```
+
+Si incluyes varias restricciones dentro del array `policy`, cada una actua como un permiso separado. El token obtendra acceso a todo aquello que encaje con al menos una de las restricciones.
+
+<Tabs items={['CLI', 'TypeScript', 'cURL']}>
+  <Tab value="CLI">
+    ```bash
+    # Dos permisos: leer connections de alice O leer/escribir servers
+    spainmcp auth token --policy '[
+      {
+        "resources": "connections",
+        "operations": "read",
+        "metadata": { "owner": "alice" }
+      },
+      {
+        "resources": "servers",
+        "operations": ["read", "write"]
+      }
+    ]'
+    ```
+  </Tab>
+  <Tab value="TypeScript">
+    ```typescript
+    const { token } = await spainmcp.tokens.create({
+      policy: [
+        { resources: 'connections', operations: 'read', metadata: { owner: 'alice' } },
+        { resources: 'servers', operations: ['read', 'write'] },
+      ],
+    })
+    ```
+  </Tab>
+  <Tab value="cURL">
+    ```bash
+    curl -X POST "https://api.spainmcp.com/v1/auth/token" \
+      -H "Authorization: Bearer $SPAINMCP_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{"policy":[{"resources":"connections","operations":"read","metadata":{"owner":"alice"}},{"resources":"servers","operations":["read","write"]}]}'
+    ```
+  </Tab>
+</Tabs>
+
+<Callout>
+  La metadata dentro de un único objeto es AND: `{ owner: 'alice', env: 'prod' }` significa que owner es alice **y** env es prod. Usa una lista para OR: `[{ owner: 'alice' }, { env: 'prod' }]` significa que owner es alice **o** env es prod.
+</Callout>
+
+## Recomendaciones de Seguridad
+
+- **Define siempre un TTL.** Los tokens caducan tras el tiempo especificado (maximo 24 horas). Cuanto mas corto, mejor: genera tokens nuevos en cada sesion.
+- **Aplica el principio de minimo privilegio.** Un token destinado a invocar herramientas solo requiere `connections:execute`, no `connections:write`.
+- **Emplea metadata para aislar el acceso por fila.** No dependas exclusivamente de los IDs de conexion: las restricciones basadas en metadata se evaluan en el servidor.
+- **Reduce el alcance antes de compartir con entornos no confiables.** Si vas a enviar un token a un navegador, agente o sandbox, limítalo al usuario y las operaciones estrictamente necesarias.
+- **Los tokens no generan permisos de la nada.** Solo las API keys o tokens preexistentes pueden crear nuevos tokens, y un token hijo jamas puede superar los permisos de su padre.

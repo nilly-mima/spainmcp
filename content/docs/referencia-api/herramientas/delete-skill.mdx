@@ -1,0 +1,51 @@
+---
+title: Eliminar un skill
+icon: DELETE
+description: Elimina permanentemente un skill del registro.
+---
+
+```
+DELETE /skills/{qualifiedName}
+```
+
+### Autorizaciones
+
+| Parámetro | Tipo | Ubicación | Requerido | Descripción |
+| --- | --- | --- | --- | --- |
+| `Authorization` | string | header | sí | API key de SpainMCP como Bearer token |
+
+### Parámetros de Ruta
+
+| Parámetro | Tipo | Requerido | Descripción |
+| --- | --- | --- | --- |
+| `qualifiedName` | string | sí | Nombre cualificado del skill (p.ej. 'namespace/skill'). Usa %2F para codificar la barra. |
+
+### Respuesta
+
+**200** — `application/json` — Skill eliminado
+
+| Campo | Tipo | Requerido |
+| --- | --- | --- |
+| `success` | boolean | sí |
+
+```json
+{
+  "success": true
+}
+```
+
+**404** — Skill no encontrado
+
+### Ejemplo
+
+```typescript
+import SpainMCP from '@spainmcp/api';
+
+const client = new SpainMCP({
+  apiKey: process.env['SPAINMCP_API_KEY'],
+});
+
+const result = await client.skills.delete('spainmcp/resumen-boe');
+
+console.log(result.success);
+```

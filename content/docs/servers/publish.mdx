@@ -1,0 +1,145 @@
+---
+title: Publish
+icon: Upload
+description: Publica tu servidor MCP en SpainMCP para distribución y analíticas.
+---
+
+Registra tu servidor MCP en el SpainMCP Gateway y accede a distribución, analíticas y OAuth UI de forma automatica.
+
+<Tabs items={['URL']}>
+  <Tab value="URL">
+    **Trae tu propio hosting** — El SpainMCP Gateway hace proxy a tu servidor upstream.
+
+    1. Ve a [spainmcp.com/publish/mcp](/publish/mcp)
+    2. Introduce la URL HTTPS pública de tu servidor
+    3. Completa el flujo de publicación
+  </Tab>
+</Tabs>
+
+## Requisitos previos
+
+- Transporte Streamable HTTP
+- Soporte OAuth (si se requiere autenticación)
+
+<Callout type="info">
+  No se necesita registro de clientes. SpainMCP gestiona el registro de clientes automáticamente mediante Client ID Metadata Documents.
+</Callout>
+
+<Callout type="info">
+  ¿Necesitas un framework o hosting? Construye servidores MCP con [xmcp](https://xmcp.dev) u hospédalos en [Gram](https://gram.dev) — ambos son compatibles con la publicación por URL de SpainMCP.
+</Callout>
+
+## Proceso de escaneo
+
+Al publicar, SpainMCP analiza tu servidor para obtener la metadata (herramientas, prompts, recursos) que aparecera en la pagina de tu servidor.
+
+- **Servidores públicos**: El escaneo se completa automáticamente
+- **Servidores con auth requerida**: Se te pedirá que te autentiques para completar el escaneo
+
+<details>
+  <summary>**Tarjeta de Servidor Estática (metadata manual)**</summary>
+
+  Cuando el escaneo automatico no logra completarse — ya sea por un muro de autenticacion, configuracion requerida u otro motivo — tienes la opcion de suministrar la metadata a mano. Para ello, sirve un archivo JSON en `/.well-known/mcp/server-card.json`:
+
+  ```json
+  {
+    "serverInfo": {
+      "name": "Your Server Name",
+      "version": "1.0.0"
+    },
+    "authentication": {
+      "required": true,
+      "schemes": ["oauth2"]
+    },
+    "tools": [
+      {
+        "name": "search",
+        "description": "Search for information",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "query": { "type": "string" }
+          },
+          "required": ["query"]
+        }
+      }
+    ],
+    "resources": [],
+    "prompts": []
+  }
+  ```
+
+  Campos:
+
+  - `serverInfo` (requerido): Nombre y versión del servidor
+  - `authentication` (opcional): Requisitos de auth y esquemas soportados
+  - `tools`, `resources`, `prompts` (opcional): Definiciones de capacidades según la spec MCP
+
+  El esquema sigue los tipos de `@modelcontextprotocol/sdk/types.js`. Ver SEP-1649 para la propuesta de spec.
+</details>
+
+<details>
+  <summary>**CLI (Avanzado)**</summary>
+
+  Otra via es publicar un servidor basado en URL a traves de la CLI, incluyendo un esquema de configuracion personalizado si lo necesitas:
+
+  ```bash
+  spainmcp mcp publish "https://tu-servidor.com/mcp"
+  ```
+
+  Para especificar un esquema de configuración, pásalo como string JSON:
+
+  ```bash
+  spainmcp mcp publish "https://tu-servidor.com/mcp" --config-schema '{"type":"object","properties":{"apiKey":{"type":"string","x-from":"header","header":"X-API-Key"}}}'
+  ```
+
+  Consulta Configuración de Sesión para el formato JSON Schema con la extensión `x-from`.
+</details>
+
+## Resolución de problemas
+
+### Error 403 Forbidden al escanear
+
+Si el despliegue falla con el mensaje "Initialization failed with status 403", tu servidor esta rechazando la peticion de escaneo. Estas son las causas mas frecuentes:
+
+- **WAF o protección anti-bots** (p.ej. Cloudflare Bot Fight Mode) bloqueando peticiones automatizadas
+- **El servidor responde 403 en vez de 401 a peticiones sin autenticar** — la spec de auth MCP indica que los servidores deben devolver 401 para activar el descubrimiento OAuth
+- **Restricciones de IP** o listas blancas que excluyen el rango de IPs de SpainMCP
+
+Las peticiones de SpainMCP incluyen el User-Agent `SpainMCPBot/1.0 (+https://mcp.lat)`. Proceden de Cloudflare Workers, algo que determinadas configuraciones WAF bloquean por defecto.
+
+#### Opcion 1: Devolver 401 (no 403) para flujos OAuth
+
+Cuando tu servidor utiliza OAuth, asegurate de que responde con `401 Unauthorized` (y no `403 Forbidden`) ante peticiones sin credenciales. SpainMCP se basa en la respuesta 401 para detectar soporte OAuth segun RFC 9728.
+
+#### Opcion 2: Permitir las peticiones de SpainMCP
+
+<details>
+  <summary>**Cloudflare (Plan Gratuito / Bot Fight Mode)**</summary>
+
+  El Bot Fight Mode en el plan gratuito no puede bypasarse con reglas WAF personalizadas. Tus opciones:
+
+  1. **Reglas de Acceso IP**: Ve a Security > WAF > Tools > IP Access Rules y añade una regla Allow para el rango de IPs de SpainMCP
+  2. **Desactivar Bot Fight Mode**: Ve a Security > Bots > Bot Fight Mode y desactívalo (esto deshabilita la protección anti-bots para todo el tráfico)
+  3. **Actualizar a Pro**: El plan Pro ($20/mes) desbloquea Super Bot Fight Mode con reglas de omisión WAF (ver abajo)
+</details>
+
+<details>
+  <summary>**Cloudflare (Pro+ / Super Bot Fight Mode)**</summary>
+
+  Crea una regla WAF de omisión para bypass de la protección anti-bots para SpainMCP:
+
+  1. Ve a Security > WAF > Custom Rules
+  2. Crea una regla con la expresión: `(http.user_agent contains "SpainMCPBot")`
+  3. Acción: Skip > selecciona Super Bot Fight Mode
+</details>
+
+<details>
+  <summary>**Otros proveedores CDN / WAF**</summary>
+
+  Añade una regla de allow para peticiones que coincidan con User-Agent `SpainMCPBot/1.0`. Los pasos exactos varían según el proveedor — consulta tu documentación CDN/WAF para configurar reglas de allow basadas en User-Agent.
+</details>
+
+#### Opcion 3: Publicar una tarjeta de servidor estatica
+
+Si prefieres saltarte el escaneo por completo, sirve un endpoint `/.well-known/mcp/server-card.json` en tu servidor. Consulta la seccion Tarjeta de Servidor Estatica mas arriba.

@@ -50,10 +50,24 @@
       "name": "datos_ine",
       "description": "Consulta indicadores estadísticos del INE: población, PIB, IPC, paro, demografía y cientos de series temporales oficiales.",
       "parameters": [
-        { "name": "indicador", "type": "string", "required": true, "description": "Tipo de dato a consultar: \"IPC\", \"paro\", \"poblacion\", \"pib\", \"natalidad\", etc." },
-        { "name": "periodo", "type": "string", "required": false, "description": "Periodo de consulta en formato YYYY o \"último\" para el más reciente" }
+        {
+          "name": "indicador",
+          "type": "string",
+          "required": true,
+          "description": "Tipo de dato a consultar: \"IPC\", \"paro\", \"poblacion\", \"pib\", \"natalidad\", etc."
+        },
+        {
+          "name": "periodo",
+          "type": "string",
+          "required": false,
+          "description": "Periodo de consulta en formato YYYY o \"último\" para el más reciente"
+        }
       ]
     },
-    { "name": "ping", "description": "Comprueba que la conexión con el servidor SpainMCP está activa." }
-  ]
+    {
+      "name": "ping",
+      "description": "Comprueba que la conexión con el servidor SpainMCP está activa."
+    }
+  ],
+  "logo_url": "/logos/ine.svg"
 }

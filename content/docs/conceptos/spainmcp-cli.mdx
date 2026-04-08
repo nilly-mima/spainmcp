@@ -1,0 +1,148 @@
+---
+title: SpainMCP CLI
+icon: Terminal
+description: Usa la SpainMCP CLI para buscar, conectar y gestionar servidores MCP y skills desde la línea de comandos.
+---
+
+<ConceptCard
+  title="Ver la SpainMCP CLI en GitHub"
+  description="La SpainMCP CLI conecta tus agentes a miles de skills y servidores MCP directamente desde la línea de comandos."
+  href="https://github.com/spainmcp/cli"
+/>
+
+## Como instalar
+
+```bash
+npm install -g @spainmcp/cli@latest
+```
+
+Es necesario tener Node.js 20 o superior.
+
+## Uso rapido
+
+```bash
+# Mostrar el menú de ayuda
+spainmcp --help
+
+# Autenticarse en SpainMCP
+spainmcp auth login
+
+# Buscar servidores MCP
+spainmcp mcp search "github"
+
+# Añadir un servidor MCP a un cliente local (p.ej., Claude Desktop)
+spainmcp mcp add exa --client claude
+
+# Añadir un servidor MCP como conexión remota SpainMCP Connect
+spainmcp mcp add https://server.spainmcp.com/exa --id exa
+
+# Listar herramientas de tus servidores MCP conectados
+spainmcp tool list
+
+# Llamar a una herramienta
+spainmcp tool call exa search '{"query": "últimas noticias sobre MCP"}'
+
+# Buscar y añadir skills
+spainmcp skill search "code review"
+spainmcp skill add anthropics/frontend-design --agent claude-code
+```
+
+## Referencia de comandos
+
+### Servidores MCP
+
+```bash
+spainmcp mcp search [term]              # Buscar en el registro de SpainMCP
+spainmcp mcp add <url>                  # Añadir una conexión MCP (remota por defecto)
+spainmcp mcp add <url> --client <name>  # Añadir a un cliente local (p.ej., claude, cursor)
+spainmcp mcp list                       # Listar tus conexiones
+spainmcp mcp remove <ids...>            # Eliminar conexiones
+spainmcp mcp get <id>                   # Obtener detalles de una conexión
+spainmcp mcp update <id>                # Actualizar una conexión
+spainmcp mcp publish <url> -n <name>    # Publicar un servidor MCP en el registro
+```
+
+### Herramientas
+
+Permite interactuar con las herramientas que ofrecen los servidores MCP vinculados mediante `spainmcp mcp`.
+
+```bash
+spainmcp tool list [connection]                    # Listar herramientas de tus servidores MCP conectados
+spainmcp tool find [query]                         # Buscar herramientas por nombre o intención
+spainmcp tool get <connection> <tool>              # Mostrar detalles completos de una herramienta
+spainmcp tool call <connection> <tool> [args]      # Llamar a una herramienta
+```
+
+### Skills
+
+Navega y agrega skills desde el Registro de Skills de SpainMCP.
+
+```bash
+spainmcp skill search [query]                      # Buscar skills
+spainmcp skill add <skill> --agent <name>          # Añadir una skill
+```
+
+### Auth
+
+```bash
+spainmcp auth login                     # Iniciar sesión en SpainMCP (OAuth)
+spainmcp auth logout                    # Cerrar sesión
+spainmcp auth whoami                    # Ver usuario actual
+spainmcp auth token                     # Acuñar un service token
+```
+
+### Namespaces
+
+```bash
+spainmcp namespace list                 # Listar tus namespaces
+spainmcp namespace use <name>           # Establecer namespace actual
+```
+
+## Flags Globales
+
+- `--json` - Salida como JSON (auto-detectado en entornos sin TTY)
+- `--table` - Salida como tabla
+- `--verbose` - Mostrar logs detallados para depuración
+- `--help` - Mostrar mensaje de ayuda
+
+## Ejemplos practicos
+
+```bash
+# Añadir un servidor MCP a Claude Desktop
+spainmcp mcp add mcp-obsidian --client claude
+
+# Añadir con datos preconfigurados (omite prompts)
+spainmcp mcp add mcp-obsidian --client claude --config '{"vaultPath":"ruta/a/vault"}'
+
+# Eliminar un servidor de un cliente
+spainmcp mcp remove mcp-obsidian --client claude
+
+# Buscar servidores MCP con salida JSON
+spainmcp --json mcp search "database"
+
+# Listar herramientas de una conexión específica
+spainmcp tool list my-github
+
+# Buscar herramientas por intención
+spainmcp tool find "create issue"
+
+# Llamar a una herramienta con argumentos JSON
+spainmcp tool call my-github create_issue '{"title":"Bug fix","body":"..."}'
+
+# Iniciar sesión y verificar auth
+spainmcp auth login
+spainmcp auth whoami
+
+# Publicar tu servidor MCP
+spainmcp mcp publish "https://mi-servidor.com" -n @miorg/mi-servidor
+
+# Mostrar ayuda
+spainmcp --help
+```
+
+## Consideraciones clave
+
+- Ejecuta `auth login` para autenticarte en SpainMCP (algunas operaciones lo requieren)
+- Tras agregar o eliminar servidores, acuerdate de reiniciar tu cliente de IA
+- El flag `--verbose` resulta muy util para depurar cuando algo no funciona
+- Utiliza `--json` cuando necesites salida procesable por otras herramientas

@@ -1,0 +1,44 @@
+---
+title: Obtener icono del servidor
+icon: GET
+description: Obtiene el icono del servidor.
+---
+
+```
+GET /servers/{qualifiedName}/icon
+```
+
+### Autorizaciones
+
+| Parámetro | Tipo | Ubicación | Requerido | Descripción |
+| --- | --- | --- | --- | --- |
+| `Authorization` | string | header | sí | API key de SpainMCP como Bearer token |
+
+### Parámetros de Ruta
+
+| Parámetro | Tipo | Requerido | Descripción |
+| --- | --- | --- | --- |
+| `qualifiedName` | string | sí | Nombre cualificado del servidor (p.ej. 'namespace/server' o 'namespace' para servidores solo-namespace). Usa %2F para codificar la barra. |
+
+### Respuesta
+
+**200** — `image/*` — Archivo de imagen del icono
+
+La respuesta es el archivo de imagen binario directamente. El content-type corresponde al formato de la imagen almacenada (p.ej. `image/png`, `image/jpeg`).
+
+**404** — Servidor o icono no encontrado
+
+### Ejemplo
+
+```typescript
+import SpainMCP from '@spainmcp/api';
+
+const client = new SpainMCP({
+  apiKey: process.env['SPAINMCP_API_KEY'],
+});
+
+const icon = await client.servers.icon.get('qualifiedName');
+
+// icon es un Response con el archivo de imagen
+console.log(icon.headers.get('content-type'));
+```

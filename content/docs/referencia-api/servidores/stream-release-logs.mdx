@@ -1,0 +1,55 @@
+---
+title: Streaming de logs del release
+icon: GET
+description: Transmite los logs de build de un release en tiempo real via SSE (Server-Sent Events).
+---
+
+```
+GET /servers/{qualifiedName}/releases/{releaseId}/logs
+```
+
+### Autorizaciones
+
+| Parámetro | Tipo | Ubicación | Requerido | Descripción |
+| --- | --- | --- | --- | --- |
+| `Authorization` | string | header | sí | API key de SpainMCP como Bearer token |
+
+### Parámetros de Ruta
+
+| Parámetro | Tipo | Requerido | Descripción |
+| --- | --- | --- | --- |
+| `qualifiedName` | string | sí | Nombre cualificado del servidor (p.ej. 'namespace/server' o 'namespace' para servidores solo-namespace). Usa %2F para codificar la barra. |
+| `releaseId` | string | sí | Identificador único del release |
+
+### Respuesta
+
+**200** — `text/event-stream` — Stream de logs en tiempo real
+
+Los eventos se envían en formato SSE estándar. Cada evento contiene una línea de log del proceso de build.
+
+```
+data: {"timestamp":"2024-01-01T00:00:00.000Z","message":"Installing dependencies..."}
+
+data: {"timestamp":"2024-01-01T00:00:05.000Z","message":"Build completed successfully."}
+```
+
+**404** — Release no encontrado
+
+### Ejemplo
+
+```typescript
+import SpainMCP from '@spainmcp/api';
+
+const client = new SpainMCP({
+  apiKey: process.env['SPAINMCP_API_KEY'],
+});
+
+const stream = await client.servers.releases.logs.stream(
+  'qualifiedName',
+  'releaseId',
+);
+
+for await (const event of stream) {
+  console.log(event.message);
+}
+```

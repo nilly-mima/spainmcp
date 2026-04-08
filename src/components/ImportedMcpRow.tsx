@@ -27,14 +27,14 @@ export default function ImportedMcpRow({ mcp }: { mcp: ImportedMcp }) {
       rel="noopener noreferrer"
       className="group flex items-center gap-3 py-3 px-3 rounded-lg hover:bg-white transition-all"
       style={{ border: '1px solid transparent' }}
-      onMouseEnter={e => (e.currentTarget.style.borderColor = '#E8E2D9')}
+      onMouseEnter={e => (e.currentTarget.style.borderColor = 'var(--border)')}
       onMouseLeave={e => (e.currentTarget.style.borderColor = 'transparent')}
     >
       <McpInitials nombre={mcp.nombre} />
 
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-stone-800 group-hover:text-orange-600 transition-colors truncate">
+          <span className="text-sm font-medium text-stone-800 group-hover:text-blue-600 transition-colors truncate">
             {mcp.nombre}
           </span>
           {mcp.lenguaje && (
@@ -46,12 +46,11 @@ export default function ImportedMcpRow({ mcp }: { mcp: ImportedMcp }) {
 
       <div className="flex items-center gap-2 shrink-0">
         <span
-          className="text-xs px-2 py-0.5 rounded-full text-stone-400"
-          style={{ background: '#F5F0E8' }}
+          className="text-xs px-2 py-0.5 rounded-full text-stone-400 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
         >
           {mcp.scope === 'local' ? '🏠 Local' : '☁️ Cloud'}
         </span>
-        <span className="text-stone-300 group-hover:text-orange-400 transition-colors text-sm">↗</span>
+        <span className="text-stone-300 group-hover:text-blue-500 transition-colors text-sm">↗</span>
       </div>
     </a>
   )

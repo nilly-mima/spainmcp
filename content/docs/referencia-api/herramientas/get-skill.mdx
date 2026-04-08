@@ -1,0 +1,64 @@
+---
+title: Obtener un skill
+icon: GET
+description: Recupera los detalles completos de un skill por su nombre cualificado.
+---
+
+```
+GET /skills/{qualifiedName}
+```
+
+### Autorizaciones
+
+| Parámetro | Tipo | Ubicación | Requerido | Descripción |
+| --- | --- | --- | --- | --- |
+| `Authorization` | string | header | sí | API key de SpainMCP como Bearer token |
+
+### Parámetros de Ruta
+
+| Parámetro | Tipo | Requerido | Descripción |
+| --- | --- | --- | --- |
+| `qualifiedName` | string | sí | Nombre cualificado del skill (p.ej. 'namespace/skill'). Usa %2F para codificar la barra. |
+
+### Respuesta
+
+**200** — `application/json` — Skill encontrado
+
+| Campo | Tipo | Requerido | Ejemplo |
+| --- | --- | --- | --- |
+| `qualifiedName` | string | sí | `"spainmcp/resumen-boe"` |
+| `displayName` | string | sí | `"Resumen BOE"` |
+| `description` | string | sí | `"Resume las publicaciones del BOE del día"` |
+| `content` | string | sí | `"Eres un asistente que resume el BOE..."` |
+| `agentConfigs` | object[] | sí | |
+| `createdAt` | string | sí | `"2026-01-15T10:30:00Z"` |
+| `updatedAt` | string | sí | `"2026-03-20T14:00:00Z"` |
+
+```json
+{
+  "qualifiedName": "spainmcp/resumen-boe",
+  "displayName": "Resumen BOE",
+  "description": "Resume las publicaciones del BOE del día",
+  "content": "Eres un asistente que resume el BOE...",
+  "agentConfigs": [],
+  "createdAt": "2026-01-15T10:30:00Z",
+  "updatedAt": "2026-03-20T14:00:00Z"
+}
+```
+
+**404** — Skill no encontrado
+
+### Ejemplo
+
+```typescript
+import SpainMCP from '@spainmcp/api';
+
+const client = new SpainMCP({
+  apiKey: process.env['SPAINMCP_API_KEY'],
+});
+
+const skill = await client.skills.get('spainmcp/resumen-boe');
+
+console.log(skill.displayName);
+console.log(skill.content);
+```

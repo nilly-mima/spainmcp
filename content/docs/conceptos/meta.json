@@ -1,0 +1,9 @@
+{
+  "title": "Conceptos",
+  "pages": [
+    "que-es-mcp",
+    "namespaces",
+    "spainmcp-cli"
+  ],
+  "collapsible": false
+}

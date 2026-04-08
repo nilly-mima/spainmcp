@@ -1,0 +1,62 @@
+---
+title: Herramientas INE
+description: Las herramientas INE dan acceso a estadísticas oficiales de España — población, economía, demografía y más.
+---
+
+Las herramientas INE son parte del servidor MCP de SpainMCP. Permiten consultar cualquier serie estadística del Instituto Nacional de Estadística directamente desde un agente.
+
+Las herramientas se exponen bajo el namespace `spainmcp`. La herramienta `datos_ine` es accesible en `mcp.lat/api/mcp`.
+
+## ¿Qué incluye?
+
+| Herramienta | Descripción |
+| ----------- | ----------- |
+| **datos_ine** | Consulta series estadísticas por código de operación INE |
+
+## Llamar a las herramientas
+
+<Tabs items={['CLI', 'TypeScript', 'cURL']}>
+  <Tab value="CLI">
+    ```bash
+    spainmcp tool call spainmcp datos_ine '{"operacion": "IPC"}'
+    spainmcp tool call spainmcp datos_ine '{"operacion": "EPA"}'
+    ```
+  </Tab>
+  <Tab value="TypeScript">
+    ```typescript
+    const result = await client.callTool({
+      name: 'datos_ine',
+      arguments: { operacion: 'IPC' }
+    })
+    ```
+  </Tab>
+  <Tab value="cURL">
+    ```bash
+    curl -X POST https://mcp.lat/api/mcp \
+      -H "Authorization: Bearer YOUR_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{"method":"tools/call","params":{"name":"datos_ine","arguments":{"operacion":"IPC"}}}'
+    ```
+  </Tab>
+</Tabs>
+
+## Operaciones más usadas
+
+| Código | Descripción |
+| ------ | ----------- |
+| **IPC** | Índice de Precios al Consumo |
+| **EPA** | Encuesta de Población Activa |
+| **CNE** | Contabilidad Nacional de España |
+| **Padrón** | Estadística del Padrón Municipal |
+| **EPDS** | Encuesta de Presupuestos de los Hogares |
+
+## Límites
+
+| Plan | Llamadas/día |
+| ---- | ------------ |
+| Free | Sin límite (API pública del INE) |
+| Pro  | Sin límite |
+
+## Datos y fuentes
+
+Datos de `servicios.ine.es/wstempus/js`. SpainMCP actúa como proxy MCP — no almacena ni modifica los datos del INE.

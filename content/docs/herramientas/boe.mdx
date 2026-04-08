@@ -1,0 +1,61 @@
+---
+title: Herramientas BOE
+description: Las herramientas BOE dan acceso al Boletín Oficial del Estado — legislación, normativas y resoluciones oficiales de España.
+---
+
+Las herramientas BOE son parte del servidor MCP de SpainMCP. Permiten a cualquier agente IA consultar la legislación española directamente desde el BOE, sin autenticación.
+
+Las herramientas se exponen bajo el namespace `spainmcp`. Por ejemplo, la herramienta `boe_del_dia` del namespace `spainmcp` es accesible en `mcp.lat/api/mcp`.
+
+## ¿Qué incluye?
+
+| Herramienta | Descripción |
+| ----------- | ----------- |
+| **boe_del_dia** | Sumario completo del BOE del día actual |
+| **buscar_boe** | Búsqueda por texto libre en el archivo histórico del BOE |
+
+## Llamar a las herramientas
+
+Puedes llamar las herramientas via la [CLI de SpainMCP](/docs/use/connect):
+
+<Tabs items={['CLI', 'TypeScript', 'cURL']}>
+  <Tab value="CLI">
+    ```bash
+    spainmcp tool call spainmcp boe_del_dia '{}'
+    spainmcp tool call spainmcp buscar_boe '{"query": "convocatoria empleo"}'
+    ```
+  </Tab>
+  <Tab value="TypeScript">
+    ```typescript
+    import { Client } from '@modelcontextprotocol/sdk/client/index.js'
+
+    const result = await client.callTool({
+      name: 'boe_del_dia',
+      arguments: {}
+    })
+    ```
+  </Tab>
+  <Tab value="cURL">
+    ```bash
+    curl -X POST https://mcp.lat/api/mcp \
+      -H "Authorization: Bearer YOUR_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{"method":"tools/call","params":{"name":"boe_del_dia","arguments":{}}}'
+    ```
+  </Tab>
+</Tabs>
+
+Los nombres de herramientas son en minúsculas con guión bajo, únicos dentro del namespace `spainmcp`.
+
+## Límites
+
+| Plan | Llamadas/día |
+| ---- | ------------ |
+| Free | Sin límite (API pública del BOE) |
+| Pro  | Sin límite |
+
+Ver la [página de precios](https://mcp.lat/precios) para detalles completos.
+
+## Datos y fuentes
+
+Los datos provienen directamente de la API oficial del BOE en `www.boe.es`. SpainMCP actúa como proxy MCP — no almacena ni modifica los datos del BOE.

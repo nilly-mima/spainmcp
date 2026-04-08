@@ -1,0 +1,50 @@
+---
+title: Crear namespace con nombre generado
+icon: POST
+description: Crea un namespace con un nombre único generado automáticamente.
+---
+
+```
+POST /namespaces/generated
+```
+
+### Autorizaciones
+
+| Parámetro | Tipo | Ubicación | Requerido | Descripción |
+| --- | --- | --- | --- | --- |
+| `Authorization` | string | header | sí | API key de SpainMCP como Bearer token |
+
+### Body
+
+No requiere body.
+
+### Respuesta
+
+**201** — `application/json` — Namespace creado con nombre generado
+
+| Campo | Tipo | Requerido | Ejemplo |
+| --- | --- | --- | --- |
+| `name` | string | sí | `"curious-falcon-42"` |
+| `createdAt` | string | sí | `"2026-01-10T08:00:00Z"` |
+
+```json
+{
+  "name": "curious-falcon-42",
+  "createdAt": "2026-01-10T08:00:00Z"
+}
+```
+
+### Ejemplo
+
+```typescript
+import SpainMCP from '@spainmcp/api';
+
+const client = new SpainMCP({
+  apiKey: process.env['SPAINMCP_API_KEY'],
+});
+
+const ns = await client.namespaces.createGenerated();
+
+console.log(ns.name);       // "curious-falcon-42"
+console.log(ns.createdAt);
+```

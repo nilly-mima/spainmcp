@@ -1,0 +1,10 @@
+{
+  "title": "Namespaces",
+  "pages": [
+    "list-namespaces",
+    "create-generated",
+    "create-namespace",
+    "delete-namespace",
+    "create-server-ns"
+  ]
+}

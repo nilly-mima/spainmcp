@@ -1,7 +1,7 @@
 import { ImportedMcp } from '@/lib/mcps'
 
 const COLORS = [
-  'bg-orange-100 text-orange-700',
+  'bg-blue-100 text-blue-700',
   'bg-blue-100 text-blue-700',
   'bg-green-100 text-green-700',
   'bg-purple-100 text-purple-700',
@@ -48,7 +48,7 @@ export default function ImportedMcpCard({ mcp }: { mcp: ImportedMcp }) {
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1.5">
-              <h3 className="font-semibold text-stone-900 dark:text-stone-100 text-sm group-hover:text-orange-600 dark:group-hover:text-orange-500 transition-colors truncate">
+              <h3 className="font-semibold text-stone-900 dark:text-stone-100 text-sm group-hover:text-blue-600 dark:group-hover:text-blue-500 transition-colors truncate">
                 {displayName}
               </h3>
             </div>

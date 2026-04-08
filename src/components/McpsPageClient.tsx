@@ -27,7 +27,7 @@ function Pagination({ page, total, onChange }: { page: number; total: number; on
   if (total <= 1) return null
 
   const btnBase = 'min-w-[32px] h-8 px-2 rounded-lg text-sm font-medium transition-colors flex items-center justify-center'
-  const btnActive = 'bg-orange-500 text-white'
+  const btnActive = 'bg-blue-500 text-white'
   const btnInactive = 'text-stone-500 hover:bg-stone-100 dark:hover:bg-stone-800'
   const btnDisabled = 'text-stone-300 dark:text-stone-600 cursor-not-allowed'
 
@@ -96,11 +96,13 @@ export default function McpsPageClient({
   const t0 = useRef(typeof performance !== 'undefined' ? performance.now() : 0)
   useEffect(() => { setMs(Math.round(performance.now() - t0.current)) }, [])
 
-  // Parse namespace: prefix
+  // Parse special prefixes
   const raw = initialQuery.toLowerCase().trim()
   const isNamespace = raw.startsWith('namespace:')
+  const isOwnerMe = raw === 'owner:me'
   const namespaceQuery = isNamespace ? raw.slice('namespace:'.length).trim() : ''
-  const textQuery      = isNamespace ? '' : raw
+  const textQuery      = (isNamespace || isOwnerMe) ? '' : raw
+  const [ownerFilter, setOwnerFilter] = useState(isOwnerMe)
 
   const filtered = mcps.filter(mcp => {
     if (soloVerificado && !mcp.verificado) return false
@@ -130,14 +132,14 @@ export default function McpsPageClient({
   const sideLabel = 'text-xs font-bold text-stone-600 dark:text-stone-400 uppercase tracking-widest mb-2'
   const sideBtn   = 'flex items-center gap-2 px-2 py-1.5 rounded-lg text-sm transition-colors text-left w-full'
   const inactive  = 'text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-800/50'
-  const active    = 'text-orange-600 dark:text-orange-500 bg-orange-50 dark:bg-orange-950/30 font-medium'
+  const active    = 'text-blue-600 dark:text-blue-500 bg-blue-50 dark:bg-blue-950/30 font-medium'
 
   return (
     <div className="py-6 flex flex-col gap-5">
       <div className="flex gap-8 items-start">
 
         {/* ── Sidebar ── */}
-        <div className="w-52 shrink-0 flex flex-col gap-6">
+        <div className="w-52 shrink-0 flex flex-col gap-6 pl-8">
 
           {/* Location */}
           <div>
@@ -157,7 +159,7 @@ export default function McpsPageClient({
           {/* Propiedad */}
           <div>
             <p className={sideLabel}>Propiedad</p>
-            <button className={`${sideBtn} ${inactive}`}>
+            <button onClick={() => { setOwnerFilter(v => !v); setPage(1) }} className={`${sideBtn} ${ownerFilter ? active : inactive}`}>
               <PersonIcon />
               <span>Mis Servidores</span>
             </button>
@@ -205,7 +207,7 @@ export default function McpsPageClient({
         </div>
 
         {/* ── Contenido ── */}
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 pr-6">
           <p className="text-sm text-stone-400 dark:text-stone-500 mb-4">
             <span className="text-stone-700 dark:text-stone-300 font-medium">{filtered.length}</span> servidor{filtered.length !== 1 ? 'es' : ''} encontrado{filtered.length !== 1 ? 's' : ''}{ms !== null && <span className="ml-1">({ms}ms)</span>}
           </p>
@@ -227,7 +229,7 @@ export default function McpsPageClient({
               <p className="text-sm">Sin resultados con los filtros aplicados</p>
               <button
                 onClick={() => { setCatActiva(null); setSoloVerif(false) }}
-                className="mt-3 text-xs text-orange-600 hover:underline"
+                className="mt-3 text-xs text-blue-600 hover:underline"
               >
                 Limpiar filtros
               </button>

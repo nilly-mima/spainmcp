@@ -1,0 +1,59 @@
+---
+title: Herramientas BORME
+description: Las herramientas BORME dan acceso al Boletín Oficial del Registro Mercantil — actos mercantiles y datos de empresas españolas.
+---
+
+Las herramientas BORME son parte del servidor MCP de SpainMCP. Permiten consultar constituciones de empresas, nombramientos, disoluciones y otros actos mercantiles oficiales.
+
+Las herramientas se exponen bajo el namespace `spainmcp`. La herramienta `borme_del_dia` del namespace `spainmcp` es accesible en `mcp.lat/api/mcp`.
+
+## ¿Qué incluye?
+
+| Herramienta | Descripción |
+| ----------- | ----------- |
+| **borme_del_dia** | Sumario de actos mercantiles del BORME del día actual |
+
+## Llamar a las herramientas
+
+<Tabs items={['CLI', 'TypeScript', 'cURL']}>
+  <Tab value="CLI">
+    ```bash
+    spainmcp tool call spainmcp borme_del_dia '{}'
+    ```
+  </Tab>
+  <Tab value="TypeScript">
+    ```typescript
+    const result = await client.callTool({
+      name: 'borme_del_dia',
+      arguments: {}
+    })
+    ```
+  </Tab>
+  <Tab value="cURL">
+    ```bash
+    curl -X POST https://mcp.lat/api/mcp \
+      -H "Authorization: Bearer YOUR_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{"method":"tools/call","params":{"name":"borme_del_dia","arguments":{}}}'
+    ```
+  </Tab>
+</Tabs>
+
+## Secciones del BORME
+
+| Sección | Contenido |
+| ------- | --------- |
+| **A** | Nombramiento de cargos, poderes notariales |
+| **B** | Actos inscritos: constituciones, ampliaciones, disoluciones |
+| **C** | Otros actos mercantiles |
+
+## Límites
+
+| Plan | Llamadas/día |
+| ---- | ------------ |
+| Free | Sin límite (API pública del BORME) |
+| Pro  | Sin límite |
+
+## Datos y fuentes
+
+Datos de `www.boe.es/diario_borme`. SpainMCP actúa como proxy MCP — no almacena ni modifica los datos del BORME.

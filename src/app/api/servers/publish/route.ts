@@ -53,9 +53,9 @@ export async function POST(req: Request) {
   const { namespace, display_name, description, upstream_url, email, api_key } = body
 
   // 2. Validar campos obligatorios
-  if (!namespace || !display_name || !upstream_url || !email || !api_key) {
+  if (!namespace || !display_name || !upstream_url) {
     return Response.json(
-      { error: "Faltan campos: namespace, display_name, upstream_url, email, api_key" },
+      { error: "Faltan campos: namespace, display_name, upstream_url" },
       { status: 400 }
     )
   }
@@ -71,20 +71,7 @@ export async function POST(req: Request) {
     return Response.json({ error: "upstream_url debe ser HTTPS" }, { status: 400 })
   }
 
-  // 3. Verificar API key
-  const hash = await sha256(api_key)
-  const { data: keyData } = await supabase
-    .from("api_keys")
-    .select("id, email")
-    .eq("key_hash", hash)
-    .eq("is_active", true)
-    .single()
-
-  if (!keyData) {
-    return Response.json({ error: "API key inválida" }, { status: 401 })
-  }
-
-  // 4. Verificar que el upstream responde
+  // 3. Verificar que el upstream responde
   const alive = await pingUpstream(upstream_url)
   if (!alive) {
     return Response.json(
@@ -102,7 +89,7 @@ export async function POST(req: Request) {
         display_name,
         description: description ?? "",
         upstream_url,
-        owner_email: email,
+        owner_email: email ?? "",
         is_active: true,
       },
       { onConflict: "namespace" }

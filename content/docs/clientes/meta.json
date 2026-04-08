@@ -1,0 +1,11 @@
+{
+  "title": "Clientes",
+  "pages": [
+    "introduccion",
+    "conectar-mcps",
+    "token-scoping",
+    "deep-linking",
+    "listar-cliente"
+  ],
+  "collapsible": false
+}

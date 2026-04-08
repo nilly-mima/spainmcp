@@ -1,0 +1,131 @@
+---
+title: Deep Linking
+icon: Link2
+description: Los deep links proporcionan una forma fluida de integrar MCPs de SpainMCP en clientes compatibles.
+---
+
+Los deep links permiten incorporar servidores MCP de SpainMCP en cualquier cliente compatible de manera directa y sin fricciones. Al hacer clic en un deep link desde la página de un servidor, el cliente se encarga de configurar automáticamente el MCP con los parámetros adecuados.
+
+Si quieres empezar con la integración, escríbenos a [contacto@spainmcp.com](mailto:contacto@spainmcp.com) o súmate a nuestra [comunidad de Discord](https://discord.gg/spainmcp) donde podremos ayudarte.
+
+## Especificación del Protocolo
+
+El formato de URL que siguen los deep links es el siguiente:
+
+```typescript
+`${clientScheme}://{optionalDeepLinkHandler}/mcp/install?name=${encodeURIComponent(displayName)}&config=${encodeURIComponent(config)}`
+
+// Ejemplo:
+// cursor://anysphere.cursor-deeplink/mcp/install?<nombre-del-servidor>&<config-json-codificado>
+```
+
+| Componente | Descripción |
+| --- | --- |
+| `{client-schema}://` | Esquema de protocolo |
+| `{optional-handler}` | Handler del deeplink |
+| `/mcp/install` | Ruta |
+| `name` | Parámetro de consulta para el nombre del servidor |
+| `config` | Parámetro de consulta para la configuración JSON codificada en base64 |
+
+El parámetro `config` incluye un objeto JSON codificado en URL que respeta el siguiente esquema:
+
+```typescript
+interface StdioMCPConfig {
+  type: "stdio";
+  command: string; // Ejemplo: "npx"
+  args: string[];  // Argumentos de línea de comandos para la CLI del MCP
+}
+
+// Nota: La configuración no requiere un campo "env" porque
+// SpainMCP gestiona automáticamente los datos sensibles a través de configuraciones guardadas.
+
+interface HttpMCPConfig {
+  type: "http";
+  url: string;    // URL del servidor MCP
+}
+
+type MCPConfig = StdioMCPConfig | HttpMCPConfig;
+```
+
+A continuación se describen los campos de configuración:
+
+| Campo | Descripción | Ejemplo |
+| --- | --- | --- |
+| `type` | Tipo de conexión del servidor | `"stdio"` o `"http"` |
+| `command` | Comando para iniciar el ejecutable del servidor (requerido para tipo stdio). El comando debe estar disponible en el path del sistema o contener su ruta completa. | `"npx"` |
+| `args` | Array de argumentos pasados al comando (requerido para tipo stdio). | `["-y", "@spainmcp/cli@latest", "run", "@wonderwhy-er/desktop-commander"]` |
+| `url` | URL del servidor MCP (requerido para tipo http) | `"https://exa.run.tools"` |
+
+## Ejemplos de Configuración
+
+### Configuración basada en stdio:
+
+```json
+{
+  "type": "stdio",
+  "command": "npx",
+  "args": ["-y", "@spainmcp/cli@latest", "run", "@wonderwhy-er/desktop-commander"]
+}
+```
+
+### Configuración basada en HTTP:
+
+```json
+{
+  "type": "http",
+  "url": "https://exa.run.tools"
+}
+```
+
+## Cómo Gestionar Deep Links
+
+Cuando tu cliente recibe un deep link, el proceso es el siguiente:
+
+1. Parsea el parámetro `config` codificado en URL usando `decodeURIComponent`
+2. Parsea el string resultante como JSON
+3. Crea el transport con los argumentos proporcionados
+
+A continuación tienes una implementación de referencia:
+
+### Handler del Deeplink
+
+```typescript
+// Parsea el deeplink y devuelve name y config
+function handleDeepLink(url: string) {
+  const urlObj = new URL(url)
+  const name = urlObj.searchParams.get('name')
+  const config = JSON.parse(decodeURIComponent(urlObj.searchParams.get('config')))
+  return { config, name }
+}
+```
+
+### Ejemplo Stdio
+
+```typescript
+// Ejemplo con transporte stdio
+async function setupStdioMCP(url: string) {
+  const config = handleDeepLink(url)
+  const transport = new StdioClientTransport({
+    command: config.command,
+    args: config.args
+  })
+
+  const client = new Client({ name: "Test client" })
+  await client.connect(transport)
+  return client
+}
+```
+
+### Ejemplo HTTP
+
+```typescript
+// Ejemplo con transporte HTTP
+async function setupHttpMCP(url: string) {
+  const config = handleDeepLink(url)
+  const transport = new StreamableHTTPClientTransport(config.url)
+
+  const client = new Client({ name: "Test client" })
+  await client.connect(transport)
+  return client
+}
+```

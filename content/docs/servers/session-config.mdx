@@ -1,0 +1,263 @@
+---
+title: Configuración de Sesión
+icon: Settings
+description: Acepta API keys, ajustes y preferencias de los usuarios que se conectan a tu servidor MCP.
+---
+
+## Visión General
+
+La mayoría de servidores MCP necesitan valores proporcionados por el usuario, como API keys, preferencias o ajustes. La forma en que estos valores llegan a tu servidor depende de cómo esté desplegado:
+
+| Tipo de Servidor | Cómo proporcionan la config los usuarios |
+| --- | --- |
+| Remoto (HTTP) | Parámetros de query o headers HTTP |
+| Local (stdio) | Argumentos de línea de comandos |
+
+Cuando defines un esquema de configuración, SpainMCP se encarga de forma automática de:
+
+- Generar un formulario OAuth UI para servidores remotos
+- Pasar los valores a tu servidor en el formato adecuado
+- Validar las entradas y aplicar valores por defecto
+
+<Callout type="info">
+  Los esquemas de configuración están limitados a 20 campos y 1KB de tamaño total. Mantén los esquemas centrados en los ajustes esenciales.
+</Callout>
+
+## Definir tu Esquema
+
+<Tabs items={['TypeScript', 'JSON Schema']}>
+  <Tab value="TypeScript">
+    Exporta un `configSchema` usando Zod para declarar qué configuración acepta tu servidor:
+
+    ```typescript title="src/index.ts"
+    import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+    import { z } from "zod/v4";
+    import type { ServerContext } from "@spainmcp/sdk";
+
+    export const configSchema = z.object({
+      apiKey: z.string()
+        .meta({ "x-from": { header: "x-api-key" } })
+        .describe("Tu API key"),
+      model: z.string().default("gpt-4").describe("Modelo a usar"),
+      temperature: z.number().min(0).max(1).default(0.7).describe("Temperatura"),
+    });
+
+    export default function createServer({
+      config,
+    }: ServerContext<z.infer<typeof configSchema>>) {
+      const server = new McpServer({
+        name: "My Server",
+        version: "1.0.0",
+      });
+
+      // Acceder a los valores proporcionados por el usuario
+      console.log(`API Key: ${config.apiKey}`);
+      console.log(`Model: ${config.model}`);
+
+      return server.server;
+    }
+    ```
+  </Tab>
+  <Tab value="JSON Schema">
+    ```json
+    {
+      "type": "object",
+      "properties": {
+        "apiKey": {
+          "type": "string",
+          "description": "Tu API key",
+          "x-from": { "header": "x-api-key" }
+        },
+        "model": {
+          "type": "string",
+          "default": "gpt-4",
+          "description": "Modelo a usar"
+        },
+        "temperature": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0.7,
+          "description": "Temperatura"
+        }
+      },
+      "required": ["apiKey"]
+    }
+    ```
+  </Tab>
+</Tabs>
+
+SpainMCP extrae este esquema de manera automática — no hace falta configuración adicional.
+
+## Transporte de Config (`x-from` y `x-to`)
+
+Las extensiones `x-from` y `x-to` determinan cómo fluyen los valores de configuración a través del gateway.
+
+### `x-from` — De dónde lee SpainMCP la config
+
+Indica dónde busca SpainMCP el valor cuando un usuario se conecta:
+
+```typescript
+z.string().meta({
+  "x-from": { header: "x-api-key" }  // Leer de un header
+})
+
+z.string().meta({
+  "x-from": { query: "model" }  // Leer de un parámetro de query
+})
+```
+
+**Por defecto:** Si no se especifica `x-from`, se asume `{ query: "<nombreDePropiedad>" }`.
+
+### `x-to` — Hacia dónde envía SpainMCP la config al upstream
+
+Define cómo reenvía SpainMCP el valor a tu servidor upstream. Resulta útil cuando tu servidor espera un nombre de header diferente al que proporcionan los clientes:
+
+```typescript
+z.string().meta({
+  "x-from": { header: "api-key" },      // El cliente envía: header api-key
+  "x-to": { header: "Authorization" }   // El upstream recibe: header Authorization
+})
+```
+
+Esto es útil cuando:
+
+- Tu servidor upstream espera un header `Authorization`, pero no puedes usar `authorization` como `x-from` (está reservado para OAuth de SpainMCP)
+- Quieres renombrar headers para compatibilidad con APIs existentes
+- Necesitas mapear nombres de parámetros amigables a nombres técnicos de headers
+
+**Por defecto:** Si no se indica `x-to`, los valores se reenvían con la misma ubicación que `x-from`.
+
+### Ejemplo: API Key de PostHog
+
+```typescript
+export const configSchema = z.object({
+  posthogApiKey: z.string()
+    .meta({
+      "x-from": { header: "posthog-api-key" },  // El cliente envía este header
+      "x-to": { header: "Authorization" }       // PostHog espera Authorization
+    })
+    .describe("Tu API key de PostHog"),
+});
+```
+
+Con esta configuración:
+- Los clientes se conectan con el header `posthog-api-key: sk-xxx`
+- Tu servidor recibe el header `Authorization: sk-xxx`
+
+## Tipos Soportados
+
+Solo los tipos simples admiten `x-from`:
+
+- `string`
+- `number`
+- `boolean`
+
+Los objetos anidados y los arrays no están soportados — solo se permiten esquemas planos.
+
+## Headers Reservados
+
+Los siguientes headers no pueden usarse como fuente `x-from`:
+
+- `authorization` — Reservado para OAuth de SpainMCP
+- `cookie` — Reservado para gestión de sesiones
+- `cf-*` — Headers de infraestructura Cloudflare
+- `spainmcp-*` — Headers internos del servicio
+
+<Callout>
+  Estas restricciones solo aplican a `x-from`. Puedes usar cualquier nombre de header (incluyendo `Authorization`) en `x-to` para reenviar valores a tu servidor upstream.
+</Callout>
+
+## Cómo llega la Configuración a tu Servidor
+
+<Tabs items={['URL', 'Local']}>
+  <Tab value="URL">
+    En servidores publicados por URL, el SpainMCP Gateway pasa todos los parámetros de query y headers directamente a tu servidor upstream.
+
+    ```
+    GET /mcp?apiKey=sk-xxx&model=gpt-4
+    x-api-key: sk-xxx
+    ```
+
+    Tu servidor recibe headers y query params tal cual — SpainMCP los transmite sin modificación.
+  </Tab>
+  <Tab value="Local">
+    En servidores locales (stdio), los valores de configuración se pasan como argumentos de línea de comandos al proceso del servidor.
+
+    ```bash
+    npx @spainmcp/cli run mi-servidor --config '{"apiKey":"sk-xxx","model":"gpt-4"}'
+    ```
+  </Tab>
+</Tabs>
+
+## Coerción de Tipos
+
+Dado que los parámetros de query, headers y argumentos CLI son strings, SpainMCP convierte los valores automáticamente:
+
+| Tipo del Schema | Coerción |
+| --- | --- |
+| `string` | Sin coerción |
+| `number` | `Number(value)` — falla si no es numérico |
+| `boolean` | `"true"` / `"1"` se convierte en `true`, `"false"` / `"0"` en `false` |
+
+## Buenas Prácticas
+
+<details>
+  <summary>**Diseño del Schema**</summary>
+
+  - Mantén el esquema lo más simple posible — solo los campos que el usuario realmente necesita proporcionar
+  - Usa valores `default` siempre que sea razonable para reducir la fricción de configuración
+  - Proporciona descripciones claras con `.describe()` — aparecen en el formulario de conexión
+  - Marca como requeridos solo los campos verdaderamente imprescindibles (normalmente solo la API key)
+</details>
+
+<details>
+  <summary>**Seguridad**</summary>
+
+  - Usa siempre `x-from: { header: "..." }` para valores sensibles como API keys — los headers no se registran en logs de acceso, a diferencia de los query params
+  - Nunca pongas valores sensibles por defecto en el esquema
+  - Considera usar `x-to: { header: "Authorization" }` para reenviar API keys a APIs upstream que esperan el header estándar
+</details>
+
+## Resolución de Problemas
+
+<details>
+  <summary>**¿La configuración no se detecta?**</summary>
+
+  - Comprueba que tu archivo exporta `configSchema` como named export en el punto de entrada del servidor
+  - Verifica que el esquema usa `z.object({...})` de nivel superior
+  - Ejecuta `spainmcp mcp publish` de nuevo para forzar un re-escaneo del esquema
+</details>
+
+<details>
+  <summary>**¿Errores de tipo?**</summary>
+
+  - Confirma que solo usas `string`, `number` o `boolean` — los tipos complejos no están soportados
+  - Comprueba que los valores `default` coinciden con el tipo declarado
+  - Revisa que los `min`/`max` de los campos numéricos son razonables
+</details>
+
+## Preguntas Frecuentes
+
+<details>
+  <summary>**¿Pueden los usuarios cambiar la configuración a mitad de sesión?**</summary>
+
+  No. La configuración se fija en el momento de la conexión. Para cambiar valores, el usuario debe desconectarse y volver a conectarse con los nuevos parámetros.
+</details>
+
+<details>
+  <summary>**¿Pueden ser todos los campos opcionales?**</summary>
+
+  Sí. Si todos los campos tienen valores `default`, los usuarios pueden conectarse sin proporcionar configuración alguna. El formulario UI mostrará los defaults que pueden modificarse.
+</details>
+
+<details>
+  <summary>**¿Dónde puedo ver la configuración de un servidor?**</summary>
+
+  En la página del servidor en [mcp.lat](https://mcp.lat), la sección de conexión muestra el esquema de configuración con los campos requeridos y sus descripciones.
+</details>
+
+## Ver También
+
+- [Publicar](/docs/servers/publish) — Publica tu servidor MCP en SpainMCP
+- [Conectar a MCPs](/docs/clientes/conectar-mcps) — Cómo los clientes se conectan a servidores con configuración

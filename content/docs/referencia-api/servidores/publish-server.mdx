@@ -1,0 +1,70 @@
+---
+title: Publicar un release
+icon: POST
+description: Publica un nuevo release para un servidor. Para servidores URL, proporciona deploymentUrl. Para servidores stdio, sube un bundle.
+---
+
+```
+POST /servers/{qualifiedName}/releases
+```
+
+### Autorizaciones
+
+| Parámetro | Tipo | Ubicación | Requerido | Descripción |
+| --- | --- | --- | --- | --- |
+| `Authorization` | string | header | sí | API key de SpainMCP como Bearer token |
+
+### Parámetros de Ruta
+
+| Parámetro | Tipo | Requerido | Descripción |
+| --- | --- | --- | --- |
+| `qualifiedName` | string | sí | Nombre cualificado del servidor (p.ej. 'namespace/server' o 'namespace' para servidores solo-namespace). Usa %2F para codificar la barra. |
+
+### Body
+
+`application/json`
+
+| Campo | Tipo | Requerido | Descripción |
+| --- | --- | --- | --- |
+| `type` | string | sí | Tipo de release: `"url"` o `"stdio"` |
+| `deploymentUrl` | string | no | URL de despliegue (requerido para tipo `"url"`) |
+| `configSchema` | object | no | JSON Schema opcional para la configuración del servidor |
+
+### Respuesta
+
+**201** — `application/json` — Release creado correctamente
+
+| Campo | Tipo | Requerido |
+| --- | --- | --- |
+| `id` | string | sí |
+| `status` | string | sí |
+| `type` | string | sí |
+| `createdAt` | string | sí |
+
+```json
+{
+  "id": "3c90c3cc-0d44-4b50-8888-8dd25736052a",
+  "status": "building",
+  "type": "url",
+  "createdAt": "2024-01-01T00:00:00.000Z"
+}
+```
+
+**404** — Servidor no encontrado
+
+### Ejemplo
+
+```typescript
+import SpainMCP from '@spainmcp/api';
+
+const client = new SpainMCP({
+  apiKey: process.env['SPAINMCP_API_KEY'],
+});
+
+const release = await client.servers.releases.create('myorg/my-server', {
+  type: 'url',
+  deploymentUrl: 'https://api.example.com/mcp',
+});
+
+console.log(release.id);
+```

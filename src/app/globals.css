@@ -1,23 +1,25 @@
 @import "tailwindcss";
+@import 'fumadocs-ui/css/neutral.css';
+@import 'fumadocs-ui/css/preset.css';
 
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --background: #F5F0E8;
-  --foreground: #1C1917;
+  --background: #FFFFFF;
+  --foreground: #111827;
   --card: #FFFFFF;
-  --border: #E8E2D9;
-  --muted: #78716C;
-  --accent: #EA580C;
+  --border: #E5E7EB;
+  --muted: #6B7280;
+  --accent: #2563EB;
 }
 
 .dark {
-  --background: #18130E;
-  --foreground: #EDE8DF;
-  --card: #221C16;
-  --border: #2D2720;
-  --muted: #7A6E66;
-  --accent: #EA580C;
+  --background: #0a0a0a;
+  --foreground: #F3F4F6;
+  --card: #111111;
+  --border: #1F2937;
+  --muted: #9CA3AF;
+  --accent: #3B82F6;
 }
 
 body {
@@ -25,6 +27,91 @@ body {
   color: var(--foreground);
   font-family: Inter, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
+}
+
+/* Ocultar nav.children en el sub-nav mobile de docs (ya aparece en el sidebar) */
+#nd-subnav .flex-1 {
+  display: none;
+}
+
+/* Docs: fondo blanco (light) / oscuro (dark), igual que Smithery */
+body:has(#nd-docs-layout) {
+  background: white;
+}
+#nd-docs-layout {
+  --color-fd-background: hsl(0, 0%, 100%);
+  /* Primary = SpainMCP orange → active items naranja como Smithery */
+  --color-fd-primary: 217.2 91.2% 59.8%;
+  --color-fd-primary-foreground: 0 0% 100%;
+}
+#nd-subnav {
+  background: white;
+}
+
+.dark body:has(#nd-docs-layout) {
+  background: hsl(0, 0%, 7%);
+}
+.dark #nd-docs-layout {
+  --color-fd-background: hsl(0, 0%, 7%);
+  --color-fd-primary: 217.2 91.2% 59.8%;
+  --color-fd-primary-foreground: 0 0% 100%;
+}
+.dark #nd-subnav {
+  background: hsl(0, 0%, 7%);
+}
+
+/* Tamaño base del sidebar — cubre folder triggers, items, headers */
+#nd-docs-layout aside {
+  font-size: 0.7rem;
+}
+
+/* TOC "En esta página" — compacto estilo Smithery */
+.\[grid-area\:toc\],
+.\[grid-area\:toc\] * {
+  font-size: 0.72rem !important;
+  line-height: 1.4 !important;
+}
+
+/* Contenido del artículo — matching Smithery */
+#nd-docs-layout article h1 { font-size: 1.75rem !important; }
+#nd-docs-layout article h2 { font-size: 1.25rem !important; }
+#nd-docs-layout article h3 { font-size: 1rem !important; }
+#nd-docs-layout article p,
+#nd-docs-layout article li,
+#nd-docs-layout article td,
+#nd-docs-layout article th,
+#nd-docs-layout article blockquote,
+#nd-docs-layout article pre,
+#nd-docs-layout article code { font-size: 0.8125rem !important; }
+
+/* Sidebar section headers → texto neutro oscuro como Smithery (NO naranja, NO uppercase) */
+#nd-docs-layout aside p {
+  color: var(--color-stone-800, #1c1917) !important;
+  font-size: 0.7rem !important;
+  font-weight: 500 !important;
+  text-transform: none !important;
+  letter-spacing: normal !important;
+  margin-top: 3rem !important;
+}
+.dark #nd-docs-layout aside p {
+  color: var(--color-stone-200, #e7e5e4) !important;
+}
+
+/* Sidebar items: más indent que los headers (como Smithery) */
+#nd-docs-layout aside a[data-active] {
+  font-size: 0.7rem !important;
+  padding-inline-start: 1.25rem !important;
+}
+/* Active sidebar item → borde izquierdo naranja sólido, sin background, como Smithery */
+#nd-docs-layout aside a[data-active="true"] {
+  background: transparent !important;
+  border-left: 2px solid #EA580C;
+  border-radius: 0 4px 4px 0 !important;
+  padding-inline-start: calc(1.25rem - 2px) !important;
+}
+/* Suprimir el ::before nativo de Fumadocs (duplica la línea) */
+#nd-docs-layout aside a[data-active="true"]::before {
+  display: none !important;
 }
 
 @keyframes fadeInUp {

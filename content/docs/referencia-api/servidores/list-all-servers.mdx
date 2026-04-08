@@ -1,0 +1,68 @@
+---
+title: Listar todos los servidores
+icon: GET
+description: Lista o busca todos los servidores en el registro.
+---
+
+```
+GET /servers
+```
+
+### Autorizaciones
+
+| Parámetro | Tipo | Ubicación | Requerido | Descripción |
+| --- | --- | --- | --- | --- |
+| `Authorization` | string | header | sí | API key de SpainMCP como Bearer token |
+
+### Parámetros de Query
+
+| Parámetro | Tipo | Default | Descripción |
+| --- | --- | --- | --- |
+| `q` | string | — | Consulta de búsqueda para filtrar servidores |
+| `page` | integer | 1 | Página de resultados |
+| `pageSize` | integer | 20 | Resultados por página (1 a 100) |
+| `owner` | string | — | Filtrar por namespace del propietario |
+
+### Respuesta
+
+**200** — `application/json` — Lista paginada de servidores
+
+| Campo | Tipo | Requerido |
+| --- | --- | --- |
+| `servers` | object[] | sí |
+| `pagination` | object | sí |
+
+```json
+{
+  "servers": [
+    {
+      "qualifiedName": "spainmcp/hello-world",
+      "displayName": "Hello World",
+      "description": "A simple hello world server",
+      "iconUrl": "https://example.com/icon.png",
+      "remote": true
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "pageSize": 20,
+    "totalPages": 1,
+    "totalItems": 1
+  }
+}
+```
+
+### Ejemplo
+
+```typescript
+import SpainMCP from '@spainmcp/api';
+
+const client = new SpainMCP({
+  apiKey: process.env['SPAINMCP_API_KEY'],
+});
+
+// Obtiene páginas automáticamente según sea necesario
+for await (const server of client.servers.list({ q: 'hello' })) {
+  console.log(server.qualifiedName);
+}
+```

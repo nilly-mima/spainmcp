@@ -3,7 +3,7 @@
 type Item = { nombre: string; descripcion_en: string; scope: string }
 
 const COLORS = [
-  'bg-orange-100 text-orange-700',
+  'bg-blue-100 text-blue-700',
   'bg-blue-100 text-blue-700',
   'bg-green-100 text-green-700',
   'bg-purple-100 text-purple-700',
@@ -18,8 +18,7 @@ function MarqueeCard({ item }: { item: Item }) {
 
   return (
     <div
-      className="w-[210px] bg-white rounded-xl p-3.5 flex flex-col gap-2 shrink-0"
-      style={{ border: '1px solid #E8E2D9' }}
+      className="w-[210px] bg-white rounded-xl p-3.5 flex flex-col gap-2 shrink-0 border border-gray-200"
     >
       <div className="flex items-center gap-2.5">
         <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 ${color}`}>

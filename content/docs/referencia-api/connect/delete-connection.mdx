@@ -1,0 +1,52 @@
+---
+title: Eliminar conexion
+icon: DELETE
+description: Elimina una conexion MCP y sus credenciales almacenadas.
+---
+
+```
+DELETE /connections/{namespace}/{connectionId}
+```
+
+### Autorizaciones
+
+| Parametro | Tipo | Ubicacion | Requerido | Descripcion |
+| --- | --- | --- | --- | --- |
+| `Authorization` | string | header | si | API key de SpainMCP como Bearer token |
+
+### Parametros de Ruta
+
+| Parametro | Tipo | Requerido | Descripcion |
+| --- | --- | --- | --- |
+| `namespace` | string | si | Namespace de la conexion (p.ej. 'myorg') |
+| `connectionId` | string | si | Identificador unico de la conexion a eliminar |
+
+### Respuesta
+
+**200** — `application/json` — Conexion eliminada
+
+| Campo | Tipo | Requerido |
+| --- | --- | --- |
+| `success` | boolean | si |
+
+```json
+{
+  "success": true
+}
+```
+
+**404** — Conexion no encontrada
+
+### Ejemplo
+
+```typescript
+import SpainMCP from '@spainmcp/api';
+
+const client = new SpainMCP({
+  apiKey: process.env['SPAINMCP_API_KEY'],
+});
+
+const result = await client.connections.delete('myorg', 'my-connection');
+
+console.log(result.success);
+```

@@ -1,0 +1,20 @@
+{
+  "title": "Servidores",
+  "pages": [
+    "get-server",
+    "create-server",
+    "delete-server",
+    "update-server",
+    "download-bundle",
+    "list-releases",
+    "publish-server",
+    "get-release",
+    "stream-release-logs",
+    "resume-release",
+    "list-runtime-logs",
+    "get-server-icon",
+    "upload-server-icon",
+    "delete-server-icon",
+    "list-all-servers"
+  ]
+}

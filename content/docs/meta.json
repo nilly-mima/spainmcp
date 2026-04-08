@@ -1,0 +1,12 @@
+{
+  "title": "SpainMCP Docs",
+  "pages": [
+    "primeros-pasos",
+    "clientes",
+    "servers",
+    "integraciones",
+    "conceptos",
+    "recetas",
+    "referencia-api"
+  ]
+}

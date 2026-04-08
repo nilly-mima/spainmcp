@@ -38,5 +38,6 @@
     "Crear branches y hacer commits"
   ],
   "fecha_verificado": "2026-04-04",
-  "dificultad_instalacion": "media"
+  "dificultad_instalacion": "media",
+  "logo_url": "/logos/github.svg"
 }

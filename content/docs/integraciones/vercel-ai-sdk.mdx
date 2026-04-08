@@ -1,0 +1,98 @@
+---
+title: Integración Vercel AI SDK
+icon: Zap
+description: Integra servidores MCP con el Vercel AI SDK usando SpainMCP Connect.
+---
+
+El [Vercel AI SDK](https://sdk.vercel.ai) incluye soporte nativo para servidores MCP. En esta guia veras como combinar SpainMCP Connect con el AI SDK para incorporar herramientas MCP en tus aplicaciones de inteligencia artificial.
+
+## Instalación
+
+```bash
+npm install ai @ai-sdk/mcp @ai-sdk/anthropic @spainmcp/api
+```
+
+## Inicio rápido
+
+Utiliza `createConnection` de `@spainmcp/api/mcp` para obtener un transport compatible con el cliente MCP del AI SDK:
+
+```typescript
+import { createMCPClient } from '@ai-sdk/mcp';
+import { generateText } from 'ai';
+import { anthropic } from '@ai-sdk/anthropic';
+import { createConnection } from '@spainmcp/api/mcp';
+
+const { transport } = await createConnection({
+  mcpUrl: 'https://exa.run.tools',
+});
+
+const mcpClient = await createMCPClient({ transport });
+const tools = await mcpClient.tools();
+
+const { text } = await generateText({
+  model: anthropic('claude-sonnet-4-20250514'),
+  tools,
+  prompt: 'Busca las últimas noticias sobre MCP.',
+});
+
+await mcpClient.close();
+```
+
+SpainMCP Connect se encarga de todo el flujo OAuth, la renovacion de tokens y la gestion de conexiones de manera transparente.
+
+## Respuestas en streaming
+
+Para obtener respuestas en streaming, usa `streamText` y cierra el cliente dentro del callback `onFinish`:
+
+```typescript
+import { createMCPClient } from '@ai-sdk/mcp';
+import { streamText } from 'ai';
+import { anthropic } from '@ai-sdk/anthropic';
+import { createConnection } from '@spainmcp/api/mcp';
+
+const { transport } = await createConnection({
+  mcpUrl: 'https://exa.run.tools',
+});
+
+const mcpClient = await createMCPClient({ transport });
+const tools = await mcpClient.tools();
+
+const result = await streamText({
+  model: anthropic('claude-sonnet-4-20250514'),
+  tools,
+  prompt: 'Busca en la web las últimas noticias de IA',
+  onFinish: async () => {
+    await mcpClient.close();
+  },
+});
+```
+
+## Conectar varios servidores MCP
+
+Puedes establecer conexion con multiples servidores y reunir todas sus herramientas en un solo objeto:
+
+```typescript
+import { createMCPClient } from '@ai-sdk/mcp';
+import { createConnection } from '@spainmcp/api/mcp';
+
+const servers = [
+  'https://exa.run.tools',
+  'https://gmail.run.tools',
+];
+
+const clients = await Promise.all(
+  servers.map(async (mcpUrl) => {
+    const { transport } = await createConnection({ mcpUrl });
+    return createMCPClient({ transport });
+  })
+);
+
+// Agregar herramientas de todos los servidores
+const allTools = Object.assign({}, ...(await Promise.all(clients.map(c => c.tools()))));
+```
+
+## Recursos adicionales
+
+- [Conectar a MCPs](/docs/clientes/conectar-mcps) — Guía completa incluyendo gestión OAuth, configuraciones multi-usuario y service tokens
+- [Scoping de Tokens](/docs/clientes/token-scoping) — Acceso seguro desde navegador y móvil
+- [Documentación MCP del Vercel AI SDK](https://sdk.vercel.ai/docs/ai-sdk-core/tools-and-tool-calling#mcp-tools)

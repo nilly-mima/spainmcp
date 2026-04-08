@@ -1,0 +1,60 @@
+---
+title: Namespaces
+icon: Layers
+description: Los namespaces agrupan tus servidores, conexiones y skills bajo un identificador compartido.
+---
+
+## Que son los Namespaces
+
+Un namespace funciona como un contenedor que te permite agrupar y organizar tus recursos dentro de SpainMCP. Cualquier servidor, conexion o skill que generes queda asociado a un namespace concreto.
+
+Los namespaces se reflejan tanto en las URLs como en los nombres cualificados de los recursos. A modo de ejemplo, si publicas un servidor con el slug `weather` dentro del namespace `acme`, su ruta de acceso sera `mcp.lat/servers/acme/weather`.
+
+## Recursos dentro de un namespace
+
+| Recurso | Descripción |
+| --- | --- |
+| Servidores | Servidores MCP que publicas en el registro de SpainMCP |
+| Conexiones | Conexiones MCP gestionadas con OAuth y almacenamiento de credenciales |
+| Skills | Skills de IA reutilizables que referencian servidores MCP |
+
+## Como crear un namespace
+
+La creacion de namespaces se realiza a traves de la API de Namespaces:
+
+<Tabs items={['CLI', 'TypeScript', 'cURL']}>
+  <Tab value="CLI">
+    ```bash
+    spainmcp namespace create mi-namespace
+    ```
+  </Tab>
+  <Tab value="TypeScript">
+    ```typescript
+    const ns = await spainmcp.namespaces.create({ name: 'mi-namespace' });
+    ```
+  </Tab>
+  <Tab value="cURL">
+    ```bash
+    curl -X POST "https://api.spainmcp.com/v1/namespaces" \
+      -H "Authorization: Bearer $SPAINMCP_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{"name": "mi-namespace"}'
+    ```
+  </Tab>
+</Tabs>
+
+Los namespaces solo admiten caracteres alfanumericos en minusculas y guiones, y cada nombre debe ser unico a nivel global dentro de SpainMCP.
+
+## Restricciones por plan
+
+| Plan | Namespaces máximos |
+| --- | --- |
+| Hobby (gratis) | 3 |
+| Pay as you Go | 100 |
+| Custom | 100+ |
+
+Puedes revisar todos los detalles de cada plan en la [página de precios](/pricing).
+
+## Trabajo en equipo y permisos compartidos
+
+Los namespaces sirven como espacios de trabajo colaborativos. Todos los recursos que contiene un namespace pueden ser administrados por cualquier persona que disponga de una [API key](/docs/clientes/token-scoping) con scope vinculado a ese namespace, lo que facilita la colaboracion entre equipos de manera similar a como funcionan los project IDs.

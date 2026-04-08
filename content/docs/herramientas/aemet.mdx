@@ -1,0 +1,65 @@
+---
+title: Herramientas AEMET
+description: Las herramientas AEMET dan acceso a previsiones meteorológicas y datos climáticos oficiales de España.
+---
+
+Las herramientas AEMET son parte del servidor MCP de SpainMCP. Permiten consultar la previsión del tiempo para cualquier municipio español directamente desde un agente.
+
+Las herramientas se exponen bajo el namespace `spainmcp`. La herramienta `tiempo_aemet` es accesible en `mcp.lat/api/mcp`.
+
+## ¿Qué incluye?
+
+| Herramienta | Descripción |
+| ----------- | ----------- |
+| **tiempo_aemet** | Previsión meteorológica por código de municipio INE |
+
+## Llamar a las herramientas
+
+<Tabs items={['CLI', 'TypeScript', 'cURL']}>
+  <Tab value="CLI">
+    ```bash
+    spainmcp tool call spainmcp tiempo_aemet '{"municipio": "28079"}'
+    spainmcp tool call spainmcp tiempo_aemet '{"municipio": "08019"}'
+    ```
+  </Tab>
+  <Tab value="TypeScript">
+    ```typescript
+    const result = await client.callTool({
+      name: 'tiempo_aemet',
+      arguments: { municipio: '28079' }
+    })
+    ```
+  </Tab>
+  <Tab value="cURL">
+    ```bash
+    curl -X POST https://mcp.lat/api/mcp \
+      -H "Authorization: Bearer YOUR_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{"method":"tools/call","params":{"name":"tiempo_aemet","arguments":{"municipio":"28079"}}}'
+    ```
+  </Tab>
+</Tabs>
+
+## Municipios frecuentes
+
+| Municipio | Código |
+| --------- | ------ |
+| Madrid | **28079** |
+| Barcelona | **08019** |
+| Valencia | **46250** |
+| Sevilla | **41091** |
+| Bilbao | **48020** |
+| Zaragoza | **50297** |
+
+## Límites
+
+| Plan | Llamadas/día |
+| ---- | ------------ |
+| Free | 50 (límite API AEMET gratuita) |
+| Pro  | Sin límite (cache 15 min) |
+
+Ver la [página de precios](https://mcp.lat/precios) para detalles completos.
+
+## Datos y fuentes
+
+Datos de la API Abierta de AEMET en `opendata.aemet.es`. Requiere API key gratuita — configurada en la infraestructura de SpainMCP.

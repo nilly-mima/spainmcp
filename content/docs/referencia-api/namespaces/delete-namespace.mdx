@@ -1,0 +1,51 @@
+---
+title: Eliminar un namespace
+icon: DELETE
+description: Elimina un namespace y todos sus recursos asociados (servidores, conexiones, etc.).
+---
+
+```
+DELETE /namespaces/{name}
+```
+
+### Autorizaciones
+
+| Parámetro | Tipo | Ubicación | Requerido | Descripción |
+| --- | --- | --- | --- | --- |
+| `Authorization` | string | header | sí | API key de SpainMCP como Bearer token |
+
+### Parámetros de Ruta
+
+| Parámetro | Tipo | Requerido | Descripción |
+| --- | --- | --- | --- |
+| `name` | string | sí | Nombre del namespace a eliminar |
+
+### Respuesta
+
+**200** — `application/json` — Namespace eliminado
+
+| Campo | Tipo | Requerido |
+| --- | --- | --- |
+| `success` | boolean | sí |
+
+```json
+{
+  "success": true
+}
+```
+
+**404** — Namespace no encontrado
+
+### Ejemplo
+
+```typescript
+import SpainMCP from '@spainmcp/api';
+
+const client = new SpainMCP({
+  apiKey: process.env['SPAINMCP_API_KEY'],
+});
+
+const result = await client.namespaces.delete('mi-empresa');
+
+console.log(result.success);
+```

@@ -39,5 +39,6 @@
     "Buscar documentación técnica actualizada"
   ],
   "fecha_verificado": "2026-04-04",
-  "dificultad_instalacion": "media"
+  "dificultad_instalacion": "media",
+  "logo_url": "https://api.smithery.ai/servers/brave/icon"
 }

@@ -1,0 +1,66 @@
+---
+title: Crear un skill (deprecated)
+icon: POST
+description: Crea un nuevo skill. Deprecated — usa PUT /skills/{qualifiedName} en su lugar.
+---
+
+```
+POST /skills
+```
+
+> **Deprecated** — Usa `PUT /skills/{qualifiedName}` para crear o actualizar skills.
+
+### Autorizaciones
+
+| Parámetro | Tipo | Ubicación | Requerido | Descripción |
+| --- | --- | --- | --- | --- |
+| `Authorization` | string | header | sí | API key de SpainMCP como Bearer token |
+
+### Body
+
+`application/json`
+
+| Campo | Tipo | Requerido | Descripción |
+| --- | --- | --- | --- |
+| `qualifiedName` | string | sí | Nombre cualificado del skill (p.ej. `"namespace/skill"`) |
+| `displayName` | string | sí | Nombre visible del skill |
+| `description` | string | sí | Descripción del skill |
+| `content` | string | sí | Contenido o instrucciones del skill |
+
+### Respuesta
+
+**201** — `application/json` — Skill creado
+
+| Campo | Tipo | Requerido | Ejemplo |
+| --- | --- | --- | --- |
+| `qualifiedName` | string | sí | `"spainmcp/resumen-boe"` |
+| `displayName` | string | sí | `"Resumen BOE"` |
+| `createdAt` | string | sí | `"2026-01-15T10:30:00Z"` |
+
+```json
+{
+  "qualifiedName": "spainmcp/resumen-boe",
+  "displayName": "Resumen BOE",
+  "createdAt": "2026-01-15T10:30:00Z"
+}
+```
+
+### Ejemplo
+
+```typescript
+import SpainMCP from '@spainmcp/api';
+
+const client = new SpainMCP({
+  apiKey: process.env['SPAINMCP_API_KEY'],
+});
+
+// Deprecated — usa client.skills.upsert() en su lugar
+const skill = await client.skills.create({
+  qualifiedName: 'spainmcp/resumen-boe',
+  displayName: 'Resumen BOE',
+  description: 'Resume las publicaciones del BOE del día',
+  content: 'Eres un asistente que resume el BOE...',
+});
+
+console.log(skill.createdAt);
+```

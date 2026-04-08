@@ -38,5 +38,6 @@
   ],
   "fecha_verificado": "2026-04-04",
   "dificultad_instalacion": "facil",
-  "especifico_espana": true
+  "especifico_espana": true,
+  "logo_url": "/logos/datosgob.svg"
 }

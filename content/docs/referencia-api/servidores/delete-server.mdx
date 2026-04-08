@@ -1,0 +1,55 @@
+---
+title: Eliminar un servidor
+icon: DELETE
+description: Elimina permanentemente un servidor, sus releases y recursos asociados.
+---
+
+```
+DELETE /servers/{qualifiedName}
+```
+
+### Autorizaciones
+
+| Parámetro | Tipo | Ubicación | Requerido | Descripción |
+| --- | --- | --- | --- | --- |
+| `Authorization` | string | header | sí | API key de SpainMCP como Bearer token |
+
+### Parámetros de Ruta
+
+| Parámetro | Tipo | Requerido | Descripción |
+| --- | --- | --- | --- |
+| `qualifiedName` | string | sí | Nombre cualificado del servidor (p.ej. 'namespace/server' o 'namespace' para servidores solo-namespace). Usa %2F para codificar la barra. |
+
+### Respuesta
+
+**200** — `application/json` — Servidor eliminado
+
+| Campo | Tipo | Requerido |
+| --- | --- | --- |
+| `success` | boolean | sí |
+| `namespace` | string | sí |
+| `server` | string | sí |
+
+```json
+{
+  "success": true,
+  "namespace": "<string>",
+  "server": "<string>"
+}
+```
+
+**404** — Servidor no encontrado
+
+### Ejemplo
+
+```typescript
+import SpainMCP from '@spainmcp/api';
+
+const client = new SpainMCP({
+  apiKey: process.env['SPAINMCP_API_KEY'],
+});
+
+const server = await client.servers.delete('qualifiedName');
+
+console.log(server.namespace);
+```

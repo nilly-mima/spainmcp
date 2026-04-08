@@ -1,0 +1,56 @@
+---
+title: Crear token de uplink
+icon: POST
+description: Crea un token de uplink para comunicación servidor-a-plataforma.
+---
+
+```
+POST /uplink/token
+```
+
+### Autorizaciones
+
+| Parámetro | Tipo | Ubicación | Requerido | Descripción |
+| --- | --- | --- | --- | --- |
+| `Authorization` | string | header | sí | API key de SpainMCP como Bearer token |
+
+### Body
+
+`application/json`
+
+| Campo | Tipo | Requerido | Descripción |
+| --- | --- | --- | --- |
+| `qualifiedName` | string | sí | Nombre cualificado del servidor que usará el token de uplink (p.ej. `"namespace/server"`) |
+
+### Respuesta
+
+**200** — `application/json` — Token de uplink creado
+
+| Campo | Tipo | Requerido | Ejemplo |
+| --- | --- | --- | --- |
+| `token` | string | sí | `"smc_up_xyz789..."` |
+| `expiresAt` | string | sí | `"2026-02-10T08:00:00Z"` |
+
+```json
+{
+  "token": "smc_up_xyz789...",
+  "expiresAt": "2026-02-10T08:00:00Z"
+}
+```
+
+### Ejemplo
+
+```typescript
+import SpainMCP from '@spainmcp/api';
+
+const client = new SpainMCP({
+  apiKey: process.env['SPAINMCP_API_KEY'],
+});
+
+const { token, expiresAt } = await client.uplink.createToken({
+  qualifiedName: 'mi-empresa/mi-servidor',
+});
+
+console.log('Uplink token:', token);
+console.log('Expira:', expiresAt);
+```

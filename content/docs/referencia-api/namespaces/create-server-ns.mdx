@@ -1,0 +1,73 @@
+---
+title: Crear servidor en namespace (deprecated)
+icon: POST
+description: Crea un servidor bajo un namespace. Deprecated — usa PUT /servers/{qualifiedName} en su lugar.
+---
+
+```
+POST /namespaces/{name}/servers
+```
+
+> **Deprecated** — Usa `PUT /servers/{qualifiedName}` para crear o actualizar servidores.
+
+### Autorizaciones
+
+| Parámetro | Tipo | Ubicación | Requerido | Descripción |
+| --- | --- | --- | --- | --- |
+| `Authorization` | string | header | sí | API key de SpainMCP como Bearer token |
+
+### Parámetros de Ruta
+
+| Parámetro | Tipo | Requerido | Descripción |
+| --- | --- | --- | --- |
+| `name` | string | sí | Nombre del namespace donde crear el servidor |
+
+### Body
+
+`application/json`
+
+| Campo | Tipo | Requerido | Descripción |
+| --- | --- | --- | --- |
+| `server` | string | sí | Nombre del servidor dentro del namespace |
+| `displayName` | string | sí | Nombre visible del servidor |
+| `description` | string | no | Descripción del servidor |
+
+### Respuesta
+
+**201** — `application/json` — Servidor creado en el namespace
+
+| Campo | Tipo | Requerido | Ejemplo |
+| --- | --- | --- | --- |
+| `namespace` | string | sí | `"mi-empresa"` |
+| `server` | string | sí | `"mi-servidor"` |
+| `displayName` | string | sí | `"Mi Servidor"` |
+| `createdAt` | string | sí | `"2026-01-15T10:30:00Z"` |
+
+```json
+{
+  "namespace": "mi-empresa",
+  "server": "mi-servidor",
+  "displayName": "Mi Servidor",
+  "createdAt": "2026-01-15T10:30:00Z"
+}
+```
+
+### Ejemplo
+
+```typescript
+import SpainMCP from '@spainmcp/api';
+
+const client = new SpainMCP({
+  apiKey: process.env['SPAINMCP_API_KEY'],
+});
+
+// Deprecated — usa client.servers.upsert() en su lugar
+const server = await client.namespaces.createServer('mi-empresa', {
+  server: 'mi-servidor',
+  displayName: 'Mi Servidor',
+  description: 'Un servidor MCP de ejemplo',
+});
+
+console.log(server.namespace);
+console.log(server.createdAt);
+```

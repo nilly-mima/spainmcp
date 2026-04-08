@@ -1,0 +1,14 @@
+{
+  "title": "Referencia API",
+  "collapsible": false,
+  "pages": [
+    "introduccion",
+    "servidores",
+    "herramientas",
+    "tokens",
+    "uplink",
+    "namespaces",
+    "connect",
+    "connect-mcp"
+  ]
+}

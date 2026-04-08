@@ -1,0 +1,62 @@
+---
+title: Listar namespaces
+icon: GET
+description: Lista los namespaces del usuario autenticado.
+---
+
+```
+GET /namespaces
+```
+
+### Autorizaciones
+
+| Parámetro | Tipo | Ubicación | Requerido | Descripción |
+| --- | --- | --- | --- | --- |
+| `Authorization` | string | header | sí | API key de SpainMCP como Bearer token |
+
+### Parámetros de Query
+
+| Parámetro | Tipo | Default | Descripción |
+| --- | --- | --- | --- |
+| `page` | integer | 1 | Página de resultados |
+| `pageSize` | integer | 20 | Resultados por página (1 a 100) |
+
+### Respuesta
+
+**200** — `application/json` — Lista paginada de namespaces
+
+| Campo | Tipo | Requerido |
+| --- | --- | --- |
+| `namespaces` | object[] | sí |
+| `pagination` | object | sí |
+
+```json
+{
+  "namespaces": [
+    {
+      "name": "mi-empresa",
+      "createdAt": "2026-01-10T08:00:00Z"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "pageSize": 20,
+    "totalPages": 1,
+    "totalItems": 1
+  }
+}
+```
+
+### Ejemplo
+
+```typescript
+import SpainMCP from '@spainmcp/api';
+
+const client = new SpainMCP({
+  apiKey: process.env['SPAINMCP_API_KEY'],
+});
+
+for await (const ns of client.namespaces.list()) {
+  console.log(ns.name);
+}
+```

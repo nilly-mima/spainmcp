@@ -1,0 +1,69 @@
+---
+title: Crear o actualizar un skill
+icon: PUT
+description: Crea un skill nuevo o actualiza uno existente (upsert).
+---
+
+```
+PUT /skills/{qualifiedName}
+```
+
+### Autorizaciones
+
+| Parámetro | Tipo | Ubicación | Requerido | Descripción |
+| --- | --- | --- | --- | --- |
+| `Authorization` | string | header | sí | API key de SpainMCP como Bearer token |
+
+### Parámetros de Ruta
+
+| Parámetro | Tipo | Requerido | Descripción |
+| --- | --- | --- | --- |
+| `qualifiedName` | string | sí | Nombre cualificado del skill (p.ej. 'namespace/skill'). Usa %2F para codificar la barra. |
+
+### Body
+
+`application/json`
+
+| Campo | Tipo | Requerido | Descripción |
+| --- | --- | --- | --- |
+| `displayName` | string | sí | Nombre visible del skill |
+| `description` | string | sí | Descripción del skill |
+| `content` | string | sí | Contenido o instrucciones del skill |
+| `agentConfigs` | object[] | no | Configuraciones de agente asociadas al skill |
+
+### Respuesta
+
+**200** — `application/json` — Skill creado o actualizado
+
+| Campo | Tipo | Requerido | Ejemplo |
+| --- | --- | --- | --- |
+| `qualifiedName` | string | sí | `"spainmcp/resumen-boe"` |
+| `displayName` | string | sí | `"Resumen BOE"` |
+| `updatedAt` | string | sí | `"2026-03-20T14:00:00Z"` |
+
+```json
+{
+  "qualifiedName": "spainmcp/resumen-boe",
+  "displayName": "Resumen BOE",
+  "updatedAt": "2026-03-20T14:00:00Z"
+}
+```
+
+### Ejemplo
+
+```typescript
+import SpainMCP from '@spainmcp/api';
+
+const client = new SpainMCP({
+  apiKey: process.env['SPAINMCP_API_KEY'],
+});
+
+const skill = await client.skills.upsert('spainmcp/resumen-boe', {
+  displayName: 'Resumen BOE',
+  description: 'Resume las publicaciones del BOE del día',
+  content: 'Eres un asistente que resume el BOE...',
+  agentConfigs: [],
+});
+
+console.log(skill.updatedAt);
+```

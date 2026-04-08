@@ -49,58 +49,75 @@ export default function UserMenu() {
   }
 
   const initial = (user.email ?? '?')[0].toUpperCase()
+  const username = user.email?.split('@')[0] ?? 'user'
+  const linkClass = "flex items-center gap-2.5 px-3 py-2 text-sm text-[var(--foreground)] hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
 
   return (
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(v => !v)}
-        className="w-8 h-8 rounded-full bg-orange-600 hover:bg-orange-700 text-white text-sm font-bold flex items-center justify-center transition-colors"
+        className="w-8 h-8 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold flex items-center justify-center transition-colors"
         title={user.email}
       >
         {initial}
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-52 bg-[var(--card)] border border-[var(--border)] rounded-xl shadow-lg py-1 z-50">
-          <div className="px-3 py-2 border-b border-[var(--border)]">
+        <div className="absolute right-0 top-full mt-2 w-56 bg-[var(--card)] border border-[var(--border)] rounded-xl shadow-lg py-1 z-50">
+          {/* User info */}
+          <div className="px-3 py-2.5 border-b border-[var(--border)]">
+            <p className="text-sm font-semibold text-[var(--foreground)]">@{username}</p>
             <p className="text-xs text-[var(--muted)] truncate">{user.email}</p>
           </div>
 
-          <Link
-            href="/account/my-servers"
-            onClick={() => setOpen(false)}
-            className="flex items-center gap-2 px-3 py-2 text-sm text-[var(--foreground)] hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>
-            </svg>
-            Mis Servidores
-          </Link>
+          {/* Menu items */}
+          <div className="py-1">
+            <Link href="/account/api-keys" onClick={() => setOpen(false)} className={linkClass}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
+              </svg>
+              API Keys
+            </Link>
+            <Link href="/mcps?q=owner%3Ame" onClick={() => setOpen(false)} className={linkClass}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M4 7h16M4 12h16M4 17h10"/><circle cx="20" cy="17" r="2"/>
+              </svg>
+              My Servers
+            </Link>
+            <Link href="/guias?q=owner%3Ame" onClick={() => setOpen(false)} className={linkClass}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/>
+              </svg>
+              My Skills
+            </Link>
+            <Link href="/account/connections" onClick={() => setOpen(false)} className={linkClass}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/>
+              </svg>
+              My Connections
+            </Link>
+            <Link href="/account/billing" onClick={() => setOpen(false)} className={linkClass}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/>
+              </svg>
+              Billing
+            </Link>
+          </div>
 
-          <Link
-            href="/account/api-keys"
-            onClick={() => setOpen(false)}
-            className="flex items-center gap-2 px-3 py-2 text-sm text-[var(--foreground)] hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
-            </svg>
-            Mis API Keys
-          </Link>
-
-          <div className="border-t border-[var(--border)] mt-1 pt-1">
+          {/* Sign out */}
+          <div className="border-t border-[var(--border)] pt-1">
             <button
               onClick={async () => {
                 await supabaseBrowser.auth.signOut()
                 setOpen(false)
               }}
-              className="flex items-center gap-2 px-3 py-2 text-sm text-red-500 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors w-full text-left"
+              className="flex items-center gap-2.5 px-3 py-2 text-sm text-red-500 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors w-full text-left"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
                 <polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
               </svg>
-              Cerrar sesión
+              Sign out
             </button>
           </div>
         </div>

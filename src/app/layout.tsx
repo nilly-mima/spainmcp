@@ -1,9 +1,7 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
+import Script from 'next/script'
 import './globals.css'
-import Header from '@/components/Header'
-import Footer from '@/components/Footer'
-import ThemeProvider from '@/components/ThemeProvider'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -26,14 +24,17 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es" suppressHydrationWarning>
+      <head>
+        <Script
+          id="theme-init"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `try{var t=localStorage.getItem('theme');var d=t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme:dark)').matches);document.documentElement.classList.toggle('dark',d)}catch(e){}`,
+          }}
+        />
+      </head>
       <body className={inter.className} suppressHydrationWarning>
-        <ThemeProvider>
-          <Header />
-          <main className="max-w-screen-xl mx-auto px-4 pt-2 pb-8">
-            {children}
-          </main>
-          <Footer />
-        </ThemeProvider>
+        {children}
       </body>
     </html>
   )

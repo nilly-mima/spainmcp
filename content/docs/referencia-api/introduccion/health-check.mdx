@@ -1,0 +1,49 @@
+---
+title: Health check
+icon: GET
+description: Comprobar si el servicio está en ejecución
+---
+
+```
+GET /health
+```
+
+### Autorizaciones
+
+| Parámetro | Tipo | Ubicación | Requerido | Descripción |
+| --- | --- | --- | --- | --- |
+| `Authorization` | string | header | sí | API key de SpainMCP como Bearer token |
+
+### Respuesta
+
+**200** — `application/json`
+
+El servicio está operativo.
+
+| Campo | Tipo | Requerido | Descripción |
+| --- | --- | --- | --- |
+| `status` | string | sí | Estado del servicio |
+| `timestamp` | string | sí | Timestamp de la respuesta |
+
+```json
+{
+  "status": "<string>",
+  "timestamp": "<string>"
+}
+```
+
+**500** — Error interno del servidor
+
+### Ejemplo
+
+```typescript
+import SpainMCP from '@spainmcp/api';
+
+const client = new SpainMCP({
+  apiKey: process.env['SPAINMCP_API_KEY'],
+});
+
+const response = await client.health.check();
+
+console.log(response.status);
+```

@@ -1,0 +1,63 @@
+---
+title: Subir icono del servidor
+icon: PUT
+description: Sube o reemplaza el icono del servidor. Acepta archivos de imagen.
+---
+
+```
+PUT /servers/{qualifiedName}/icon
+```
+
+### Autorizaciones
+
+| Parámetro | Tipo | Ubicación | Requerido | Descripción |
+| --- | --- | --- | --- | --- |
+| `Authorization` | string | header | sí | API key de SpainMCP como Bearer token |
+
+### Parámetros de Ruta
+
+| Parámetro | Tipo | Requerido | Descripción |
+| --- | --- | --- | --- |
+| `qualifiedName` | string | sí | Nombre cualificado del servidor (p.ej. 'namespace/server' o 'namespace' para servidores solo-namespace). Usa %2F para codificar la barra. |
+
+### Body
+
+`multipart/form-data`
+
+| Campo | Tipo | Requerido | Descripción |
+| --- | --- | --- | --- |
+| `file` | file | sí | Archivo de imagen para el icono del servidor |
+
+### Respuesta
+
+**200** — `application/json` — Icono subido correctamente
+
+| Campo | Tipo | Requerido |
+| --- | --- | --- |
+| `success` | boolean | sí |
+| `iconUrl` | string | sí |
+
+```json
+{
+  "success": true,
+  "iconUrl": "https://cdn.spainmcp.com/icons/myorg/my-server.png"
+}
+```
+
+### Ejemplo
+
+```typescript
+import SpainMCP, { toFile } from '@spainmcp/api';
+import fs from 'fs';
+
+const client = new SpainMCP({
+  apiKey: process.env['SPAINMCP_API_KEY'],
+});
+
+const result = await client.servers.icon.upload(
+  'qualifiedName',
+  await toFile(fs.createReadStream('icon.png'), 'icon.png'),
+);
+
+console.log(result.iconUrl);
+```

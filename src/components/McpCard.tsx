@@ -10,7 +10,7 @@ function McpIcon({ nombre, id }: { nombre: string; id: string }) {
     .toUpperCase()
 
   const palettes = [
-    { bg: '#FFF0E8', text: '#C2400C' },
+    { bg: '#EFF6FF', text: '#2563EB' },
     { bg: '#EEF2FF', text: '#4338CA' },
     { bg: '#F0FDF4', text: '#15803D' },
     { bg: '#FDF4FF', text: '#9333EA' },
@@ -22,7 +22,7 @@ function McpIcon({ nombre, id }: { nombre: string; id: string }) {
 
   return (
     <div
-      className="w-12 h-12 rounded-xl flex items-center justify-center text-sm font-bold shrink-0"
+      className="w-9 h-9 rounded-lg flex items-center justify-center text-xs font-bold shrink-0"
       style={{ background: p.bg, color: p.text }}
     >
       {initials}
@@ -32,7 +32,7 @@ function McpIcon({ nombre, id }: { nombre: string; id: string }) {
 
 function CheckBadge() {
   return (
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" className="text-orange-500 shrink-0">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" className="text-blue-500 shrink-0">
       <circle cx="12" cy="12" r="10" fill="currentColor" opacity="0.15"/>
       <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5"/>
       <polyline points="8 12 11 15 16 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -65,15 +65,18 @@ export default function McpCard({ mcp }: { mcp: Mcp }) {
   return (
     <Link href={`/mcps/${mcp.id}`} className="group block h-full">
       <div
-        className="bg-white dark:bg-stone-900 rounded-xl p-4 h-full flex flex-col gap-3 transition-shadow hover:shadow-md cursor-pointer"
-        style={{ border: '1px solid #E8E2D9' }}
+        className="bg-transparent rounded-xl p-3 h-full flex flex-col gap-2 transition-colors hover:bg-gray-50 dark:hover:bg-white/5 cursor-pointer border border-gray-200 dark:border-gray-700/50"
       >
         {/* Header */}
         <div className="flex items-start gap-3">
-          <McpIcon nombre={mcp.nombre} id={mcp.id} />
+          {mcp.logo_url ? (
+            <img src={mcp.logo_url} alt="" className="w-9 h-9 rounded-lg object-contain shrink-0" />
+          ) : (
+            <McpIcon nombre={mcp.nombre} id={mcp.id} />
+          )}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1.5">
-              <h3 className="font-bold text-orange-600 dark:text-orange-500 text-sm leading-tight truncate group-hover:underline">
+              <h3 className="font-bold text-blue-600 dark:text-white text-sm leading-tight truncate group-hover:underline">
                 {mcp.nombre}
               </h3>
               {mcp.verificado && <CheckBadge />}
@@ -83,15 +86,14 @@ export default function McpCard({ mcp }: { mcp: Mcp }) {
         </div>
 
         {/* Descripción */}
-        <p className="text-sm text-stone-500 dark:text-stone-400 leading-relaxed flex-1 line-clamp-3">
+        <p className="text-xs text-stone-500 dark:text-stone-400 leading-relaxed flex-1 line-clamp-2">
           {mcp.descripcion_corta}
         </p>
 
         {/* Footer */}
-        <div className="flex items-center justify-between pt-2" style={{ borderTop: '1px solid #F0EBE3' }}>
+        <div className="flex items-center justify-between pt-1.5" style={{ borderTop: '1px solid var(--border)' }}>
           <span
-            className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full text-stone-500 font-medium"
-            style={{ background: '#F5F0E8', border: '1px solid #E8E2D9' }}
+            className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full text-stone-500 font-medium bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
           >
             <GlobeIcon />
             {isRemote ? 'Remoto' : 'Local'}

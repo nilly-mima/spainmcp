@@ -7,10 +7,15 @@ import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { createClient } from '@supabase/supabase-js'
 
+interface DispatchNamespace {
+  get(name: string, opts?: Record<string, unknown>, extra?: { limits?: { cpuMs: number; subRequests: number } }): { fetch(req: Request): Promise<Response> }
+}
+
 interface Env {
   SUPABASE_URL: string
   SUPABASE_SERVICE_ROLE_KEY: string
   OAUTH_KV: KVNamespace
+  DISPATCHER?: DispatchNamespace  // Workers for Platforms (when activated)
   GITHUB_CLIENT_ID?: string
   GITHUB_CLIENT_SECRET?: string
   GOOGLE_CLIENT_ID?: string
@@ -696,6 +701,13 @@ app.post('/mcp/:username', async (c) => {
         jsonBody = responseText
       }
 
+      // Fix JSON-RPC id: upstream returns id:1 but client sent rpcId
+      try {
+        const parsed = JSON.parse(jsonBody)
+        parsed.id = rpcId
+        jsonBody = JSON.stringify(parsed)
+      } catch { /* keep original */ }
+
       return new Response(jsonBody, {
         status: upstreamRes.status,
         headers: {
@@ -762,6 +774,67 @@ app.get('/mcp/:username', (c) => {
 })
 
 // ═══════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════
+// HOSTED MCP SERVERS — /hosted/:namespace/:server
+// Dispatches to user-deployed Workers via Workers for Platforms
+// ═══════════════════════════════════════════════════
+
+app.all('/hosted/:namespace/:server', async (c) => {
+  const { namespace, server } = c.req.param()
+  const env = c.env
+
+  // If Workers for Platforms is not activated, serve from stored code
+  if (!env.DISPATCHER) {
+    // Fallback: load code from Supabase and execute inline
+    // (This is a temporary solution until WfP is activated)
+    const sb = getSupabase(env)
+    const qualifiedName = `${namespace}/${server}`
+
+    const { data: srv } = await sb.from('mcp_servers')
+      .select('source_code, is_deployed')
+      .eq('namespace', qualifiedName)
+      .single()
+
+    if (!srv?.source_code || !srv.is_deployed) {
+      return c.json({ error: `Hosted server ${qualifiedName} not found` }, 404)
+    }
+
+    // Code is stored but Workers for Platforms is not activated
+    // When WfP is active ($25/mo), the code runs in an isolated V8 sandbox
+    return c.json({
+      error: 'Server is deployed but Workers for Platforms is not yet activated',
+      qualifiedName,
+      hint: 'Activate WfP at https://dash.cloudflare.com to enable hosted execution',
+    }, 503)
+  }
+
+  // Workers for Platforms: dispatch to user worker
+  const scriptName = `${namespace}--${server}`
+  try {
+    const userWorker = env.DISPATCHER.get(scriptName, {}, {
+      limits: { cpuMs: 10, subRequests: 5 },
+    })
+    return userWorker.fetch(c.req.raw)
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err)
+    if (msg.includes('Worker not found')) {
+      return c.json({ error: `Hosted server ${namespace}/${server} not found` }, 404)
+    }
+    return c.json({ error: msg }, 500)
+  }
+})
+
+// Info endpoint for hosted servers
+app.get('/hosted/:namespace/:server', async (c) => {
+  const { namespace, server } = c.req.param()
+  return c.json({
+    name: `${namespace}/${server}`,
+    hostedBy: 'SpainMCP',
+    endpoint: `https://spainmcp-connect.nilmiq.workers.dev/hosted/${namespace}/${server}`,
+    protocol: 'MCP Streamable HTTP',
+  })
+})
+
 // Token refresh endpoint (called by cron or manually)
 // ═══════════════════════════════════════════════════
 

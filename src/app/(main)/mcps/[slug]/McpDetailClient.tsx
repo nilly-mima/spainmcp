@@ -225,9 +225,9 @@ function ClientList() {
           <span className="text-base font-semibold text-stone-800 dark:text-stone-200">{info.label}</span>
         </div>
         <p className="text-sm text-stone-500 dark:text-stone-400">Instala este servidor con el siguiente comando:</p>
-        <div className="rounded-lg flex items-start gap-2 px-3 py-3" style={{ background: '#FFFBEB', border: '1px solid #FDE68A' }}>
-          <code className="font-mono text-xs text-stone-700 flex-1 leading-relaxed break-all">{info.install}</code>
-          <button onClick={copy} className="text-stone-400 hover:text-stone-600 shrink-0 mt-0.5 transition-colors">
+        <div className="rounded-lg flex items-start gap-2 px-3 py-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/40">
+          <code className="font-mono text-xs text-stone-700 dark:text-stone-300 flex-1 leading-relaxed break-all">{info.install}</code>
+          <button onClick={copy} className="text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 shrink-0 mt-0.5 transition-colors">
             {copied ? <span className="text-green-500 text-xs">✓</span> : <CopyIcon />}
           </button>
         </div>
@@ -297,9 +297,9 @@ function SyntaxBlock({ code }: { code: string }) {
   const copy = () => { navigator.clipboard.writeText(code); setCopied(true); setTimeout(() => setCopied(false), 1500) }
   const lines = code.split('\n')
   return (
-    <div className="relative rounded-xl overflow-hidden" style={{ background: '#FFFBEB', border: '1px solid #FDE68A' }}>
+    <div className="relative rounded-xl overflow-hidden bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/40">
       <button onClick={copy}
-        className="absolute top-3 right-3 flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg border border-amber-200 bg-white/80 text-stone-500 hover:text-stone-700 transition-colors z-10">
+        className="absolute top-3 right-3 flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg border border-amber-200 dark:border-amber-800/40 bg-white/80 dark:bg-stone-900/80 text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 transition-colors z-10">
         <CopyIcon /> {copied ? 'Copiado' : 'Copy'}
       </button>
       <pre className="p-4 pr-24 overflow-x-auto text-xs font-mono leading-relaxed">
@@ -422,7 +422,7 @@ function PerformanceTab({ mcp }: { mcp: Mcp }) {
             </div>
             <div className="flex gap-0.5">
               {uptimeBars.map((c, i) => (
-                <div key={i} className="flex-1 h-8 rounded-sm" style={{ background: c === 'blue' ? '#3B82F6' : '#E2DDD6' }} />
+                <div key={i} className={`flex-1 h-8 rounded-sm ${c === 'blue' ? 'bg-blue-400' : 'bg-stone-200 dark:bg-stone-700'}`} />
               ))}
             </div>
           </div>

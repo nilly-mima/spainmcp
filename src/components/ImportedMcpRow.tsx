@@ -25,7 +25,7 @@ export default function ImportedMcpRow({ mcp }: { mcp: ImportedMcp }) {
       href={mcp.github_url}
       target="_blank"
       rel="noopener noreferrer"
-      className="group flex items-center gap-3 py-3 px-3 rounded-lg hover:bg-white transition-all"
+      className="group flex items-center gap-3 py-3 px-3 rounded-lg hover:bg-stone-50 dark:hover:bg-white/5 transition-all"
       style={{ border: '1px solid transparent' }}
       onMouseEnter={e => (e.currentTarget.style.borderColor = 'var(--border)')}
       onMouseLeave={e => (e.currentTarget.style.borderColor = 'transparent')}

@@ -15,7 +15,7 @@ function McpListItem({ mcp }: { mcp: Mcp }) {
   const color = COLORS[mcp.nombre.charCodeAt(0) % COLORS.length]
 
   return (
-    <Link href={`/mcps/${mcp.id}`} className="block group p-4 hover:bg-gray-50 dark:bg-gray-800/60 dark:hover:bg-stone-800/30 transition-colors">
+    <Link href={`/mcps/${mcp.id}`} className="block group p-4 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
       <div className="flex flex-col gap-1.5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
@@ -66,14 +66,14 @@ function MascotSvg() {
       <circle cx="90" cy="172" r="3" fill="#93C5FD"/>
 
       {/* Pierna izquierda — pegada */}
-      <rect x="72" y="165" width="11" height="70" rx="5.5" fill="white" stroke="#1C1917" strokeWidth="2"/>
+      <rect x="72" y="165" width="11" height="70" rx="5.5" fill="#F1F5F9" stroke="#94A3B8" strokeWidth="1.5"/>
       {/* Pierna derecha — pegada */}
-      <rect x="97" y="165" width="11" height="70" rx="5.5" fill="white" stroke="#1C1917" strokeWidth="2"/>
+      <rect x="97" y="165" width="11" height="70" rx="5.5" fill="#F1F5F9" stroke="#94A3B8" strokeWidth="1.5"/>
 
       {/* Zapato izquierdo */}
-      <ellipse cx="77.5" cy="237" rx="12" ry="6" fill="white" stroke="#1C1917" strokeWidth="2"/>
+      <ellipse cx="77.5" cy="237" rx="12" ry="6" fill="#F1F5F9" stroke="#94A3B8" strokeWidth="1.5"/>
       {/* Zapato derecho */}
-      <ellipse cx="102.5" cy="237" rx="12" ry="6" fill="white" stroke="#1C1917" strokeWidth="2"/>
+      <ellipse cx="102.5" cy="237" rx="12" ry="6" fill="#F1F5F9" stroke="#94A3B8" strokeWidth="1.5"/>
 
       {/* Rayos */}
       <g opacity="0.75">
@@ -166,7 +166,7 @@ export default function McpListPreview({
             </Link>
             <Link
               href="/publish/mcp"
-              className="border border-gray-300 dark:border-gray-700 dark:border-stone-700 bg-white dark:bg-[var(--card)] text-gray-700 dark:text-gray-300 dark:text-gray-300 dark:text-gray-600 px-7 py-2.5 rounded-xl font-bold text-sm hover:bg-gray-50 dark:bg-gray-800 dark:hover:bg-stone-800 transition-colors"
+              className="border border-gray-300 dark:border-gray-700 bg-white dark:bg-[var(--card)] text-gray-700 dark:text-gray-300 px-7 py-2.5 rounded-xl font-bold text-sm hover:bg-gray-50 dark:hover:bg-stone-800 transition-colors"
             >
               Publicar MCP
             </Link>

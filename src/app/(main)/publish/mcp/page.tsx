@@ -58,8 +58,8 @@ function GlobeLabel({ text, cx, cy, anchor = "middle" }: { text: string; cx: num
   const x = anchor === "middle" ? cx - w / 2 : cx
   return (
     <>
-      <rect x={x} y={cy - h / 2} width={w} height={h} rx="9" fill="#EFF6FF" stroke="#2563EB" strokeWidth="1"/>
-      <text x={x + w / 2} y={cy + 4} textAnchor="middle" fontSize="9" fill="#2563EB" fontWeight="500">{text}</text>
+      <rect x={x} y={cy - h / 2} width={w} height={h} rx="9" fill="#2563EB" fillOpacity="0.12" stroke="#2563EB" strokeWidth="1"/>
+      <text x={x + w / 2} y={cy + 4} textAnchor="middle" fontSize="9" fill="#3B82F6" fontWeight="600">{text}</text>
     </>
   )
 }
@@ -78,41 +78,41 @@ function GlobeIllustration({ ns, serverId, upstreamUrl }: { ns: string; serverId
   }
 
   return (
-    <svg viewBox="0 0 380 290" fill="none" className="w-full max-w-sm mx-auto">
+    <svg viewBox="0 0 380 290" fill="none" className="w-full max-w-sm mx-auto text-stone-300 dark:text-stone-600">
       {/* Globe base — dotted latitude lines */}
       {Array.from({ length: 12 }, (_, i) => {
         const cy = 145 + (i - 5.5) * 18
         const rx = Math.sqrt(Math.max(0, 130 * 130 - (cy - 145) * (cy - 145))) * 0.85
         return rx > 8 ? (
           <ellipse key={i} cx="175" cy={cy} rx={rx} ry={6}
-            stroke="#d6d3d1" strokeWidth="1" strokeDasharray="3 4" fill="none" />
+            stroke="currentColor" strokeWidth="1" strokeDasharray="3 4" fill="none" />
         ) : null
       })}
       {/* Vertical arcs */}
       {[-70, -35, 0, 35, 70].map((offset, i) => (
         <ellipse key={i} cx="175" cy="145" rx={Math.abs(offset) || 8} ry="130"
-          stroke="#d6d3d1" strokeWidth="1" strokeDasharray="3 4" fill="none" />
+          stroke="currentColor" strokeWidth="1" strokeDasharray="3 4" fill="none" />
       ))}
-      <circle cx="175" cy="145" r="130" stroke="#e7e5e4" strokeWidth="1.5" fill="none"/>
+      <circle cx="175" cy="145" r="130" stroke="currentColor" strokeWidth="1.5" fill="none"/>
 
       {/* Connection lines */}
       <line x1="175" y1="62" x2="250" y2="125" stroke="#2563EB" strokeWidth="1.5" opacity="0.6"/>
       <line x1="250" y1="125" x2="112" y2="198" stroke="#2563EB" strokeWidth="1.5" opacity="0.6"/>
 
       {/* Node: gateway (top center) */}
-      <circle cx="175" cy="57" r="14" fill="#EFF6FF" stroke="#2563EB" strokeWidth="1.5"/>
+      <circle cx="175" cy="57" r="14" fill="#2563EB" fillOpacity="0.15" stroke="#2563EB" strokeWidth="1.5"/>
       <rect x="169" y="51" width="12" height="4" rx="1" fill="#2563EB"/>
       <rect x="169" y="57" width="12" height="4" rx="1" fill="#2563EB"/>
       <rect x="169" y="63" width="12" height="4" rx="1" fill="#2563EB"/>
 
       {/* Node: server (right) */}
-      <circle cx="253" cy="122" r="14" fill="#EFF6FF" stroke="#2563EB" strokeWidth="1.5"/>
+      <circle cx="253" cy="122" r="14" fill="#2563EB" fillOpacity="0.15" stroke="#2563EB" strokeWidth="1.5"/>
       <rect x="247" y="115" width="12" height="14" rx="2" fill="none" stroke="#2563EB" strokeWidth="1.5"/>
       <line x1="250" y1="120" x2="262" y2="120" stroke="#2563EB" strokeWidth="1"/>
       <line x1="250" y1="124" x2="262" y2="124" stroke="#2563EB" strokeWidth="1"/>
 
       {/* Node: client (bottom left) */}
-      <circle cx="110" cy="198" r="14" fill="#EFF6FF" stroke="#2563EB" strokeWidth="1.5"/>
+      <circle cx="110" cy="198" r="14" fill="#2563EB" fillOpacity="0.15" stroke="#2563EB" strokeWidth="1.5"/>
       <circle cx="110" cy="193" r="4" fill="#2563EB"/>
       <path d="M102 206 Q110 200 118 206" stroke="#2563EB" strokeWidth="1.5" fill="none"/>
 
@@ -162,13 +162,13 @@ function ConnectionDiagram({ ns, serverId, upstreamUrl, params }: { ns: string; 
       <div className="flex items-center gap-2 mb-1">
         <span className="text-xs font-semibold tracking-widest text-stone-400 uppercase">MCP Client</span>
         <div className="flex items-center -space-x-1">
-          <div className="w-7 h-7 rounded-full bg-blue-100 border-2 border-white flex items-center justify-center">
+          <div className="w-7 h-7 rounded-full bg-blue-100 dark:bg-blue-900/40 border-2 border-white dark:border-stone-900 flex items-center justify-center">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="#2563EB"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>
           </div>
-          <div className="w-7 h-7 rounded-full bg-green-100 border-2 border-white flex items-center justify-center">
+          <div className="w-7 h-7 rounded-full bg-green-100 dark:bg-green-900/40 border-2 border-white dark:border-stone-900 flex items-center justify-center">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="#16a34a"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>
           </div>
-          <div className="w-7 h-7 rounded-full bg-stone-100 border-2 border-white flex items-center justify-center">
+          <div className="w-7 h-7 rounded-full bg-stone-100 dark:bg-stone-700 border-2 border-white dark:border-stone-900 flex items-center justify-center">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2"><circle cx="12" cy="12" r="9"/><path d="M8 12h8M12 8v8"/></svg>
           </div>
         </div>

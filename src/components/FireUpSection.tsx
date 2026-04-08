@@ -16,14 +16,14 @@ function CoolMascot() {
       <ellipse cx="280" cy="310" rx="80" ry="12" fill="#1C1917" opacity="0.15"/>
 
       {/* Pierna izquierda — pegada */}
-      <rect x="250" y="215" width="14" height="78" rx="7" fill="white" stroke="#1C1917" strokeWidth="3"/>
+      <rect x="250" y="215" width="14" height="78" rx="7" fill="#F1F5F9" stroke="#94A3B8" strokeWidth="2"/>
       {/* Pierna derecha — pegada */}
-      <rect x="296" y="215" width="14" height="78" rx="7" fill="white" stroke="#1C1917" strokeWidth="3"/>
+      <rect x="296" y="215" width="14" height="78" rx="7" fill="#F1F5F9" stroke="#94A3B8" strokeWidth="2"/>
 
       {/* Zapato izquierdo */}
-      <ellipse cx="257" cy="296" rx="16" ry="8" fill="white" stroke="#1C1917" strokeWidth="2.5"/>
+      <ellipse cx="257" cy="296" rx="16" ry="8" fill="#F1F5F9" stroke="#94A3B8" strokeWidth="2"/>
       {/* Zapato derecho */}
-      <ellipse cx="303" cy="296" rx="16" ry="8" fill="white" stroke="#1C1917" strokeWidth="2.5"/>
+      <ellipse cx="303" cy="296" rx="16" ry="8" fill="#F1F5F9" stroke="#94A3B8" strokeWidth="2"/>
 
       {/* Rayos (conexiones MCP) */}
       <g opacity="0.85">
@@ -91,8 +91,8 @@ export default function FireUpSection() {
       <div className="relative z-10 flex flex-col items-center gap-8">
 
         {/* Titular */}
-        <h2 className="text-5xl sm:text-6xl font-black text-gray-900 dark:text-gray-100 dark:text-stone-100 text-center leading-[1.1]">
-          <span className="text-blue-600">Enciende</span> tu<br/>agente
+        <h2 className="text-5xl sm:text-6xl font-black text-gray-900 dark:text-gray-100 text-center leading-[1.1]">
+          <span className="text-blue-600">Conecta</span> en<br/>30 segundos
         </h2>
 
         {/* CTAs */}
@@ -107,8 +107,8 @@ export default function FireUpSection() {
             className="flex items-center gap-2 bg-white dark:bg-gray-900 rounded-lg px-4 h-[42px] font-mono text-sm text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700"
           >
             <span className="text-gray-400 dark:text-gray-500 select-none">$</span>
-            <code>claude mcp add github</code>
-            <CopyButton text="claude mcp add github" />
+            <code>claude mcp add --transport http spainmcp https://mcp.spainmcp.com</code>
+            <CopyButton text="claude mcp add --transport http spainmcp https://mcp.spainmcp.com" />
           </div>
         </div>
 

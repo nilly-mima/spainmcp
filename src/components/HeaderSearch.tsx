@@ -131,7 +131,7 @@ export default function HeaderSearch({ stars, namespaces }: Props) {
           onChange={e => handleChange(e.target.value)}
           onFocus={() => { if (isNamespace) setShowDrop(true) }}
           className="w-full pl-10 pr-8 py-2 rounded-xl text-sm text-stone-700 dark:text-stone-200 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
-          style={{ background: '#FFFFFF', border: '1px solid var(--border)' }}
+          style={{ background: 'var(--background)', border: '1px solid var(--border)' }}
         />
         {value && (
           <button onClick={handleClear} className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 transition text-xs">

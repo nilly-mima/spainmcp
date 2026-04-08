@@ -8,14 +8,14 @@ function PublishMascot() {
       <ellipse cx="100" cy="260" rx="55" ry="10" fill="#1C1917" opacity="0.12"/>
 
       {/* Pierna izquierda — corta */}
-      <rect x="80" y="178" width="12" height="40" rx="6" fill="white" stroke="#1C1917" strokeWidth="2.5"/>
+      <rect x="80" y="178" width="12" height="40" rx="6" fill="#F1F5F9" stroke="#94A3B8" strokeWidth="2"/>
       {/* Pierna derecha — corta */}
-      <rect x="108" y="178" width="12" height="40" rx="6" fill="white" stroke="#1C1917" strokeWidth="2.5"/>
+      <rect x="108" y="178" width="12" height="40" rx="6" fill="#F1F5F9" stroke="#94A3B8" strokeWidth="2"/>
 
       {/* Zapato izquierdo */}
-      <ellipse cx="86" cy="220" rx="14" ry="7" fill="white" stroke="#1C1917" strokeWidth="2"/>
+      <ellipse cx="86" cy="220" rx="14" ry="7" fill="#F1F5F9" stroke="#94A3B8" strokeWidth="1.5"/>
       {/* Zapato derecho */}
-      <ellipse cx="114" cy="220" rx="14" ry="7" fill="white" stroke="#1C1917" strokeWidth="2"/>
+      <ellipse cx="114" cy="220" rx="14" ry="7" fill="#F1F5F9" stroke="#94A3B8" strokeWidth="1.5"/>
 
       {/* Rayos */}
       <g opacity="0.8">
@@ -87,9 +87,9 @@ export default function PublishSection() {
 
         {/* Título */}
         <div className="flex flex-col gap-1.5">
-          <h2 className="text-4xl font-black text-gray-900 dark:text-gray-100 tracking-tight">Publica en SpainMCP</h2>
+          <h2 className="text-4xl font-black text-gray-900 dark:text-gray-100 tracking-tight">Publica tu MCP y llega a toda España</h2>
           <p className="text-gray-500 dark:text-gray-400">
-            Publica tu MCP una vez, disponible para toda España y LATAM.
+            Un comando. Tu herramienta disponible para toda la comunidad hispanohablante, indexada y con analytics desde el primer día.
           </p>
         </div>
 
@@ -139,7 +139,7 @@ export default function PublishSection() {
             <svg viewBox="0 0 200 44" className="w-full" preserveAspectRatio="none" aria-hidden="true">
               <path
                 d="M0,36 Q18,30 35,33 Q52,36 68,22 Q84,8 100,16 Q116,24 132,11 Q148,0 164,7 Q178,13 192,5 Q196,3 200,6"
-                fill="none" stroke="#1C1917" strokeOpacity="0.7" strokeWidth="1.5" strokeLinecap="round"
+                fill="none" stroke="currentColor" strokeOpacity="0.5" strokeWidth="1.5" strokeLinecap="round" className="text-stone-700 dark:text-stone-300"
               />
             </svg>
           </div>
@@ -155,7 +155,7 @@ export default function PublishSection() {
           </Link>
           <Link
             href="/docs"
-            className="border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 px-7 py-2.5 rounded-xl font-bold text-sm hover:bg-gray-50 dark:bg-gray-800 transition-colors"
+            className="border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 px-7 py-2.5 rounded-xl font-bold text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
           >
             Documentación
           </Link>

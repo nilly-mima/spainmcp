@@ -12,7 +12,7 @@ function CopyIcon({ onClick }: { onClick: () => void }) {
     setTimeout(() => setDone(false), 2000)
   }
   return (
-    <button onClick={handle} className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:text-gray-400 transition-colors shrink-0" title="Copiar">
+    <button onClick={handle} className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors shrink-0" title="Copiar">
       {done ? (
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
       ) : (
@@ -51,9 +51,9 @@ export default function HowToConnect() {
   return (
     <section className="flex flex-col items-center gap-10">
       <div className="flex flex-col items-center gap-3 text-center">
-        <h2 className="text-4xl font-black text-gray-900 dark:text-gray-100 tracking-tight">Conecta en segundos</h2>
+        <h2 className="text-4xl font-black text-gray-900 dark:text-gray-100 tracking-tight">Conecta en 30 segundos</h2>
         <p className="text-gray-500 dark:text-gray-400 max-w-md">
-          Tres comandos. Tu IA conectada a cualquier herramienta del directorio.
+          Tres comandos y tu IA tiene acceso a BOE, BORME, AEMET y cualquier herramienta del directorio.
         </p>
       </div>
 

@@ -45,19 +45,19 @@ export default function Home() {
       <section className="pt-6 pb-4 flex flex-col lg:flex-row items-center gap-10">
         <div className="flex flex-col gap-7 flex-1 min-w-0 animate-fade-in-up">
           <h1 className="text-[3.375rem] md:text-[4.05rem] lg:text-[5.4rem] font-black text-gray-900 dark:text-white leading-none tracking-tighter">
-            La forma más rápida de extender tu IA
+            Conecta Claude al BOE, AEMET y BORME en 2 clics
           </h1>
           <p className="text-lg text-gray-500 dark:text-gray-400 max-w-sm leading-relaxed">
-            Conecta Claude a miles de herramientas con servidores MCP.
-            Guías en español, verificados, para España y LATAM.
+            El directorio de herramientas MCP para España. Sin código, sin configuración.
+            Añade BOE, BORME, AEMET, GitHub y más a tu IA en segundos.
           </p>
           <div className="flex items-center gap-3 flex-wrap">
             <div
               className="flex items-center gap-3 bg-gray-50 dark:bg-gray-900 rounded-xl px-4 py-2.5 text-sm font-mono text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-800"
             >
               <span className="text-gray-400">$</span>
-              <span>claude mcp add github</span>
-              <CopyButton text="claude mcp add github" />
+              <span>claude mcp add --transport http spainmcp https://mcp.spainmcp.com</span>
+              <CopyButton text="claude mcp add --transport http spainmcp https://mcp.spainmcp.com" />
             </div>
             <Link
               href="/mcps"
@@ -65,6 +65,15 @@ export default function Home() {
             >
               Ver {mcps.length}+ MCPs →
             </Link>
+          </div>
+          <div className="flex items-center gap-4 flex-wrap text-sm text-gray-400 dark:text-gray-500">
+            <span>22+ endpoints</span>
+            <span className="text-gray-200 dark:text-gray-700">|</span>
+            <span>5 herramientas españolas</span>
+            <span className="text-gray-200 dark:text-gray-700">|</span>
+            <span>OAuth automático</span>
+            <span className="text-gray-200 dark:text-gray-700">|</span>
+            <span>Gratis</span>
           </div>
         </div>
 
@@ -76,6 +85,25 @@ export default function Home() {
       {/* ── Hero cards ── */}
       <HeroCards row1={smitheryRow1} row2={smitheryRow2} row3={smitheryRow3} total={totalImportados} />
 
+
+      {/* ── Trust signals ── */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="rounded-xl p-5 flex flex-col gap-1.5 border" style={{ background: 'var(--card)', borderColor: 'var(--border)' }}>
+          <span className="text-2xl font-black text-gray-900 dark:text-gray-100">22+</span>
+          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">API endpoints activos</span>
+          <span className="text-xs text-gray-400 dark:text-gray-500">BOE, BORME, INE, AEMET y más</span>
+        </div>
+        <div className="rounded-xl p-5 flex flex-col gap-1.5 border" style={{ background: 'var(--card)', borderColor: 'var(--border)' }}>
+          <span className="text-2xl font-black text-gray-900 dark:text-gray-100">5</span>
+          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Herramientas españolas verificadas</span>
+          <span className="text-xs text-gray-400 dark:text-gray-500">Probadas y documentadas en español</span>
+        </div>
+        <div className="rounded-xl p-5 flex flex-col gap-1.5 border" style={{ background: 'var(--card)', borderColor: 'var(--border)' }}>
+          <span className="text-2xl font-black text-gray-900 dark:text-gray-100">OAuth</span>
+          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Autenticación automática</span>
+          <span className="text-xs text-gray-400 dark:text-gray-500">Sin tokens manuales, sin configuración</span>
+        </div>
+      </div>
 
       {/* ── Cómo conectar + lista MCPs ── */}
       <FadeIn>

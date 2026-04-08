@@ -18,7 +18,7 @@ function MarqueeCard({ item }: { item: Item }) {
 
   return (
     <div
-      className="w-[210px] bg-white rounded-xl p-3.5 flex flex-col gap-2 shrink-0 border border-gray-200"
+      className="w-[210px] bg-white dark:bg-gray-900 rounded-xl p-3.5 flex flex-col gap-2 shrink-0 border border-gray-200 dark:border-gray-800"
     >
       <div className="flex items-center gap-2.5">
         <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 ${color}`}>

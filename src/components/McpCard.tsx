@@ -10,20 +10,19 @@ function McpIcon({ nombre, id }: { nombre: string; id: string }) {
     .toUpperCase()
 
   const palettes = [
-    { bg: '#EFF6FF', text: '#2563EB' },
-    { bg: '#EEF2FF', text: '#4338CA' },
-    { bg: '#F0FDF4', text: '#15803D' },
-    { bg: '#FDF4FF', text: '#9333EA' },
-    { bg: '#FEFCE8', text: '#A16207' },
-    { bg: '#FFF1F2', text: '#BE123C' },
-    { bg: '#F0F9FF', text: '#0369A1' },
+    'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300',
+    'bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300',
+    'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300',
+    'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300',
+    'bg-yellow-100 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-300',
+    'bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300',
+    'bg-sky-100 dark:bg-sky-900/40 text-sky-700 dark:text-sky-300',
   ]
   const p = palettes[id.charCodeAt(0) % palettes.length]
 
   return (
     <div
-      className="w-9 h-9 rounded-lg flex items-center justify-center text-xs font-bold shrink-0"
-      style={{ background: p.bg, color: p.text }}
+      className={`w-9 h-9 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 ${p}`}
     >
       {initials}
     </div>

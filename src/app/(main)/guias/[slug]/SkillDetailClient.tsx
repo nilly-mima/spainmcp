@@ -340,7 +340,7 @@ export default function SkillDetailClient({ skill }: { skill: Skill }) {
               <h2 className="flex items-center gap-2 text-base font-semibold text-stone-800 dark:text-stone-200">
                 <FileIcon /> SKILL.md
               </h2>
-              <div className="rounded-xl p-5 overflow-y-auto [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-stone-300 [&::-webkit-scrollbar-thumb]:rounded-full" style={{ border: '1px solid #E8E2D9', maxHeight: '480px' }}>
+              <div className="rounded-xl p-5 overflow-y-auto border border-stone-200 dark:border-stone-700 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-stone-300 [&::-webkit-scrollbar-thumb]:rounded-full" style={{ maxHeight: '480px' }}>
                 <SkillMd content={skill.skill_md} />
               </div>
             </div>
@@ -349,7 +349,7 @@ export default function SkillDetailClient({ skill }: { skill: Skill }) {
 
         {/* Right — Install */}
         <div className="flex flex-col gap-4">
-          <div className="rounded-xl flex flex-col gap-4 p-5" style={{ border: '1px solid #E8E2D9' }}>
+          <div className="rounded-xl flex flex-col gap-4 p-5 border border-stone-200 dark:border-stone-700">
 
             <h2 className="flex items-center gap-2 text-base font-semibold text-stone-800 dark:text-stone-200">
               <LinkIcon /> Instalar
@@ -361,12 +361,12 @@ export default function SkillDetailClient({ skill }: { skill: Skill }) {
                 <p className="text-xs text-stone-500">Instalar via SpainMCP CLI</p>
                 <div className="relative group">
                   <span className="text-xs text-stone-400 cursor-default">ⓘ</span>
-                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 rounded-lg text-xs text-stone-700 bg-white shadow-md border border-stone-100 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 rounded-lg text-xs text-stone-700 dark:text-stone-200 bg-white dark:bg-stone-800 shadow-md border border-stone-100 dark:border-stone-700 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
                     Funciona con la Skills CLI
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-white dark:bg-stone-900" style={{ border: '1px solid #E8E2D9' }}>
+              <div className="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700">
                 <code className="flex-1 text-xs font-mono text-stone-700 dark:text-stone-300 truncate">{installCmd}</code>
                 <button onClick={copy} className="text-stone-400 hover:text-stone-600 shrink-0 transition-colors">
                   {copied ? <span className="text-green-500 text-xs">✓</span> : <CopyIcon />}
@@ -381,7 +381,7 @@ export default function SkillDetailClient({ skill }: { skill: Skill }) {
             </div>
 
             {/* Agent search / detail */}
-            <div className="flex flex-col rounded-xl overflow-hidden bg-white dark:bg-stone-900" style={{ border: '1px solid #E8E2D9', minHeight: '268px' }}>
+            <div className="flex flex-col rounded-xl overflow-hidden bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700" style={{ minHeight: '268px' }}>
               {selectedAgent ? (
                 <div className="flex flex-col gap-3 p-4">
                   <button onClick={() => setSelectedAgent(null)}
@@ -396,14 +396,14 @@ export default function SkillDetailClient({ skill }: { skill: Skill }) {
                     <span className="text-base font-bold text-stone-800 dark:text-stone-200">{selectedAgent.label}</span>
                   </div>
                   <p className="text-sm text-stone-600 dark:text-stone-400">Instalar en {selectedAgent.label}:</p>
-                  <div className="flex items-center gap-2 rounded-lg px-3 py-2.5" style={{ background: '#FFFBEB', border: '1px solid #FDE68A' }}>
-                    <code className="flex-1 text-xs font-mono text-stone-700 truncate">
+                  <div className="flex items-center gap-2 rounded-lg px-3 py-2.5 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/40">
+                    <code className="flex-1 text-xs font-mono text-stone-700 dark:text-stone-300 truncate">
                       {`npx @spainmcp/cli@latest skill add ${skill.creator}/${skill.nombre} --agent ${selectedAgent.flag}`}
                     </code>
                     <button onClick={() => {
                       navigator.clipboard.writeText(`npx @spainmcp/cli@latest skill add ${skill.creator}/${skill.nombre} --agent ${selectedAgent.flag}`)
                       setAgentCopied(true); setTimeout(() => setAgentCopied(false), 1500)
-                    }} className="shrink-0 text-stone-400 hover:text-stone-600 transition-colors text-xs">
+                    }} className="shrink-0 text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 transition-colors text-xs">
                       {agentCopied ? '✓' : '⧉'}
                     </button>
                   </div>
@@ -438,7 +438,7 @@ export default function SkillDetailClient({ skill }: { skill: Skill }) {
 
           {/* Repository */}
           {skill.repo && (
-            <div className="rounded-xl p-4 flex flex-col gap-3" style={{ border: '1px solid #E8E2D9' }}>
+            <div className="rounded-xl p-4 flex flex-col gap-3 border border-stone-200 dark:border-stone-700">
               <h3 className="flex items-center gap-2 text-sm font-semibold text-stone-700 dark:text-stone-300">
                 <RepoIcon /> Repositorio
               </h3>

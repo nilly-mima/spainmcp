@@ -681,23 +681,25 @@ app.post('/mcp/:username', async (c) => {
     try {
       const upstreamRes = await forwardToolCall(actualToolName, args, targetConn, env)
       const ct = upstreamRes.headers.get('content-type') ?? ''
+      const responseText = await upstreamRes.text()
 
-      if (ct.includes('text/event-stream') && upstreamRes.body) {
-        return new Response(upstreamRes.body, {
-          status: upstreamRes.status,
-          headers: {
-            'Content-Type': 'text/event-stream',
-            'Cache-Control': 'no-cache',
-            'X-SpainMCP-Gateway': `@${username}`,
-          },
-        })
+      // Parse SSE → JSON for Streamable HTTP clients (Claude Code)
+      let jsonBody: string
+      if (ct.includes('text/event-stream') || responseText.includes('event:')) {
+        const dataLine = responseText.split('\n').find(l => l.startsWith('data:'))
+        if (dataLine) {
+          jsonBody = dataLine.slice(5).trim()
+        } else {
+          jsonBody = responseText
+        }
+      } else {
+        jsonBody = responseText
       }
 
-      const responseBody = await upstreamRes.text()
-      return new Response(responseBody, {
+      return new Response(jsonBody, {
         status: upstreamRes.status,
         headers: {
-          'Content-Type': ct || 'application/json',
+          'Content-Type': 'application/json',
           'X-SpainMCP-Gateway': `@${username}`,
         },
       })

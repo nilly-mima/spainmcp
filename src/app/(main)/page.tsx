@@ -45,7 +45,7 @@ export default function Home() {
       <section className="pt-6 pb-4 flex flex-col lg:flex-row items-center gap-10">
         <div className="flex flex-col gap-7 flex-1 min-w-0 animate-fade-in-up">
           <h1 className="text-[3.375rem] md:text-[4.05rem] lg:text-[5.4rem] font-black text-gray-900 dark:text-white leading-none tracking-tighter">
-            Conecta Claude al BOE, AEMET y BORME en 2 clics
+            La forma más rápida de extender tu IA
           </h1>
           <p className="text-lg text-gray-500 dark:text-gray-400 max-w-sm leading-relaxed">
             El directorio de herramientas MCP para España. Sin código, sin configuración.

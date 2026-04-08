@@ -479,13 +479,291 @@ app.post('/proxy/:namespace/:connectionId/mcp', async (c) => {
 })
 
 // ═══════════════════════════════════════════════════
+// GATEWAY PER-USER — /mcp/@username
+// One URL = all user's tools from all connections
+// MCP Streamable HTTP endpoint (JSON-RPC over POST)
+// ═══════════════════════════════════════════════════
+
+// Cache: username → { namespaceId, connections[] } (KV, 60s TTL)
+async function getUserConnections(username: string, env: Env) {
+  const cacheKey = `gateway:${username}`
+  const cached = await env.OAUTH_KV.get(cacheKey, 'json') as {
+    namespaceId: string
+    connections: { id: string; connectionId: string; name: string | null; mcpUrl: string; headersEncrypted: string | null }[]
+  } | null
+
+  if (cached) return cached
+
+  const sb = getSupabase(env)
+
+  // Find namespace by name (username = namespace name)
+  const { data: ns } = await sb.from('namespaces')
+    .select('id').eq('name', username).single()
+  if (!ns) return null
+
+  // Get all connected connections for this namespace
+  const { data: conns } = await sb.from('connections')
+    .select('id, connection_id, name, mcp_url, headers_encrypted')
+    .eq('namespace_id', ns.id)
+    .eq('status', 'connected')
+
+  if (!conns || conns.length === 0) return null
+
+  const result = {
+    namespaceId: ns.id,
+    connections: conns.map(c => ({
+      id: c.id,
+      connectionId: c.connection_id,
+      name: c.name,
+      mcpUrl: c.mcp_url,
+      headersEncrypted: c.headers_encrypted,
+    })),
+  }
+
+  // Cache for 60s
+  await env.OAUTH_KV.put(cacheKey, JSON.stringify(result), { expirationTtl: 60 })
+  return result
+}
+
+// Fetch tools from a single upstream MCP server
+async function fetchToolsFromUpstream(
+  mcpUrl: string,
+  headersEncrypted: string | null,
+): Promise<{ name: string; description?: string; inputSchema?: unknown }[]> {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json, text/event-stream',
+  }
+  if (headersEncrypted) {
+    try { Object.assign(headers, JSON.parse(headersEncrypted)) } catch { /* skip */ }
+  }
+
+  try {
+    const res = await fetch(mcpUrl, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'tools/list', params: {} }),
+    })
+
+    const text = await res.text()
+
+    // Handle SSE response (event: message\ndata: {...})
+    let data: unknown
+    if (text.includes('event:') || text.includes('data:')) {
+      const dataLine = text.split('\n').find(l => l.startsWith('data:'))
+      if (dataLine) data = JSON.parse(dataLine.slice(5).trim())
+    } else {
+      data = JSON.parse(text)
+    }
+
+    const result = (data as { result?: { tools?: unknown[] } })?.result?.tools
+    return (result as { name: string; description?: string; inputSchema?: unknown }[]) ?? []
+  } catch {
+    return []
+  }
+}
+
+// Forward a tool call to the right upstream
+async function forwardToolCall(
+  toolName: string,
+  args: Record<string, unknown>,
+  conn: { id: string; mcpUrl: string; headersEncrypted: string | null },
+  env: Env,
+): Promise<Response> {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json, text/event-stream',
+  }
+  if (conn.headersEncrypted) {
+    try { Object.assign(headers, JSON.parse(conn.headersEncrypted)) } catch { /* skip */ }
+  }
+
+  const body = {
+    jsonrpc: '2.0',
+    id: 1,
+    method: 'tools/call',
+    params: { name: toolName, arguments: args },
+  }
+
+  const start = Date.now()
+  const upstreamRes = await fetch(conn.mcpUrl, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(body),
+  })
+  const duration = Date.now() - start
+
+  // Log RPC (fire and forget)
+  const sb = getSupabase(env)
+  sb.from('connection_logs').insert({
+    connection_id: conn.id,
+    namespace_id: '', // filled below
+    method: 'tools/call',
+    tool_name: toolName,
+    duration_ms: duration,
+    status_code: upstreamRes.status,
+  }).then(() => {}, () => {})
+
+  return upstreamRes
+}
+
+// Main gateway endpoint: POST /mcp/@username
+app.post('/mcp/:username', async (c) => {
+  const username = c.req.param('username').replace(/^@/, '')
+  const env = c.env
+
+  const userData = await getUserConnections(username, env)
+  if (!userData) {
+    return c.json({
+      jsonrpc: '2.0',
+      error: { code: -32001, message: `User @${username} not found or has no active connections` },
+      id: null,
+    }, 404)
+  }
+
+  const body = await c.req.json() as {
+    jsonrpc: string
+    id: number | string
+    method: string
+    params?: Record<string, unknown>
+  }
+
+  const { method, id: rpcId } = body
+
+  // ── tools/list: aggregate from all connections ──
+  if (method === 'tools/list') {
+    const allTools: { name: string; description?: string; inputSchema?: unknown; _connectionId?: string }[] = []
+
+    // Fetch tools from all connections in parallel
+    const results = await Promise.all(
+      userData.connections.map(async (conn) => {
+        const tools = await fetchToolsFromUpstream(conn.mcpUrl, conn.headersEncrypted)
+        return tools.map(t => ({
+          ...t,
+          // Prefix tool name with connection name to avoid collisions
+          name: userData.connections.length > 1 ? `${conn.connectionId}__${t.name}` : t.name,
+          description: `[${conn.name ?? conn.connectionId}] ${t.description ?? ''}`.trim(),
+        }))
+      })
+    )
+
+    for (const tools of results) allTools.push(...tools)
+
+    return c.json({
+      jsonrpc: '2.0',
+      id: rpcId,
+      result: { tools: allTools },
+    })
+  }
+
+  // ── tools/call: route to correct connection ──
+  if (method === 'tools/call') {
+    const toolName = (body.params?.name as string) ?? ''
+    const args = (body.params?.arguments as Record<string, unknown>) ?? {}
+
+    // Parse: "connectionId__toolName" or just "toolName"
+    let targetConn = userData.connections[0] // default: first connection
+    let actualToolName = toolName
+
+    if (toolName.includes('__')) {
+      const [connId, ...rest] = toolName.split('__')
+      actualToolName = rest.join('__')
+      const found = userData.connections.find(c => c.connectionId === connId)
+      if (found) targetConn = found
+    } else if (userData.connections.length === 1) {
+      targetConn = userData.connections[0]
+    } else {
+      // Try to find which connection has this tool (check KV cache)
+      // For now: try first connection
+      targetConn = userData.connections[0]
+    }
+
+    try {
+      const upstreamRes = await forwardToolCall(actualToolName, args, targetConn, env)
+      const ct = upstreamRes.headers.get('content-type') ?? ''
+
+      if (ct.includes('text/event-stream') && upstreamRes.body) {
+        return new Response(upstreamRes.body, {
+          status: upstreamRes.status,
+          headers: {
+            'Content-Type': 'text/event-stream',
+            'Cache-Control': 'no-cache',
+            'X-SpainMCP-Gateway': `@${username}`,
+          },
+        })
+      }
+
+      const responseBody = await upstreamRes.text()
+      return new Response(responseBody, {
+        status: upstreamRes.status,
+        headers: {
+          'Content-Type': ct || 'application/json',
+          'X-SpainMCP-Gateway': `@${username}`,
+        },
+      })
+    } catch (err) {
+      return c.json({
+        jsonrpc: '2.0',
+        error: { code: -32000, message: `Upstream error: ${String(err)}` },
+        id: rpcId,
+      }, 502)
+    }
+  }
+
+  // ── initialize / other MCP methods ──
+  if (method === 'initialize') {
+    return c.json({
+      jsonrpc: '2.0',
+      id: rpcId,
+      result: {
+        protocolVersion: '2024-11-05',
+        capabilities: { tools: { listChanged: false } },
+        serverInfo: {
+          name: `SpainMCP Gateway @${username}`,
+          version: '1.0.0',
+        },
+      },
+    })
+  }
+
+  if (method === 'notifications/initialized') {
+    return c.json({ jsonrpc: '2.0', id: rpcId, result: {} })
+  }
+
+  return c.json({
+    jsonrpc: '2.0',
+    error: { code: -32601, message: `Method not found: ${method}` },
+    id: rpcId,
+  })
+})
+
+// Gateway info (GET for browsers / discovery)
+app.get('/mcp/:username', (c) => {
+  const username = c.req.param('username').replace(/^@/, '')
+  return c.json({
+    name: `SpainMCP Gateway @${username}`,
+    version: '1.0.0',
+    protocol: 'MCP Streamable HTTP',
+    endpoint: `https://spainmcp-connect.nilmiq.workers.dev/mcp/@${username}`,
+    instructions: {
+      claude_desktop: {
+        mcpServers: {
+          spainmcp: {
+            url: `https://spainmcp-connect.nilmiq.workers.dev/mcp/@${username}`,
+          },
+        },
+      },
+      claude_code: `claude mcp add spainmcp https://spainmcp-connect.nilmiq.workers.dev/mcp/@${username}`,
+      cursor: `Add to .cursor/mcp.json: { "url": "https://spainmcp-connect.nilmiq.workers.dev/mcp/@${username}" }`,
+    },
+  })
+})
+
+// ═══════════════════════════════════════════════════
 // Token refresh endpoint (called by cron or manually)
 // ═══════════════════════════════════════════════════
 
 app.post('/internal/refresh-tokens', async (c) => {
-  // This would be called by a cron trigger or manually
-  // Lists all refresh:* keys in KV and refreshes expired tokens
-  // TODO: Implement when we have real OAuth connections
   return c.json({ message: 'Token refresh not yet implemented', refreshed: 0 })
 })
 

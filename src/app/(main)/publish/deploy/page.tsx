@@ -1,167 +1,65 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabaseBrowser } from '@/lib/supabase-client'
 import Link from 'next/link'
+import { SERVER_TEMPLATES } from '@/data/server-templates'
 
-const TEMPLATE = `// ═══════════════════════════════════════════════════
-// SpainMCP — MCP Server Template
-// Customiza las tools y despliega en SpainMCP
-// Zero dependencies — funciona como CF Worker directo
-// ═══════════════════════════════════════════════════
-
-// ── Define tus tools aquí ──
-
-const TOOLS = [
-  {
-    name: "hello",
-    description: "Saluda a alguien por su nombre",
-    inputSchema: {
-      type: "object",
-      properties: {
-        name: { type: "string", description: "Nombre de la persona" },
-      },
-    },
-  },
-  {
-    name: "sumar",
-    description: "Suma dos números",
-    inputSchema: {
-      type: "object",
-      properties: {
-        a: { type: "number", description: "Primer número" },
-        b: { type: "number", description: "Segundo número" },
-      },
-      required: ["a", "b"],
-    },
-  },
-];
-
-// ── Implementa tus tools aquí ──
-
-async function handleTool(
-  name: string,
-  args: Record<string, unknown>,
-): Promise<{ type: string; text: string }[]> {
-  switch (name) {
-    case "hello": {
-      const who = (args.name as string) ?? "Mundo";
-      return [{ type: "text", text: \`¡Hola, \${who}!\` }];
-    }
-    case "sumar": {
-      const a = Number(args.a ?? 0);
-      const b = Number(args.b ?? 0);
-      return [{ type: "text", text: \`\${a} + \${b} = \${a + b}\` }];
-    }
-    default:
-      throw new Error(\`Tool no encontrada: \${name}\`);
-  }
+// ── Tool preview parser ──────────────────────────────────────────────────────
+// Extracts tool names + descriptions from raw code string (best-effort regex).
+interface ParsedTool {
+  name: string
+  description: string
 }
 
-// ═══════════════════════════════════════════════════
-// MCP Protocol handler — NO TOCAR
-// ═══════════════════════════════════════════════════
+function parseToolsFromCode(code: string): ParsedTool[] {
+  const tools: ParsedTool[] = []
+  // Extract individual tool entries by finding name: "..." patterns in the TOOLS section.
+  // We scan line-by-line to extract name + description pairs grouped by proximity.
+  const lines = code.split('\n')
+  let pendingName: string | null = null
+  let pendingDesc: string | null = null
 
-const SERVER_NAME = "mi-mcp-server";
-const SERVER_VERSION = "1.0.0";
+  for (const line of lines) {
+    const nameMatch = line.match(/name\s*:\s*["'`]([^"'`]+)["'`]/)
+    const descMatch = line.match(/description\s*:\s*["'`]([^"'`]+)["'`]/)
 
-export default {
-  async fetch(request: Request): Promise<Response> {
-    if (request.method === "OPTIONS") {
-      return new Response(null, {
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
-          "Access-Control-Allow-Headers": "Content-Type, Authorization, Accept",
-        },
-      });
-    }
-
-    if (request.method === "GET") {
-      return Response.json({
-        name: SERVER_NAME,
-        version: SERVER_VERSION,
-        protocol: "MCP Streamable HTTP",
-        tools: TOOLS.length,
-      });
-    }
-
-    if (request.method !== "POST") {
-      return Response.json({ error: "Method not allowed" }, { status: 405 });
-    }
-
-    let body: { jsonrpc?: string; id?: unknown; method?: string; params?: Record<string, unknown> };
-    try {
-      body = await request.json();
-    } catch {
-      return Response.json(
-        { jsonrpc: "2.0", error: { code: -32700, message: "Parse error" }, id: null },
-        { status: 400 },
-      );
-    }
-
-    const { method, id, params } = body;
-
-    if (method === "initialize") {
-      return Response.json({
-        jsonrpc: "2.0",
-        id,
-        result: {
-          protocolVersion: "2024-11-05",
-          serverInfo: { name: SERVER_NAME, version: SERVER_VERSION },
-          capabilities: { tools: { listChanged: false } },
-        },
-      });
-    }
-
-    if (method === "notifications/initialized") {
-      return Response.json({ jsonrpc: "2.0", id, result: {} });
-    }
-
-    if (method === "tools/list") {
-      return Response.json({
-        jsonrpc: "2.0",
-        id,
-        result: { tools: TOOLS },
-      });
-    }
-
-    if (method === "tools/call") {
-      const toolName = (params?.name as string) ?? "";
-      const args = (params?.arguments as Record<string, unknown>) ?? {};
-
-      const tool = TOOLS.find((t) => t.name === toolName);
-      if (!tool) {
-        return Response.json({
-          jsonrpc: "2.0",
-          id,
-          error: { code: -32601, message: \`Tool not found: \${toolName}\` },
-        });
+    if (nameMatch) {
+      // Flush previous pending if any
+      if (pendingName !== null) {
+        tools.push({ name: pendingName, description: pendingDesc ?? '' })
+        pendingDesc = null
       }
-
-      try {
-        const content = await handleTool(toolName, args);
-        return Response.json({ jsonrpc: "2.0", id, result: { content } });
-      } catch (err) {
-        return Response.json({
-          jsonrpc: "2.0",
-          id,
-          error: { code: -32000, message: String(err) },
-        });
+      pendingName = nameMatch[1]
+      if (descMatch) {
+        pendingDesc = descMatch[1]
       }
+    } else if (descMatch && pendingName !== null) {
+      pendingDesc = descMatch[1]
+    } else if (line.trim() === '},' && pendingName !== null) {
+      tools.push({ name: pendingName, description: pendingDesc ?? '' })
+      pendingName = null
+      pendingDesc = null
     }
+  }
+  // Flush last pending
+  if (pendingName !== null) {
+    tools.push({ name: pendingName, description: pendingDesc ?? '' })
+  }
 
-    return Response.json({
-      jsonrpc: "2.0",
-      id,
-      error: { code: -32601, message: \`Method not found: \${method}\` },
-    });
-  },
-};
-`
+  // Deduplicate (handleTool switch cases also have name matches — keep only first N unique)
+  const seen = new Set<string>()
+  return tools.filter((t) => {
+    if (seen.has(t.name)) return false
+    seen.add(t.name)
+    return true
+  })
+}
 
-type DeployState = 'idle' | 'deploying' | 'success' | 'error'
+// ── Types ────────────────────────────────────────────────────────────────────
+
+type DeployPhase = 'idle' | 'validating' | 'deploying' | 'live'
 
 interface DeployResult {
   qualifiedName: string
@@ -171,16 +69,59 @@ interface DeployResult {
   releaseId: string
 }
 
+interface TestResult {
+  ok: boolean
+  tools?: ParsedTool[]
+  toolCount?: number
+  error?: string
+  note?: string
+}
+
+// ── Copy helper ──────────────────────────────────────────────────────────────
+
+function CopyButton({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false)
+  function handleCopy() {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1500)
+    }).catch(() => {})
+  }
+  return (
+    <button
+      onClick={handleCopy}
+      className="flex-shrink-0 p-1 rounded hover:opacity-70 transition-opacity"
+      title={copied ? 'Copiado' : 'Copiar'}
+    >
+      {copied ? (
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2.5">
+          <polyline points="20 6 9 17 4 12" />
+        </svg>
+      ) : (
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#8b949e" strokeWidth="2">
+          <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+          <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
+        </svg>
+      )}
+    </button>
+  )
+}
+
+// ── Main Page ────────────────────────────────────────────────────────────────
+
 export default function DeployPage() {
   const router = useRouter()
   const [apiKey, setApiKey] = useState<string | null>(null)
   const [apiKeyInput, setApiKeyInput] = useState('')
   const [qualifiedName, setQualifiedName] = useState('')
-  const [code, setCode] = useState(TEMPLATE)
-  const [deployState, setDeployState] = useState<DeployState>('idle')
+  const [code, setCode] = useState(SERVER_TEMPLATES[0].code)
+  const [selectedTemplate, setSelectedTemplate] = useState('blank')
+  const [deployPhase, setDeployPhase] = useState<DeployPhase>('idle')
   const [deployResult, setDeployResult] = useState<DeployResult | null>(null)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const [authLoading, setAuthLoading] = useState(true)
+  const [testResult, setTestResult] = useState<TestResult | null>(null)
+  const [testLoading, setTestLoading] = useState(false)
 
   useEffect(() => {
     supabaseBrowser.auth.getSession().then(({ data }) => {
@@ -197,6 +138,20 @@ export default function DeployPage() {
     if (stored) setApiKey(stored)
   }, [])
 
+  const parsedTools = useMemo(() => parseToolsFromCode(code), [code])
+
+  function handleTemplateChange(id: string) {
+    const tpl = SERVER_TEMPLATES.find((t) => t.id === id)
+    if (tpl) {
+      setSelectedTemplate(id)
+      setCode(tpl.code)
+      setDeployPhase('idle')
+      setDeployResult(null)
+      setErrorMsg(null)
+      setTestResult(null)
+    }
+  }
+
   function handleSaveKey(e: React.FormEvent) {
     e.preventDefault()
     if (apiKeyInput.startsWith('sk-spainmcp-')) {
@@ -208,9 +163,26 @@ export default function DeployPage() {
   async function handleDeploy() {
     if (!apiKey || !qualifiedName.trim() || !code.trim()) return
 
-    setDeployState('deploying')
+    setDeployPhase('validating')
     setErrorMsg(null)
     setDeployResult(null)
+    setTestResult(null)
+
+    // Client-side pre-validation
+    await new Promise((r) => setTimeout(r, 400))
+
+    if (!code.includes('export default')) {
+      setDeployPhase('idle')
+      setErrorMsg('El codigo debe contener "export default".')
+      return
+    }
+    if (parsedTools.length === 0) {
+      setDeployPhase('idle')
+      setErrorMsg('El array TOOLS debe tener al menos 1 tool.')
+      return
+    }
+
+    setDeployPhase('deploying')
 
     try {
       const res = await fetch(
@@ -228,22 +200,48 @@ export default function DeployPage() {
       const data = await res.json()
 
       if (!res.ok) {
-        setDeployState('error')
+        setDeployPhase('idle')
         setErrorMsg(data.error ?? `Error ${res.status}`)
         return
       }
 
       setDeployResult(data as DeployResult)
-      setDeployState('success')
+      setDeployPhase('live')
     } catch (err) {
-      setDeployState('error')
+      setDeployPhase('idle')
       setErrorMsg(err instanceof Error ? err.message : 'Error de red')
     }
   }
 
-  function copyToClipboard(text: string) {
-    navigator.clipboard.writeText(text).catch(() => {})
+  async function handleTest() {
+    if (!apiKey || !deployResult) return
+    setTestLoading(true)
+    setTestResult(null)
+    try {
+      const res = await fetch(
+        `/api/v1/servers/${encodeURIComponent(deployResult.qualifiedName)}/deploy/test`,
+        {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${apiKey}` },
+        }
+      )
+      const data = await res.json()
+      setTestResult(data as TestResult)
+    } catch (err) {
+      setTestResult({ ok: false, error: err instanceof Error ? err.message : 'Error de red' })
+    } finally {
+      setTestLoading(false)
+    }
   }
+
+  // ── Derived values ──────────────────────────────────────────────────────
+
+  function buildDeployUrl(qname: string) {
+    // namespace/server-name → {namespace}-{server-name}.nilmiq.workers.dev
+    return `https://${qname.replace('/', '-')}.nilmiq.workers.dev`
+  }
+
+  // ── Render: auth loading ────────────────────────────────────────────────
 
   if (authLoading) {
     return (
@@ -252,6 +250,8 @@ export default function DeployPage() {
       </div>
     )
   }
+
+  // ── Render: no API key ──────────────────────────────────────────────────
 
   if (!apiKey) {
     return (
@@ -262,10 +262,7 @@ export default function DeployPage() {
         <p className="text-sm mb-8" style={{ color: 'var(--muted)' }}>
           Necesitas una API key para desplegar.
         </p>
-        <div
-          className="rounded-xl p-8 text-center"
-          style={{ border: '1px solid var(--border)' }}
-        >
+        <div className="rounded-2xl p-8 text-center" style={{ border: '1px solid var(--border)' }}>
           <p className="text-sm mb-4" style={{ color: 'var(--muted)' }}>
             Introduce tu API key para continuar.
           </p>
@@ -296,9 +293,30 @@ export default function DeployPage() {
     )
   }
 
+  // ── Render: main ────────────────────────────────────────────────────────
+
+  const isDeploying = deployPhase === 'validating' || deployPhase === 'deploying'
+
   return (
     <div className="max-w-6xl mx-auto py-8 px-4">
-      <div className="mb-8">
+
+      {/* Beta banner */}
+      <div
+        className="flex items-start gap-3 px-4 py-3 rounded-2xl mb-8"
+        style={{ background: '#2563eb12', border: '1px solid #2563eb30' }}
+      >
+        <svg className="flex-shrink-0 mt-0.5" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" strokeWidth="2">
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="8" x2="12" y2="12" />
+          <line x1="12" y1="16" x2="12.01" y2="16" />
+        </svg>
+        <p className="text-sm" style={{ color: '#93c5fd' }}>
+          <span className="font-semibold">Server Deploy esta en beta.</span>{' '}
+          Tu servidor se desplegara en Cloudflare Workers automaticamente cuando Workers for Platforms este activo. El codigo ya queda guardado y listo.
+        </p>
+      </div>
+
+      <div className="mb-6">
         <h1 className="text-2xl font-bold mb-1" style={{ color: 'var(--foreground)' }}>
           Despliega un MCP Server
         </h1>
@@ -307,26 +325,70 @@ export default function DeployPage() {
         </p>
       </div>
 
-      {/* Namespace input */}
-      <div className="mb-4">
-        <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--muted)' }}>
-          Nombre del servidor (namespace/server-name)
-        </label>
-        <input
-          type="text"
-          value={qualifiedName}
-          onChange={(e) => setQualifiedName(e.target.value)}
-          placeholder="mi-namespace/mi-servidor"
-          className="w-full max-w-sm px-3 py-2 rounded-lg text-sm bg-transparent font-mono"
-          style={{ border: '1px solid var(--border)', color: 'var(--foreground)' }}
-        />
-        <p className="text-xs mt-1" style={{ color: 'var(--muted)' }}>
-          El servidor debe existir en tu cuenta. Formato: <span className="font-mono">namespace/nombre</span>
-        </p>
+      {/* Top controls: namespace + template selector */}
+      <div className="flex flex-wrap gap-4 mb-6">
+        <div className="flex-1 min-w-56">
+          <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--muted)' }}>
+            Nombre del servidor
+          </label>
+          <input
+            type="text"
+            value={qualifiedName}
+            onChange={(e) => setQualifiedName(e.target.value)}
+            placeholder="mi-namespace/mi-servidor"
+            className="w-full px-3 py-2 rounded-lg text-sm bg-transparent font-mono"
+            style={{ border: '1px solid var(--border)', color: 'var(--foreground)' }}
+          />
+          <p className="text-xs mt-1" style={{ color: 'var(--muted)' }}>
+            Formato: <span className="font-mono">namespace/nombre</span>
+          </p>
+        </div>
+
+        <div>
+          <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--muted)' }}>
+            Plantilla
+          </label>
+          <div className="flex gap-2">
+            {SERVER_TEMPLATES.map((tpl) => (
+              <button
+                key={tpl.id}
+                onClick={() => handleTemplateChange(tpl.id)}
+                title={tpl.description}
+                className="px-3 py-2 rounded-lg text-xs font-medium transition-colors"
+                style={
+                  selectedTemplate === tpl.id
+                    ? { background: '#2563eb', color: '#fff', border: '1px solid #2563eb' }
+                    : { background: 'transparent', color: 'var(--foreground)', border: '1px solid var(--border)' }
+                }
+              >
+                {tpl.label}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
+
+      {/* Error banner */}
+      {errorMsg && (
+        <div
+          className="flex items-start gap-2 px-4 py-3 rounded-xl mb-5"
+          style={{ background: '#ef444415', border: '1px solid #ef444430' }}
+        >
+          <svg className="flex-shrink-0 mt-0.5" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="15" y1="9" x2="9" y2="15" />
+            <line x1="9" y1="9" x2="15" y2="15" />
+          </svg>
+          <p className="text-sm flex-1" style={{ color: '#ef4444' }}>{errorMsg}</p>
+          <button onClick={() => setErrorMsg(null)} className="text-xs hover:opacity-70" style={{ color: '#ef4444' }}>
+            Cerrar
+          </button>
+        </div>
+      )}
 
       {/* Two-column layout */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
         {/* LEFT: Code editor */}
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between">
@@ -334,17 +396,25 @@ export default function DeployPage() {
               Codigo del servidor
             </span>
             <button
-              onClick={() => setCode(TEMPLATE)}
+              onClick={() => handleTemplateChange(selectedTemplate)}
               className="text-xs px-2 py-1 rounded-md hover:opacity-80 transition-opacity"
               style={{ color: 'var(--muted)', border: '1px solid var(--border)' }}
             >
-              Resetear template
+              Resetear plantilla
             </button>
           </div>
+
           <textarea
             value={code}
-            onChange={(e) => setCode(e.target.value)}
-            rows={30}
+            onChange={(e) => {
+              setCode(e.target.value)
+              if (deployPhase === 'live') {
+                setDeployPhase('idle')
+                setDeployResult(null)
+                setTestResult(null)
+              }
+            }}
+            rows={32}
             spellCheck={false}
             className="w-full rounded-xl p-4 text-sm font-mono resize-y leading-relaxed"
             style={{
@@ -354,132 +424,151 @@ export default function DeployPage() {
               outline: 'none',
             }}
           />
-          <button
-            onClick={handleDeploy}
-            disabled={deployState === 'deploying' || !qualifiedName.trim() || !code.trim()}
-            className="w-full py-2.5 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            style={
-              deployState === 'deploying' || !qualifiedName.trim() || !code.trim()
-                ? { background: '#2563eb80', color: '#fff' }
-                : { background: '#2563eb', color: '#fff' }
-            }
-          >
-            {deployState === 'deploying' ? 'Desplegando...' : 'Desplegar'}
-          </button>
+
+          {/* Deploy button + phase indicator */}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleDeploy}
+              disabled={isDeploying || !qualifiedName.trim() || !code.trim()}
+              className="flex-1 py-2.5 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              style={
+                isDeploying || !qualifiedName.trim() || !code.trim()
+                  ? { background: '#2563eb80', color: '#fff' }
+                  : { background: '#2563eb', color: '#fff' }
+              }
+            >
+              {deployPhase === 'validating'
+                ? 'Validando...'
+                : deployPhase === 'deploying'
+                ? 'Desplegando...'
+                : deployPhase === 'live'
+                ? 'Redesplegar'
+                : 'Desplegar'}
+            </button>
+
+            {/* Phase dots */}
+            <div className="flex items-center gap-1.5">
+              {(['idle', 'validating', 'deploying', 'live'] as DeployPhase[]).map((phase, i) => {
+                const active = deployPhase === phase
+                const past =
+                  (phase === 'idle' && ['validating', 'deploying', 'live'].includes(deployPhase)) ||
+                  (phase === 'validating' && ['deploying', 'live'].includes(deployPhase)) ||
+                  (phase === 'deploying' && deployPhase === 'live')
+                return (
+                  <div
+                    key={phase}
+                    title={['Listo', 'Validando', 'Desplegando', 'Activo'][i]}
+                    className="rounded-full transition-all"
+                    style={{
+                      width: active ? 8 : 6,
+                      height: active ? 8 : 6,
+                      background: active
+                        ? (phase === 'live' ? '#22c55e' : '#2563eb')
+                        : past
+                        ? '#22c55e60'
+                        : 'var(--border)',
+                    }}
+                  />
+                )
+              })}
+            </div>
+          </div>
         </div>
 
-        {/* RIGHT: Status panel */}
+        {/* RIGHT: Preview + Status */}
         <div className="flex flex-col gap-4">
-          {/* Idle state */}
-          {deployState === 'idle' && (
-            <div
-              className="rounded-xl p-6 h-full"
-              style={{ border: '1px solid var(--border)' }}
-            >
-              <h2 className="text-base font-semibold mb-4" style={{ color: 'var(--foreground)' }}>
-                Como funciona
-              </h2>
-              <ol className="flex flex-col gap-3">
-                {[
-                  { n: '1', title: 'Escribe tu codigo', body: 'Edita el template de la izquierda. Define tools en TOOLS[] e implementalas en handleTool().' },
-                  { n: '2', title: 'Asigna un nombre', body: 'Usa el formato namespace/servidor. El namespace debe existir en tu cuenta.' },
-                  { n: '3', title: 'Haz clic en Desplegar', body: 'Tu codigo se guarda y queda disponible en el gateway de SpainMCP al instante.' },
-                  { n: '4', title: 'Conecta tu agente', body: 'Usa la URL desplegada como endpoint MCP desde Claude, Cursor o cualquier cliente compatible.' },
-                ].map((step) => (
-                  <li key={step.n} className="flex gap-3">
+
+          {/* Tool preview panel */}
+          <div className="rounded-2xl p-4" style={{ border: '1px solid var(--border)' }}>
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-xs font-medium" style={{ color: 'var(--muted)' }}>
+                Tools detectadas
+              </p>
+              <span
+                className="text-xs px-2 py-0.5 rounded-full font-medium"
+                style={{
+                  background: parsedTools.length > 0 ? '#22c55e20' : 'var(--border)',
+                  color: parsedTools.length > 0 ? '#22c55e' : 'var(--muted)',
+                }}
+              >
+                {parsedTools.length} tool{parsedTools.length !== 1 ? 's' : ''}
+              </span>
+            </div>
+
+            {parsedTools.length === 0 ? (
+              <p className="text-xs" style={{ color: 'var(--muted)' }}>
+                No se detectaron tools. Asegurate de que TOOLS[] tiene al menos una entrada con <span className="font-mono">name</span>.
+              </p>
+            ) : (
+              <ul className="flex flex-col gap-2">
+                {parsedTools.map((tool) => (
+                  <li key={tool.name} className="flex items-start gap-2">
                     <span
-                      className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold"
+                      className="flex-shrink-0 mt-0.5 w-4 h-4 rounded flex items-center justify-center text-[10px] font-bold"
                       style={{ background: '#2563eb20', color: '#2563eb' }}
                     >
-                      {step.n}
+                      T
                     </span>
-                    <div>
-                      <p className="text-sm font-medium" style={{ color: 'var(--foreground)' }}>
-                        {step.title}
+                    <div className="min-w-0">
+                      <p className="text-xs font-mono font-medium" style={{ color: 'var(--foreground)' }}>
+                        {tool.name}
                       </p>
-                      <p className="text-xs mt-0.5" style={{ color: 'var(--muted)' }}>
-                        {step.body}
-                      </p>
+                      {tool.description && (
+                        <p className="text-xs truncate" style={{ color: 'var(--muted)' }}>
+                          {tool.description}
+                        </p>
+                      )}
                     </div>
                   </li>
                 ))}
-              </ol>
+              </ul>
+            )}
+          </div>
 
+          {/* Deploy URL preview (when name is filled) */}
+          {qualifiedName.trim() && (
+            <div className="rounded-2xl p-4" style={{ border: '1px solid var(--border)' }}>
+              <p className="text-xs font-medium mb-2" style={{ color: 'var(--muted)' }}>
+                URL que se generara
+              </p>
               <div
-                className="mt-6 p-4 rounded-lg"
-                style={{ background: '#2563eb10', border: '1px solid #2563eb30' }}
+                className="flex items-center gap-2 px-3 py-2 rounded-lg"
+                style={{ background: '#0d1117', border: '1px solid #30363d' }}
               >
-                <p className="text-xs font-medium mb-1" style={{ color: '#60a5fa' }}>
-                  Sobre el template
-                </p>
-                <p className="text-xs" style={{ color: 'var(--muted)' }}>
-                  El template incluye dos tools de ejemplo (hello y sumar) y el handler MCP completo
-                  compatible con el protocolo MCP Streamable HTTP 2024-11-05.
-                  Solo necesitas tocar TOOLS[] y handleTool().
-                </p>
+                <span className="text-xs font-mono flex-1 truncate" style={{ color: '#e6edf3' }}>
+                  {buildDeployUrl(qualifiedName.trim())}
+                </span>
+                <CopyButton text={buildDeployUrl(qualifiedName.trim())} />
               </div>
             </div>
           )}
 
-          {/* Deploying state */}
-          {deployState === 'deploying' && (
+          {/* Deploying spinner */}
+          {isDeploying && (
             <div
-              className="rounded-xl p-6 flex flex-col items-center justify-center gap-4 min-h-64"
+              className="rounded-2xl p-6 flex flex-col items-center justify-center gap-4"
               style={{ border: '1px solid var(--border)' }}
             >
               <div
-                className="w-10 h-10 rounded-full border-2 border-t-transparent animate-spin"
+                className="w-8 h-8 rounded-full border-2 animate-spin"
                 style={{ borderColor: '#2563eb', borderTopColor: 'transparent' }}
               />
-              <div className="text-center">
-                <p className="text-sm font-medium" style={{ color: 'var(--foreground)' }}>
-                  Desplegando...
-                </p>
-                <p className="text-xs mt-1" style={{ color: 'var(--muted)' }}>
-                  Guardando codigo y activando el servidor
-                </p>
-              </div>
+              <p className="text-sm" style={{ color: 'var(--muted)' }}>
+                {deployPhase === 'validating' ? 'Validando codigo...' : 'Guardando y activando servidor...'}
+              </p>
             </div>
           )}
 
-          {/* Error state */}
-          {deployState === 'error' && (
+          {/* Live state */}
+          {deployPhase === 'live' && deployResult && (
             <div
-              className="rounded-xl p-6 flex flex-col gap-4"
-              style={{ border: '1px solid var(--border)' }}
-            >
-              <div
-                className="flex items-center gap-2 p-3 rounded-lg"
-                style={{ background: '#ef444415', border: '1px solid #ef444430' }}
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2">
-                  <circle cx="12" cy="12" r="10"/>
-                  <line x1="15" y1="9" x2="9" y2="15"/>
-                  <line x1="9" y1="9" x2="15" y2="15"/>
-                </svg>
-                <p className="text-sm" style={{ color: '#ef4444' }}>
-                  {errorMsg ?? 'Error desconocido'}
-                </p>
-              </div>
-              <button
-                onClick={() => { setDeployState('idle'); setErrorMsg(null) }}
-                className="text-sm text-blue-500 hover:underline text-left"
-              >
-                Volver a intentar
-              </button>
-            </div>
-          )}
-
-          {/* Success state */}
-          {deployState === 'success' && deployResult && (
-            <div
-              className="rounded-xl p-6 flex flex-col gap-5"
-              style={{ border: '1px solid var(--border)' }}
+              className="rounded-2xl p-5 flex flex-col gap-4"
+              style={{ border: '1px solid #22c55e40', background: '#22c55e08' }}
             >
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: '#22c55e20' }}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2.5">
-                    <polyline points="20 6 9 17 4 12"/>
+                <div className="w-7 h-7 rounded-full flex items-center justify-center" style={{ background: '#22c55e20' }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2.5">
+                    <polyline points="20 6 9 17 4 12" />
                   </svg>
                 </div>
                 <div>
@@ -492,6 +581,7 @@ export default function DeployPage() {
                 </div>
               </div>
 
+              {/* URL */}
               <div>
                 <p className="text-xs font-medium mb-1.5" style={{ color: 'var(--muted)' }}>
                   URL del servidor
@@ -503,27 +593,25 @@ export default function DeployPage() {
                   <span className="text-xs font-mono flex-1 truncate" style={{ color: '#e6edf3' }}>
                     {deployResult.deployUrl}
                   </span>
-                  <button
-                    onClick={() => copyToClipboard(deployResult.deployUrl)}
-                    className="flex-shrink-0 p-1 rounded hover:opacity-70 transition-opacity"
-                    title="Copiar URL"
-                  >
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#8b949e" strokeWidth="2">
-                      <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
-                      <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
-                    </svg>
-                  </button>
+                  <CopyButton text={deployResult.deployUrl} />
                 </div>
               </div>
 
+              {/* Integration snippets */}
               <div>
                 <p className="text-xs font-medium mb-2" style={{ color: 'var(--muted)' }}>
                   Como conectarlo
                 </p>
                 <div className="flex flex-col gap-2">
                   {[
-                    { label: 'Claude Desktop', snippet: `{"mcpServers":{"${deployResult.qualifiedName}":{"url":"${deployResult.deployUrl}"}}}` },
-                    { label: 'Cursor / VS Code', snippet: `npx mcp-remote ${deployResult.deployUrl}` },
+                    {
+                      label: 'Claude Desktop',
+                      snippet: `{"mcpServers":{"${deployResult.qualifiedName}":{"url":"${deployResult.deployUrl}"}}}`,
+                    },
+                    {
+                      label: 'Cursor / VS Code',
+                      snippet: `npx mcp-remote ${deployResult.deployUrl}`,
+                    },
                   ].map((item) => (
                     <div key={item.label}>
                       <p className="text-xs mb-1" style={{ color: 'var(--muted)' }}>{item.label}</p>
@@ -534,25 +622,78 @@ export default function DeployPage() {
                         <code className="text-xs font-mono flex-1 break-all" style={{ color: '#e6edf3' }}>
                           {item.snippet}
                         </code>
-                        <button
-                          onClick={() => copyToClipboard(item.snippet)}
-                          className="flex-shrink-0 p-1 rounded hover:opacity-70 transition-opacity mt-0.5"
-                          title="Copiar"
-                        >
-                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#8b949e" strokeWidth="2">
-                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
-                            <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
-                          </svg>
-                        </button>
+                        <CopyButton text={item.snippet} />
                       </div>
                     </div>
                   ))}
                 </div>
               </div>
 
-              <div className="flex gap-2 pt-1">
+              {/* Test button */}
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <button
+                    onClick={handleTest}
+                    disabled={testLoading}
+                    className="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors disabled:opacity-50"
+                    style={{ background: '#2563eb', color: '#fff' }}
+                  >
+                    {testLoading ? 'Probando...' : 'Probar servidor (tools/list)'}
+                  </button>
+                  {testLoading && (
+                    <div
+                      className="w-4 h-4 rounded-full border-2 animate-spin"
+                      style={{ borderColor: '#2563eb', borderTopColor: 'transparent' }}
+                    />
+                  )}
+                </div>
+
+                {testResult && (
+                  <div
+                    className="rounded-lg px-3 py-2.5"
+                    style={{
+                      background: testResult.ok ? '#22c55e10' : '#ef444410',
+                      border: `1px solid ${testResult.ok ? '#22c55e30' : '#ef444430'}`,
+                    }}
+                  >
+                    {testResult.ok ? (
+                      <>
+                        <p className="text-xs font-medium mb-1" style={{ color: '#22c55e' }}>
+                          Servidor respondio correctamente — {testResult.toolCount} tool{(testResult.toolCount ?? 0) !== 1 ? 's' : ''}
+                        </p>
+                        {testResult.tools && testResult.tools.length > 0 && (
+                          <ul className="flex flex-col gap-0.5">
+                            {testResult.tools.map((t) => (
+                              <li key={t.name} className="text-xs font-mono" style={{ color: 'var(--muted)' }}>
+                                · {t.name}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </>
+                    ) : (
+                      <>
+                        <p className="text-xs font-medium mb-1" style={{ color: '#f87171' }}>
+                          {testResult.error ?? 'Error al contactar el servidor'}
+                        </p>
+                        {testResult.note && (
+                          <p className="text-xs" style={{ color: 'var(--muted)' }}>
+                            {testResult.note}
+                          </p>
+                        )}
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <div className="flex gap-2 pt-1 border-t" style={{ borderColor: 'var(--border)' }}>
                 <button
-                  onClick={() => { setDeployState('idle'); setDeployResult(null) }}
+                  onClick={() => {
+                    setDeployPhase('idle')
+                    setDeployResult(null)
+                    setTestResult(null)
+                  }}
                   className="text-xs px-3 py-1.5 rounded-lg hover:opacity-80 transition-opacity"
                   style={{ border: '1px solid var(--border)', color: 'var(--muted)' }}
                 >
@@ -567,6 +708,41 @@ export default function DeployPage() {
               </div>
             </div>
           )}
+
+          {/* Idle guide (only when not live/deploying) */}
+          {deployPhase === 'idle' && (
+            <div className="rounded-2xl p-5" style={{ border: '1px solid var(--border)' }}>
+              <h2 className="text-sm font-semibold mb-3" style={{ color: 'var(--foreground)' }}>
+                Como funciona
+              </h2>
+              <ol className="flex flex-col gap-3">
+                {[
+                  { n: '1', title: 'Elige una plantilla', body: 'Selecciona En blanco, API Proxy o Base de datos para empezar con el codigo correcto.' },
+                  { n: '2', title: 'Edita las tools', body: 'Modifica TOOLS[] y handleTool(). El panel de la derecha muestra las tools detectadas en tiempo real.' },
+                  { n: '3', title: 'Asigna un nombre y despliega', body: 'Formato namespace/servidor. El namespace debe existir en tu cuenta.' },
+                  { n: '4', title: 'Prueba el servidor', body: 'Usa el boton Probar para enviar tools/list y verificar que el servidor responde.' },
+                ].map((step) => (
+                  <li key={step.n} className="flex gap-3">
+                    <span
+                      className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold"
+                      style={{ background: '#2563eb20', color: '#2563eb' }}
+                    >
+                      {step.n}
+                    </span>
+                    <div>
+                      <p className="text-xs font-medium" style={{ color: 'var(--foreground)' }}>
+                        {step.title}
+                      </p>
+                      <p className="text-xs mt-0.5" style={{ color: 'var(--muted)' }}>
+                        {step.body}
+                      </p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          )}
+
         </div>
       </div>
     </div>

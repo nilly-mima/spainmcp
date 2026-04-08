@@ -41,6 +41,23 @@ export async function POST(
     )
   }
 
+  const toolsArrayMatch = code.match(/const\s+TOOLS\s*=\s*\[/)
+  if (!toolsArrayMatch) {
+    return NextResponse.json(
+      { error: 'code must define a TOOLS array (const TOOLS = [...])' },
+      { status: 422 }
+    )
+  }
+
+  // Count tool entries by counting { name: occurrences inside TOOLS block
+  const toolNameCount = (code.match(/name\s*:\s*["'`]/g) ?? []).length
+  if (toolNameCount < 1) {
+    return NextResponse.json(
+      { error: 'TOOLS array must contain at least 1 tool with a name property' },
+      { status: 422 }
+    )
+  }
+
   const supabase = getServiceClient()
 
   const { data: server, error: serverError } = await supabase

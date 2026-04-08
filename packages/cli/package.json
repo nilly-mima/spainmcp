@@ -1,6 +1,6 @@
 {
   "name": "@spainmcp/cli",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Conecta SpainMCP a Claude Desktop, Cursor, VS Code y más",
   "type": "module",
   "bin": {

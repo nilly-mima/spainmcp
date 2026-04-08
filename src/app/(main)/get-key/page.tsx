@@ -37,6 +37,7 @@ export default function GetKeyPage() {
         return
       }
       setApiKey(data.key)
+      localStorage.setItem("spainmcp_api_key", data.key)
       setState("success")
     } catch {
       setErrorMsg("Error de red. Inténtalo de nuevo.")

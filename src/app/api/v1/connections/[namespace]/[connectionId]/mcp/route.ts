@@ -63,6 +63,7 @@ export async function POST(
 
   const upstreamHeaders: Record<string, string> = {
     'Content-Type': 'application/json',
+    'Accept': 'application/json, text/event-stream',
   }
 
   if (conn.headers_encrypted) {

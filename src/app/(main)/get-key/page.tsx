@@ -2,8 +2,11 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import Turnstile from "@/components/Turnstile"
 
 type State = "idle" | "loading" | "success" | "error"
+
+const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? ""
 
 export default function GetKeyPage() {
   const [email, setEmail] = useState("")
@@ -11,15 +14,21 @@ export default function GetKeyPage() {
   const [apiKey, setApiKey] = useState("")
   const [copied, setCopied] = useState(false)
   const [errorMsg, setErrorMsg] = useState("")
+  const [turnstileToken, setTurnstileToken] = useState("")
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    if (TURNSTILE_SITE_KEY && !turnstileToken) {
+      setErrorMsg("Esperando verificación de seguridad...")
+      setState("error")
+      return
+    }
     setState("loading")
     try {
       const res = await fetch("/api/keys/request", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, turnstileToken }),
       })
       const data = await res.json()
       if (!res.ok || !data.success) {
@@ -85,6 +94,13 @@ export default function GetKeyPage() {
 
                 {state === "error" && (
                   <p className="text-sm text-red-500">{errorMsg}</p>
+                )}
+
+                {TURNSTILE_SITE_KEY && (
+                  <Turnstile
+                    siteKey={TURNSTILE_SITE_KEY}
+                    onVerify={setTurnstileToken}
+                  />
                 )}
 
                 <button

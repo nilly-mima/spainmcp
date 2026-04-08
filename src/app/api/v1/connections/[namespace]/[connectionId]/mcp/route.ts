@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { authenticateRequest } from '@/lib/api-auth'
+import { checkRateLimit } from '@/lib/rate-limit'
 
 function getServiceClient() {
   return createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
@@ -32,6 +33,22 @@ export async function POST(
   }
 
   const { namespace, connectionId } = await params
+
+  const rateLimit = await checkRateLimit(auth.userId)
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      {
+        jsonrpc: '2.0',
+        error: {
+          code: -32000,
+          message: `Rate limit exceeded. Upgrade to Pro for unlimited RPCs. Used: ${rateLimit.used}/${rateLimit.limit} this month.`,
+        },
+        id: null,
+      },
+      { status: 429 }
+    )
+  }
+
   const supabase = getServiceClient()
   const { ns, err, status } = await resolveNamespace(supabase, namespace, auth.userId)
   if (!ns) return NextResponse.json({ error: err }, { status })

@@ -62,6 +62,7 @@ const LINKS = {
   recursos: [
     { label: 'Documentacion',      href: '/docs'   },
     { label: 'Politica de privacidad', href: '/privacy' },
+    { label: 'Aviso legal',        href: '/legal'  },
     { label: 'Estado del sistema',  href: '/status' },
   ],
   empresa: [

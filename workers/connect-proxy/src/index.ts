@@ -11,10 +11,15 @@ interface DispatchNamespace {
   get(name: string, opts?: Record<string, unknown>, extra?: { limits?: { cpuMs: number; subRequests: number } }): { fetch(req: Request): Promise<Response> }
 }
 
+interface AnalyticsEngine {
+  writeDataPoint(data: { indexes?: string[]; blobs?: string[]; doubles?: number[] }): void
+}
+
 interface Env {
   SUPABASE_URL: string
   SUPABASE_SERVICE_ROLE_KEY: string
   OAUTH_KV: KVNamespace
+  USAGE?: AnalyticsEngine  // Analytics Engine for RPC metering
   DISPATCHER?: DispatchNamespace  // Workers for Platforms (when activated)
   GITHUB_CLIENT_ID?: string
   GITHUB_CLIENT_SECRET?: string
@@ -444,17 +449,29 @@ app.post('/proxy/:namespace/:connectionId/mcp', async (c) => {
       connection_id: conn.id, namespace_id: ns.id, method,
       tool_name: toolName, duration_ms: duration, status_code: 502, error: String(err),
     }).then(() => {}, () => {})
+    // Analytics Engine: async metering (instant, no await)
+    env.USAGE?.writeDataPoint({
+      indexes: [namespace],
+      blobs: [method, toolName ?? '', conn.id, '502', 'error'],
+      doubles: [1, duration],
+    })
     return c.json({ error: 'Upstream unreachable' }, 502)
   }
 
   const duration = Date.now() - start
 
-  // Log + update (fire and forget)
+  // Log to Supabase (fire and forget)
   sb.from('connection_logs').insert({
     connection_id: conn.id, namespace_id: ns.id, method,
     tool_name: toolName, duration_ms: duration, status_code: upstreamRes.status,
     error: upstreamRes.ok ? null : `HTTP ${upstreamRes.status}`,
   }).then(() => {}, () => {})
+  // Analytics Engine: async metering (instant, no await)
+  env.USAGE?.writeDataPoint({
+    indexes: [namespace],
+    blobs: [method, toolName ?? '', conn.id, String(upstreamRes.status), upstreamRes.ok ? 'ok' : 'error'],
+    doubles: [1, duration],
+  })
   sb.from('connections').update({ last_used_at: new Date().toISOString() })
     .eq('id', conn.id).then(() => {}, () => {})
 
@@ -598,7 +615,14 @@ async function forwardToolCall(
   })
   const duration = Date.now() - start
 
-  // Log RPC (fire and forget)
+  // Analytics Engine: gateway metering
+  env.USAGE?.writeDataPoint({
+    indexes: ['gateway'],
+    blobs: ['tools/call', toolName, conn.id, String(upstreamRes.status), upstreamRes.ok ? 'ok' : 'error'],
+    doubles: [1, duration],
+  })
+
+  // Log RPC to Supabase (fire and forget — will be removed when Analytics Engine is fully verified)
   const sb = getSupabase(env)
   sb.from('connection_logs').insert({
     connection_id: conn.id,

@@ -15,3 +15,8 @@ SUPABASE_URL = "https://xjumlmtepbzebuxbhksu.supabase.co"
 [[kv_namespaces]]
 binding = "OAUTH_KV"
 id = "81fbab580b6b4486bf120d68459be0aa"
+
+# Analytics Engine for RPC metering (replaces connection_logs for high-perf metering)
+[[analytics_engine_datasets]]
+binding = "USAGE"
+dataset = "spainmcp_rpcs"

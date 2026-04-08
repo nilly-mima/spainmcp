@@ -87,7 +87,7 @@ export default function PublishSection() {
 
         {/* Título */}
         <div className="flex flex-col gap-1.5">
-          <h2 className="text-4xl font-black text-gray-900 dark:text-gray-100 tracking-tight">Publica tu MCP y llega a toda España</h2>
+          <h2 className="text-4xl font-black text-gray-900 dark:text-gray-100 tracking-tight">Publica tu MCP y llega a millones</h2>
           <p className="text-gray-500 dark:text-gray-400">
             Un comando. Tu herramienta disponible para toda la comunidad hispanohablante, indexada y con analytics desde el primer día.
           </p>

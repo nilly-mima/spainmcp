@@ -45,11 +45,10 @@ export default function Home() {
       <section className="pt-6 pb-4 flex flex-col lg:flex-row items-center gap-10">
         <div className="flex flex-col gap-7 flex-1 min-w-0 animate-fade-in-up">
           <h1 className="text-[3.375rem] md:text-[4.05rem] lg:text-[5.4rem] font-black text-gray-900 dark:text-white leading-none tracking-tighter">
-            La forma más rápida de extender tu IA
+            Extiende tu IA en 2 clicks
           </h1>
           <p className="text-lg text-gray-500 dark:text-gray-400 max-w-sm leading-relaxed">
-            El directorio de herramientas MCP para España. Sin código, sin configuración.
-            Añade BOE, BORME, AEMET, GitHub y más a tu IA en segundos.
+            Conecta GitHub, Gmail, Notion, Slack y más a tu IA con un solo comando. Sin código, sin configuración. En español.
           </p>
           <div className="flex items-center gap-3 flex-wrap">
             <div

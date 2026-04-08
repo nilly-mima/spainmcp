@@ -18,16 +18,35 @@ async function sha256(text: string): Promise<string> {
 }
 
 export async function POST(req: Request) {
-  // 1. Leer email del body
+  // 1. Leer email + turnstile token del body
   let email: string
+  let turnstileToken: string | undefined
   try {
     const body = await req.json()
     email = body.email?.trim().toLowerCase()
+    turnstileToken = body.turnstileToken
     if (!email || !email.includes("@")) {
       return Response.json({ error: "Email inválido" }, { status: 400 })
     }
   } catch {
     return Response.json({ error: "Body inválido" }, { status: 400 })
+  }
+
+  // 2. Validar Turnstile token (server-side)
+  const turnstileSecret = process.env.TURNSTILE_SECRET_KEY
+  if (turnstileSecret) {
+    if (!turnstileToken) {
+      return Response.json({ error: "Verificación de seguridad requerida" }, { status: 400 })
+    }
+    const verifyRes = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ secret: turnstileSecret, response: turnstileToken }),
+    })
+    const verifyData = await verifyRes.json() as { success: boolean }
+    if (!verifyData.success) {
+      return Response.json({ error: "Verificación de seguridad fallida. Recarga la página." }, { status: 403 })
+    }
   }
 
   // 2. Generar API key

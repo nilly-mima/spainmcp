@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { supabaseBrowser } from "@/lib/supabase-client"
 
 type Mode = "github" | "upload"
 type State = "idle" | "loading" | "success" | "error"
@@ -30,9 +31,12 @@ export default function PublishSkillPage() {
         body.githubUrl = githubUrl
       }
 
+      const { data: { session } } = await supabaseBrowser.auth.getSession()
+      if (!session?.access_token) throw new Error("Inicia sesión para publicar")
+
       const res = await fetch("/api/catalog/skills", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${session.access_token}` },
         body: JSON.stringify(body),
       })
 

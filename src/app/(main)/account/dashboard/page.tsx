@@ -7,6 +7,7 @@ import { supabaseBrowser } from '@/lib/supabase-client'
 import { usePlan } from '@/hooks/usePlan'
 
 type Range = '7d' | '30d' | '90d'
+type MyItem = { id: string; nombre: string; slug: string; status: string; is_public: boolean; created_at: string }
 
 type Stats = {
   total_calls: number
@@ -23,6 +24,51 @@ type ActivityRow = {
   latency_ms: number | null
 }
 
+function StatusBadge({ status }: { status: string }) {
+  const styles: Record<string, string> = {
+    draft: 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400',
+    pending_review: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400',
+    approved: 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400',
+    rejected: 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400',
+  }
+  const labels: Record<string, string> = {
+    draft: 'Borrador',
+    pending_review: 'En revisión',
+    approved: 'Aprobado',
+    rejected: 'Rechazado',
+  }
+  return (
+    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${styles[status] ?? styles.draft}`}>
+      {labels[status] ?? status}
+    </span>
+  )
+}
+
+function ItemActions({ item, type, onAction }: {
+  item: MyItem
+  type: 'mcp' | 'skill'
+  onAction: (id: string, type: 'mcp' | 'skill', action: 'request_review' | 'toggle_public' | 'delete') => void
+}) {
+  const btnClass = 'text-xs px-2 py-1 rounded-lg transition-colors'
+  return (
+    <div className="flex items-center gap-1 justify-end">
+      {(item.status === 'draft' || item.status === 'rejected') && (
+        <button onClick={() => onAction(item.id, type, 'request_review')} className={`${btnClass} text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/30`}>
+          Solicitar revisión
+        </button>
+      )}
+      {item.status === 'approved' && (
+        <button onClick={() => onAction(item.id, type, 'toggle_public')} className={`${btnClass} text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800`}>
+          {item.is_public ? 'Hacer privado' : 'Hacer público'}
+        </button>
+      )}
+      <button onClick={() => onAction(item.id, type, 'delete')} className={`${btnClass} text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30`}>
+        Eliminar
+      </button>
+    </div>
+  )
+}
+
 export default function DashboardPage() {
   const router = useRouter()
   const { tier } = usePlan()
@@ -31,6 +77,9 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true)
   const [stats, setStats] = useState<Stats | null>(null)
   const [activity, setActivity] = useState<ActivityRow[]>([])
+  const [myMcps, setMyMcps] = useState<MyItem[]>([])
+  const [mySkills, setMySkills] = useState<MyItem[]>([])
+  const [accessToken, setAccessToken] = useState('')
 
   useEffect(() => {
     supabaseBrowser.auth.getSession().then(async ({ data }) => {
@@ -40,7 +89,9 @@ export default function DashboardPage() {
         return
       }
       setEmail(user.email)
+      setAccessToken(data.session?.access_token ?? '')
       await loadDashboard(user.email, '30d')
+      await loadMyItems(data.session?.access_token ?? '')
       setLoading(false)
     })
   }, [router])
@@ -54,6 +105,25 @@ export default function DashboardPage() {
       setActivity(json.recent_activity ?? [])
     }
     setLoading(false)
+  }
+
+  async function loadMyItems(token: string) {
+    const res = await fetch('/api/account/my-items', { headers: { Authorization: `Bearer ${token}` } })
+    if (res.ok) {
+      const json = await res.json()
+      setMyMcps(json.mcps ?? [])
+      setMySkills(json.skills ?? [])
+    }
+  }
+
+  async function handleItemAction(id: string, type: 'mcp' | 'skill', action: 'request_review' | 'toggle_public' | 'delete') {
+    if (action === 'delete' && !confirm('¿Eliminar este item?')) return
+    await fetch('/api/account/my-items', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
+      body: JSON.stringify({ id, type, action }),
+    })
+    await loadMyItems(accessToken)
   }
 
   function handleRangeChange(r: Range) {
@@ -256,6 +326,58 @@ export default function DashboardPage() {
           </div>
         )}
       </div>
+
+      {/* My MCPs & Skills */}
+      {(myMcps.length > 0 || mySkills.length > 0) && (
+        <div className="mb-6">
+          <h2 className="text-lg font-bold text-[var(--foreground)] mb-3">Mis publicaciones</h2>
+          <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl overflow-hidden">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-[var(--border)] text-[var(--muted)] text-xs uppercase tracking-wider">
+                  <th className="text-left px-4 py-3 font-medium">Tipo</th>
+                  <th className="text-left px-4 py-3 font-medium">Nombre</th>
+                  <th className="text-left px-4 py-3 font-medium">Estado</th>
+                  <th className="text-left px-4 py-3 font-medium">Visible</th>
+                  <th className="text-right px-4 py-3 font-medium">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {myMcps.map(item => (
+                  <tr key={item.id} className="border-b border-[var(--border)] last:border-0">
+                    <td className="px-4 py-3 text-xs font-medium text-blue-600">MCP</td>
+                    <td className="px-4 py-3 font-medium text-[var(--foreground)]">{item.nombre}</td>
+                    <td className="px-4 py-3">
+                      <StatusBadge status={item.status} />
+                    </td>
+                    <td className="px-4 py-3 text-xs">
+                      {item.is_public ? <span className="text-green-600">Publico</span> : <span className="text-stone-400">Privado</span>}
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      <ItemActions item={item} type="mcp" onAction={handleItemAction} />
+                    </td>
+                  </tr>
+                ))}
+                {mySkills.map(item => (
+                  <tr key={item.id} className="border-b border-[var(--border)] last:border-0">
+                    <td className="px-4 py-3 text-xs font-medium text-purple-600">Skill</td>
+                    <td className="px-4 py-3 font-medium text-[var(--foreground)]">{item.nombre}</td>
+                    <td className="px-4 py-3">
+                      <StatusBadge status={item.status} />
+                    </td>
+                    <td className="px-4 py-3 text-xs">
+                      {item.is_public ? <span className="text-green-600">Publico</span> : <span className="text-stone-400">Privado</span>}
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      <ItemActions item={item} type="skill" onAction={handleItemAction} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
 
       {/* Quick Actions */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">

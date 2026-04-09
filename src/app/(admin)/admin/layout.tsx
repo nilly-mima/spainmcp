@@ -57,6 +57,15 @@ const NAV = [
     ),
   },
   {
+    href: '/admin/review',
+    label: 'Revisión',
+    icon: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/>
+      </svg>
+    ),
+  },
+  {
     href: '/admin/analytics',
     label: 'Analytics',
     icon: (

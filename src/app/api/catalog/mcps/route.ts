@@ -19,6 +19,8 @@ export async function GET(req: NextRequest) {
     .from('mcp_catalog')
     .select('id, nombre, slug, descripcion_es, descripcion_en, scope, icon_url, upstream_url, downloads, is_active, created_at, categoria', { count: 'exact' })
     .eq('is_active', true)
+    .eq('status', 'approved')
+    .eq('is_public', true)
     .order('downloads', { ascending: false })
     .range(offset, offset + pageSize - 1)
 

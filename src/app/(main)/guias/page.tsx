@@ -19,6 +19,8 @@ async function getSkillsCatalog(): Promise<{ skills: Skill[]; total: number }> {
       .from('skills_catalog')
       .select('id, nombre, slug, descripcion, categoria, installs, stars, author, icon_url, is_active, created_at', { count: 'exact' })
       .eq('is_active', true)
+      .eq('status', 'approved')
+      .eq('is_public', true)
       .order('created_at', { ascending: false })
       .limit(500)
 

@@ -3,6 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import type { CredentialMapping } from "@/lib/types"
+import { supabaseBrowser } from "@/lib/supabase-client"
 
 type State = "idle" | "loading" | "success" | "error"
 type Param = { name: string; type: "string" | "number" | "boolean"; from: "query" | "header"; required: boolean; description: string; defaultValue: string }
@@ -231,10 +232,18 @@ export default function PublishMcpPage() {
   async function handlePublish() {
     setState("loading")
     try {
+      const { data: { session } } = await supabaseBrowser.auth.getSession()
+      if (!session?.access_token) {
+        setErrorMsg("Inicia sesión para publicar")
+        setState("error")
+        setStep(1)
+        return
+      }
+
       const validMappings = credMappings.filter(m => m.name && m.from.key && m.to.key)
       const res = await fetch("/api/servers/publish", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${session.access_token}` },
         body: JSON.stringify({
           namespace: `@${ns}/${serverId}`,
           display_name: serverId,

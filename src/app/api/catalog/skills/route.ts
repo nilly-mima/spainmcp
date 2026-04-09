@@ -19,6 +19,8 @@ export async function GET(req: NextRequest) {
     .from('skills_catalog')
     .select('id, nombre, descripcion, categoria, is_active, created_at', { count: 'exact' })
     .eq('is_active', true)
+    .eq('status', 'approved')
+    .eq('is_public', true)
     .order('created_at', { ascending: false })
     .range(offset, offset + pageSize - 1)
 
@@ -95,9 +97,24 @@ async function fetchFileTree(owner: string, repo: string, branch: string, dirPat
   })
 }
 
+/* ── Get authenticated user email ── */
+async function getUserEmail(req: NextRequest): Promise<string | null> {
+  const token = req.headers.get('Authorization')?.replace('Bearer ', '').trim()
+  if (!token) return null
+  const supabase = getServiceClient()
+  const { data } = await supabase.auth.getUser(token)
+  return data.user?.email ?? null
+}
+
 /* ── POST: Publish a skill ── */
 export async function POST(req: NextRequest) {
   try {
+    // Auth
+    const userEmail = await getUserEmail(req)
+    if (!userEmail) {
+      return NextResponse.json({ error: 'Debes iniciar sesión para publicar' }, { status: 401 })
+    }
+
     const body = await req.json()
     const { namespace, slug, githubUrl, content: rawContent } = body as {
       namespace?: string; slug?: string; githubUrl?: string; content?: string
@@ -165,6 +182,9 @@ export async function POST(req: NextRequest) {
         stars: 0,
         file_tree: fileTree,
         repo_url: repoUrl,
+        owner_id: userEmail,
+        status: 'draft',
+        is_public: false,
       })
       .select()
       .single()

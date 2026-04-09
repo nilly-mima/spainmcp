@@ -260,6 +260,34 @@ function BillingPage() {
         </div>
       </div>
 
+      {/* Uso extra metered — solo Pro */}
+      {isPro && (
+        <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 mb-4">
+          <h2 className="text-lg font-bold text-[var(--foreground)] mb-1">Uso variable este periodo</h2>
+          <p className="text-sm text-[var(--muted)] mb-4">
+            El plan Pro incluye RPCs ilimitados a €0,50 por cada 1.000 RPCs. El coste se añade a tu factura mensual.
+          </p>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-stone-50 dark:bg-stone-900 border border-[var(--border)] rounded-lg p-4">
+              <p className="text-xs font-semibold text-[var(--muted)] uppercase tracking-wide mb-1">Uso extra este periodo</p>
+              <p className="text-2xl font-bold text-[var(--foreground)]">
+                {used.toLocaleString('es-ES')} <span className="text-base font-normal text-[var(--muted)]">RPCs</span>
+              </p>
+            </div>
+            <div className="bg-stone-50 dark:bg-stone-900 border border-[var(--border)] rounded-lg p-4">
+              <p className="text-xs font-semibold text-[var(--muted)] uppercase tracking-wide mb-1">Coste estimado</p>
+              <p className="text-2xl font-bold text-[var(--foreground)]">
+                €{(used * 0.0005).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </p>
+              <p className="text-xs text-[var(--muted)] mt-0.5">+ €29,00 base</p>
+            </div>
+          </div>
+          <p className="text-xs text-[var(--muted)] mt-3">
+            Reinicio el {usage?.resetDate ?? '—'}. El importe real puede diferir del estimado.
+          </p>
+        </div>
+      )}
+
       {/* Comparacion de planes */}
       {!isPro && (
         <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl overflow-hidden">

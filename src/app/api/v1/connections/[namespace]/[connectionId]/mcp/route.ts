@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { authenticateRequest } from '@/lib/api-auth'
 import { checkRateLimit } from '@/lib/rate-limit'
+import { reportRpcUsage, resolveStripeCustomerId } from '@/lib/stripe-metering'
 
 function getServiceClient() {
   return createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
@@ -118,10 +119,20 @@ export async function POST(
 
   const duration = Date.now() - startMs
 
-  // Log and update last_used_at in parallel — fire and forget
+  // Report metered usage to Stripe — fire-and-forget, only for api_key auth (Pro users)
+  const meteringPromise = (async () => {
+    if (auth.type === 'api_key' && auth.email && upstreamResponse.status < 500) {
+      const customerId = await resolveStripeCustomerId(auth.email)
+      if (customerId) {
+        await reportRpcUsage(customerId)
+      }
+    }
+  })()
+
   Promise.all([
     logRpc(supabase, conn.id, ns.id, method, toolName, duration, upstreamResponse.status, null),
     supabase.from('connections').update({ last_used_at: new Date().toISOString() }).eq('id', conn.id),
+    meteringPromise,
   ]).catch(console.error)
 
   const contentType = upstreamResponse.headers.get('content-type') ?? ''

@@ -52,10 +52,19 @@ export async function POST(req: NextRequest) {
         .eq('is_active', true)
     }
 
+    const lineItems: { price: string; quantity?: number }[] = [
+      { price: process.env.STRIPE_PRO_PRICE_ID!, quantity: 1 },
+    ]
+
+    if (process.env.STRIPE_METERED_PRICE_ID) {
+      // Metered price — no quantity (Stripe derives it from meter events)
+      lineItems.push({ price: process.env.STRIPE_METERED_PRICE_ID })
+    }
+
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       mode: 'subscription',
-      line_items: [{ price: process.env.STRIPE_PRO_PRICE_ID!, quantity: 1 }],
+      line_items: lineItems,
       success_url: `${baseUrl}/account/billing?success=true`,
       cancel_url: `${baseUrl}/account/billing?canceled=true`,
       metadata: { email },

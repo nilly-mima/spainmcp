@@ -263,7 +263,6 @@ export default function SkillsDirectory({ skills, total, initialSearch = '' }: {
   const parsed = useMemo(() => parseQuery(query), [query])
 
   const filtered = useMemo(() => {
-    const t = performance.now()
     const { verified, category, namespace, ownerMe, text } = parsed
     let result = skills
     if (verified) result = result.filter(s => s.verified)
@@ -278,9 +277,15 @@ export default function SkillsDirectory({ skills, total, initialSearch = '' }: {
         s.descripcion.toLowerCase().includes(q)
       )
     }
-    setTimeout(() => setMs(Math.round(performance.now() - t)), 0)
     return result
   }, [skills, parsed])
+
+  // Measure filter time outside useMemo to avoid state update during render
+  useEffect(() => {
+    const t = performance.now()
+    parseQuery(query) // re-run parse to measure
+    setMs(Math.round(performance.now() - t))
+  }, [query, skills])
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
   const safePage   = Math.min(page, totalPages)

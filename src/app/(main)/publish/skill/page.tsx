@@ -23,10 +23,29 @@ export default function PublishSkillPage() {
     e.preventDefault()
     setState("loading")
     setErrorMsg("")
-    // TODO: conectar con API cuando el backend esté listo
-    setTimeout(() => {
+
+    try {
+      const body: Record<string, string> = { namespace: ns, slug }
+      if (mode === "github") {
+        body.githubUrl = githubUrl
+      }
+
+      const res = await fetch("/api/catalog/skills", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      })
+
+      if (!res.ok) {
+        const err = await res.json()
+        throw new Error(err.error || "Error al publicar")
+      }
+
       setState("success")
-    }, 1500)
+    } catch (err: unknown) {
+      setState("error")
+      setErrorMsg(err instanceof Error ? err.message : "Error desconocido")
+    }
   }
 
   if (state === "success") {

@@ -178,17 +178,17 @@ function SkillMd({ content }: { content: string }) {
 
 /* ── Agents list ── */
 const AGENTS = [
-  { label: 'Claude Code',    color: '#D97706', flag: 'claude-code',  path: '.claude/skills',    logo: '/logos/agents/claude.svg' },
-  { label: 'Cursor',         color: '#1A1A2E', flag: 'cursor',       path: '.cursor/skills',    logo: '/logos/agents/cursor.svg' },
-  { label: 'Gemini CLI',     color: '#4285F4', flag: 'gemini',       path: '.gemini/skills',    logo: '/logos/agents/gemini.svg' },
-  { label: 'Codex',          color: '#10A37F', flag: 'codex',        path: '.codex/skills',     logo: '/logos/agents/codex.svg' },
-  { label: 'Windsurf',       color: '#06B6D4', flag: 'windsurf',     path: '.windsurf/skills',  logo: '/logos/agents/windsurf.svg' },
-  { label: 'GitHub Copilot', color: '#24292F', flag: 'copilot',      path: '.vscode/skills',    logo: '/logos/agents/copilot.svg' },
-  { label: 'Amp',            color: '#E85D2F', flag: 'amp',          path: '.amp/skills' },
-  { label: 'Kilo Code',      color: '#7C3AED', flag: 'kilo-code',    path: '.kilocode/skills' },
-  { label: 'Cline',          color: '#F97316', flag: 'cline',        path: '.cline/skills' },
-  { label: 'Roo Code',       color: '#8B5CF6', flag: 'roo-code',     path: '.roocode/skills' },
-  { label: 'VS Code',        color: '#0078D4', flag: 'vscode',       path: '.vscode/skills' },
+  { label: 'Claude Code',    color: '#D97706', flag: 'claude-code',  path: '.claude/skills',    logo: 'https://cdn.simpleicons.org/anthropic/white' },
+  { label: 'Cursor',         color: '#1A1A2E', flag: 'cursor',       path: '.cursor/skills',    logo: 'https://cursor.sh/favicon.ico' },
+  { label: 'Gemini CLI',     color: '#4285F4', flag: 'gemini',       path: '.gemini/skills',    logo: 'https://cdn.simpleicons.org/google/white' },
+  { label: 'Codex',          color: '#10A37F', flag: 'codex',        path: '.codex/skills',     logo: 'https://cdn.simpleicons.org/openai/white' },
+  { label: 'Windsurf',       color: '#06B6D4', flag: 'windsurf',     path: '.windsurf/skills',  logo: 'https://codeium.com/favicon.ico' },
+  { label: 'GitHub Copilot', color: '#24292F', flag: 'copilot',      path: '.vscode/skills',    logo: 'https://cdn.simpleicons.org/github/white' },
+  { label: 'Amp',            color: '#E85D2F', flag: 'amp',          path: '.amp/skills',       logo: 'https://cdn.simpleicons.org/amp/white' },
+  { label: 'Kilo Code',      color: '#7C3AED', flag: 'kilo-code',    path: '.kilocode/skills',  logo: 'https://cdn.simpleicons.org/visualstudiocode/white' },
+  { label: 'Cline',          color: '#F97316', flag: 'cline',        path: '.cline/skills',     logo: 'https://cdn.simpleicons.org/cline/white' },
+  { label: 'Roo Code',       color: '#8B5CF6', flag: 'roo-code',     path: '.roocode/skills',   logo: 'https://cdn.simpleicons.org/visualstudiocode/white' },
+  { label: 'VS Code',        color: '#0078D4', flag: 'vscode',       path: '.vscode/skills',    logo: 'https://cdn.simpleicons.org/visualstudiocode/white' },
 ]
 
 export default function SkillDetailClient({ skill }: { skill: SkillFull }) {
@@ -415,8 +415,10 @@ export default function SkillDetailClient({ skill }: { skill: SkillFull }) {
                           className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-xs font-bold shrink-0 overflow-hidden"
                           style={{ background: a.color }}
                         >
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={a.logo} alt={a.label} className="w-5 h-5 object-contain" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; (e.target as HTMLImageElement).parentElement!.textContent = a.label[0] }} />
+                          {a.logo ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={a.logo} alt={a.label} className="w-4 h-4 object-contain" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; const p = (e.target as HTMLImageElement).parentElement; if (p) p.textContent = a.label[0] }} />
+                          ) : a.label[0]}
                         </div>
                         <span className="text-sm text-[var(--foreground)]">{a.label}</span>
                       </button>

@@ -12,6 +12,8 @@ export interface Skill {
   verified: boolean
   repo?: string
   skill_md?: string
+  slug?: string
+  author?: string
 }
 
 const SKILLS_FILE = path.join(process.cwd(), 'src/data/skills.json')

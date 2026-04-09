@@ -19,6 +19,7 @@ interface SkillForm {
   slug: string
   descripcion: string
   categoria: string
+  content: string
   icon_url: string
   is_active: boolean
 }
@@ -28,6 +29,7 @@ const EMPTY: SkillForm = {
   slug: '',
   descripcion: '',
   categoria: 'general',
+  content: '',
   icon_url: '',
   is_active: true,
 }
@@ -87,6 +89,7 @@ export default function SkillEditPage() {
           slug: s.slug ?? '',
           descripcion: s.descripcion ?? '',
           categoria: s.categoria ?? 'general',
+          content: s.content ?? '',
           icon_url: s.icon_url ?? '',
           is_active: s.is_active ?? true,
         })
@@ -117,6 +120,7 @@ export default function SkillEditPage() {
         slug: form.slug,
         descripcion: form.descripcion,
         categoria: form.categoria,
+        content: form.content,
         icon_url: form.icon_url,
         is_active: form.is_active,
       }
@@ -240,6 +244,23 @@ export default function SkillEditPage() {
             placeholder="Describe para que sirve esta skill..."
             className={`${inputCls} resize-none`}
           />
+        </div>
+        <div>
+          <label className="block text-xs font-medium text-[var(--muted)] mb-1">
+            Contenido SKILL.md{' '}
+            <span className="font-normal text-[var(--muted)] opacity-70">(Markdown)</span>
+          </label>
+          <textarea
+            value={form.content}
+            onChange={(e) => set('content', e.target.value)}
+            rows={20}
+            placeholder={`# ${form.nombre || 'Nombre de la skill'}\n\n## Descripcion\n\nEscribe aqui el contenido completo en Markdown...\n\n## Uso\n\n- Ejemplo 1\n- Ejemplo 2`}
+            className={`${inputCls} font-mono text-xs resize-y`}
+            spellCheck={false}
+          />
+          <p className="text-xs text-[var(--muted)] mt-1">
+            Este contenido se muestra como SKILL.md en la pagina de detalle y se descarga al hacer clic en &ldquo;Descargar skill&rdquo;.
+          </p>
         </div>
         <div className="flex items-center gap-3">
           <button

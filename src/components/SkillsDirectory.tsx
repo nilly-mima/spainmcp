@@ -306,7 +306,10 @@ export default function SkillsDirectory({ skills, total, initialSearch = '' }: {
                     {/* Top row: name + stars */}
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex items-center gap-1.5 min-w-0 flex-wrap">
-                        <Link href={`/guias/${skill.id}`} className="text-blue-600 dark:text-white font-semibold text-sm hover:underline">
+                        <Link
+                          href={skill.slug ? `/skills/${skill.slug}` : `/guias/${skill.id}`}
+                          className="text-blue-600 dark:text-white font-semibold text-sm hover:underline"
+                        >
                           {skill.creator}/{skill.nombre}
                         </Link>
                         {skill.verified && <VerifiedIcon />}

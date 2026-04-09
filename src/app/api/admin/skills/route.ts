@@ -46,14 +46,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'No autorizado' }, { status: 403 })
   }
 
-  let body: { nombre?: string; descripcion?: string; categoria?: string }
+  let body: { nombre?: string; slug?: string; descripcion?: string; categoria?: string; content?: string; icon_url?: string }
   try {
     body = await req.json()
   } catch {
     return NextResponse.json({ error: 'Body inválido' }, { status: 400 })
   }
 
-  const { nombre, descripcion, categoria } = body
+  const { nombre, slug, descripcion, categoria, content, icon_url } = body
   if (!nombre) {
     return NextResponse.json({ error: 'nombre es obligatorio' }, { status: 400 })
   }
@@ -61,7 +61,15 @@ export async function POST(req: NextRequest) {
   const supabase = getServiceClient()
   const { data, error } = await supabase
     .from('skills_catalog')
-    .insert({ nombre, descripcion: descripcion ?? '', categoria: categoria ?? 'general', is_active: true })
+    .insert({
+      nombre,
+      slug: slug ?? '',
+      descripcion: descripcion ?? '',
+      categoria: categoria ?? 'general',
+      content: content ?? null,
+      icon_url: icon_url ?? null,
+      is_active: true,
+    })
     .select()
     .single()
 

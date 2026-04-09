@@ -17,7 +17,7 @@ async function getSkillsCatalog(): Promise<{ skills: Skill[]; total: number }> {
 
     const { data, count, error } = await supabase
       .from('skills_catalog')
-      .select('id, nombre, descripcion, categoria, is_active, created_at', { count: 'exact' })
+      .select('id, nombre, slug, descripcion, categoria, installs, stars, author, is_active, created_at', { count: 'exact' })
       .eq('is_active', true)
       .order('created_at', { ascending: false })
       .limit(500)
@@ -27,13 +27,15 @@ async function getSkillsCatalog(): Promise<{ skills: Skill[]; total: number }> {
     // Map skills_catalog shape to the Skill interface used by SkillsDirectory
     const mapped: Skill[] = data.map(row => ({
       id: row.id,
-      creator: 'spainmcp',
+      creator: row.author ?? 'spainmcp',
       nombre: row.nombre,
       descripcion: row.descripcion ?? '',
       categoria: row.categoria ?? 'general',
-      installs: 0,
-      stars: 0,
-      verified: true,
+      installs: row.installs ?? 0,
+      stars: row.stars ?? 0,
+      verified: (row.author ?? 'spainmcp') === 'spainmcp',
+      slug: row.slug ?? '',
+      author: row.author ?? 'spainmcp',
     }))
 
     return { skills: mapped, total: count ?? mapped.length }

@@ -75,6 +75,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   useEffect(() => {
+    // Don't redirect if already on login page
+    if (pathname === '/admin/login') {
+      setChecking(false)
+      return
+    }
     supabaseBrowser.auth.getSession().then(({ data }) => {
       const email = data.session?.user?.email
       if (!isAdmin(email)) {
@@ -83,7 +88,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         setChecking(false)
       }
     })
-  }, [router])
+  }, [router, pathname])
+
+  // Login page renders without sidebar
+  if (pathname === '/admin/login') {
+    return <>{children}</>
+  }
 
   if (checking) {
     return (
@@ -154,7 +164,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </nav>
 
         {/* Footer */}
-        <div className="border-t border-[var(--border)] p-4 shrink-0">
+        <div className="border-t border-[var(--border)] p-4 shrink-0 flex flex-col gap-2">
           <Link
             href="/"
             className="flex items-center gap-2 text-xs text-[var(--muted)] hover:text-[var(--foreground)] transition-colors"
@@ -164,6 +174,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </svg>
             Volver al sitio
           </Link>
+          <button
+            onClick={async () => {
+              await supabaseBrowser.auth.signOut()
+              window.location.href = '/admin/login'
+            }}
+            className="flex items-center gap-2 text-xs text-red-500 hover:text-red-400 transition-colors"
+          >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+            </svg>
+            Cerrar sesión
+          </button>
         </div>
       </aside>
 

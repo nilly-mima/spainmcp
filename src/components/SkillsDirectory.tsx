@@ -458,8 +458,8 @@ export default function SkillsDirectory({ skills, total, initialSearch = '' }: {
                         {skill.verified && <VerifiedIcon />}
                       </div>
                       <div className="flex items-center gap-1 text-stone-400 dark:text-stone-500 text-xs shrink-0">
-                        <StarIcon />
-                        <span>{fmtNum(skill.stars)}</span>
+                        <DownloadIcon />
+                        <span>{fmtNum(skill.installs)}</span>
                       </div>
                     </div>
 

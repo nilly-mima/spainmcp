@@ -289,7 +289,6 @@ export default function SkillDetailClient({ skill }: { skill: Skill }) {
               {skill.verified && <VerifiedIcon />}
             </div>
             <div className="flex items-center gap-4 text-xs text-stone-400 mt-1">
-              <span className="flex items-center gap-1"><StarIcon /> {skill.stars.toLocaleString()}</span>
               <span className="flex items-center gap-1"><DownloadIcon /> {skill.installs.toLocaleString()} installs</span>
             </div>
           </div>

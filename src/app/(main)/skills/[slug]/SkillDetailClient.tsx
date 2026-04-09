@@ -269,9 +269,6 @@ export default function SkillDetailClient({ skill }: { skill: SkillFull }) {
             </div>
             <div className="flex items-center gap-3 text-xs text-[var(--muted)] mt-0.5 flex-wrap">
               <span className="flex items-center gap-1">
-                <StarIcon /> {(skill.stars ?? 0).toLocaleString()}
-              </span>
-              <span className="flex items-center gap-1">
                 <DownloadIcon /> {(skill.installs ?? 0).toLocaleString()} installs
               </span>
             </div>

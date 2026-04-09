@@ -62,12 +62,15 @@ export default function PublishSkillPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/>
               </svg>
             </div>
-            <h1 className="text-xl font-bold text-stone-900 dark:text-stone-100">Skill publicada</h1>
+            <h1 className="text-xl font-bold text-stone-900 dark:text-stone-100">Skill guardada como borrador</h1>
           </div>
           <p className="text-sm text-stone-500 dark:text-stone-400 mb-4">
-            Tu skill <strong>@{ns}/{slug}</strong> ya esta disponible en el directorio de SpainMCP.
+            Tu skill <strong>@{ns}/{slug}</strong> se ha guardado correctamente. Ve a tu Dashboard para solicitar revisión y hacerla pública.
           </p>
-          <a href="/guias" className="text-sm text-blue-600 hover:underline">← Ver directorio de Skills</a>
+          <div className="flex flex-col gap-2">
+            <a href="/account/dashboard" className="text-sm text-blue-600 hover:underline">→ Ir a mi Dashboard</a>
+            <a href="/guias" className="text-sm text-stone-400 hover:underline">← Ver directorio de Skills</a>
+          </div>
         </div>
       </div>
     )

@@ -285,10 +285,10 @@ export default function PublishMcpPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/>
               </svg>
             </div>
-            <h1 className="text-xl font-bold text-stone-900 dark:text-stone-100">MCP publicado</h1>
+            <h1 className="text-xl font-bold text-stone-900 dark:text-stone-100">MCP guardado como borrador</h1>
           </div>
           <p className="text-sm text-stone-500 dark:text-stone-400 mb-6">
-            Tu MCP está disponible en el gateway de SpainMCP.
+            Tu MCP se ha registrado correctamente. Ve a tu Dashboard para solicitar revisión y hacerlo público en el directorio.
           </p>
           <div className="space-y-3 mb-6">
             <div>
@@ -307,9 +307,14 @@ export default function PublishMcpPage() {
               </div>
             </div>
           </div>
-          <Link href="/mcps" className="block text-center text-sm text-stone-400 hover:text-stone-700 dark:hover:text-stone-300 transition-colors">
-            ← Ver directorio de MCPs
-          </Link>
+          <div className="flex flex-col gap-2 items-center">
+            <Link href="/account/dashboard" className="text-sm text-blue-600 hover:underline">
+              → Ir a mi Dashboard
+            </Link>
+            <Link href="/mcps" className="text-sm text-stone-400 hover:text-stone-700 dark:hover:text-stone-300 transition-colors">
+              ← Ver directorio de MCPs
+            </Link>
+          </div>
         </div>
       </div>
     )

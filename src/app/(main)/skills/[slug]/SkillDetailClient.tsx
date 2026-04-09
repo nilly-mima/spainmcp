@@ -178,12 +178,12 @@ function SkillMd({ content }: { content: string }) {
 
 /* ── Agents list ── */
 const AGENTS = [
-  { label: 'Claude Code',    color: '#D97706', flag: 'claude-code',  path: '.claude/skills' },
-  { label: 'Cursor',         color: '#1A1A2E', flag: 'cursor',       path: '.cursor/skills' },
-  { label: 'Gemini CLI',     color: '#4285F4', flag: 'gemini',       path: '.gemini/skills' },
-  { label: 'Codex',          color: '#10A37F', flag: 'codex',        path: '.codex/skills' },
-  { label: 'Windsurf',       color: '#06B6D4', flag: 'windsurf',     path: '.windsurf/skills' },
-  { label: 'GitHub Copilot', color: '#24292F', flag: 'copilot',      path: '.vscode/skills' },
+  { label: 'Claude Code',    color: '#D97706', flag: 'claude-code',  path: '.claude/skills',    logo: '/logos/agents/claude.svg' },
+  { label: 'Cursor',         color: '#1A1A2E', flag: 'cursor',       path: '.cursor/skills',    logo: '/logos/agents/cursor.svg' },
+  { label: 'Gemini CLI',     color: '#4285F4', flag: 'gemini',       path: '.gemini/skills',    logo: '/logos/agents/gemini.svg' },
+  { label: 'Codex',          color: '#10A37F', flag: 'codex',        path: '.codex/skills',     logo: '/logos/agents/codex.svg' },
+  { label: 'Windsurf',       color: '#06B6D4', flag: 'windsurf',     path: '.windsurf/skills',  logo: '/logos/agents/windsurf.svg' },
+  { label: 'GitHub Copilot', color: '#24292F', flag: 'copilot',      path: '.vscode/skills',    logo: '/logos/agents/copilot.svg' },
   { label: 'Amp',            color: '#E85D2F', flag: 'amp',          path: '.amp/skills' },
   { label: 'Kilo Code',      color: '#7C3AED', flag: 'kilo-code',    path: '.kilocode/skills' },
   { label: 'Cline',          color: '#F97316', flag: 'cline',        path: '.cline/skills' },
@@ -412,10 +412,11 @@ export default function SkillDetailClient({ skill }: { skill: SkillFull }) {
                         className="flex items-center gap-3 px-4 py-3 hover:bg-blue-50 dark:hover:bg-blue-950/20 transition-colors text-left"
                       >
                         <div
-                          className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-xs font-bold shrink-0"
+                          className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-xs font-bold shrink-0 overflow-hidden"
                           style={{ background: a.color }}
                         >
-                          {a.label[0]}
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={a.logo} alt={a.label} className="w-5 h-5 object-contain" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; (e.target as HTMLImageElement).parentElement!.textContent = a.label[0] }} />
                         </div>
                         <span className="text-sm text-[var(--foreground)]">{a.label}</span>
                       </button>

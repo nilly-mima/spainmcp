@@ -78,7 +78,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     supabaseBrowser.auth.getSession().then(({ data }) => {
       const email = data.session?.user?.email
       if (!isAdmin(email)) {
-        router.replace('/login?next=/admin')
+        router.replace('/admin/login')
       } else {
         setChecking(false)
       }

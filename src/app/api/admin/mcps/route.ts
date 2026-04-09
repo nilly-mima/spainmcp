@@ -17,6 +17,18 @@ export async function GET(req: NextRequest) {
   }
 
   const supabase = getServiceClient()
+  const id = req.nextUrl.searchParams.get('id')
+
+  if (id) {
+    const { data, error } = await supabase
+      .from('mcp_catalog')
+      .select('*')
+      .eq('id', id)
+      .single()
+    if (error) return NextResponse.json({ error: error.message }, { status: 404 })
+    return NextResponse.json({ mcp: data })
+  }
+
   const { data, error } = await supabase
     .from('mcp_catalog')
     .select('*')

@@ -37,7 +37,6 @@ export default async function Header() {
             </svg>
             SpainMCP
           </Link>
-          <HeaderProBadge />
         </div>
 
         {/* Centro contextual: GitHub en home, buscador en MCPs/Skills, nada en el resto */}

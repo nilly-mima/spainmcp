@@ -64,11 +64,6 @@ export default function UserMenu() {
         <div className="w-8 h-8 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold flex items-center justify-center transition-colors">
           {initial}
         </div>
-        {tier === 'pro' && (
-          <span className="text-xs font-bold px-1.5 py-0.5 rounded-full bg-purple-600 text-white leading-none">
-            Pro
-          </span>
-        )}
       </button>
 
       {open && (

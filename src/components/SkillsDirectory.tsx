@@ -7,19 +7,20 @@ import { Skill } from '@/lib/skills'
 const PAGE_SIZE = 15
 
 const CATS = [
-  { id: null,            label: 'Todos' },
-  { id: 'Research',      label: 'Investigación' },
-  { id: 'Coding',        label: 'Programación' },
-  { id: 'Writing',       label: 'Escritura' },
-  { id: 'Data & Analytics', label: 'Datos y Análisis' },
-  { id: 'Design',        label: 'Diseño' },
-  { id: 'Planning',      label: 'Planificación' },
-  { id: 'Communication', label: 'Comunicación' },
-  { id: 'Productivity',  label: 'Productividad' },
-  { id: 'DevOps',        label: 'DevOps' },
-  { id: 'AI & ML',       label: 'IA y ML' },
-  { id: 'Security',      label: 'Seguridad' },
-  { id: 'Business',      label: 'Negocio' },
+  { id: null,               label: 'Todos' },
+  { id: 'investigación',    label: 'Investigación' },
+  { id: 'programación',     label: 'Programación' },
+  { id: 'escritura',        label: 'Escritura' },
+  { id: 'datos',            label: 'Datos y Análisis' },
+  { id: 'automatización',   label: 'Automatización' },
+  { id: 'general',          label: 'General' },
+  // Legacy English IDs (for imported skills)
+  { id: 'Research',         label: 'Research' },
+  { id: 'Coding',           label: 'Coding' },
+  { id: 'Writing',          label: 'Writing' },
+  { id: 'Data & Analytics', label: 'Data & Analytics' },
+  { id: 'Design',           label: 'Diseño' },
+  { id: 'Business',         label: 'Negocio' },
 ]
 
 /* ── Icons ── */
@@ -91,18 +92,19 @@ function GithubIcon() {
 }
 
 const CAT_ICONS: Record<string, React.ReactNode> = {
-  'Research':      <SearchIcon />,
-  'Coding':        <CodeIcon />,
-  'Writing':       <PencilIcon />,
+  'investigación':    <SearchIcon />,
+  'programación':     <CodeIcon />,
+  'escritura':        <PencilIcon />,
+  'datos':            <BarChartIcon />,
+  'automatización':   <ZapIcon />,
+  'general':          <GridIcon />,
+  // Legacy English
+  'Research':         <SearchIcon />,
+  'Coding':           <CodeIcon />,
+  'Writing':          <PencilIcon />,
   'Data & Analytics': <BarChartIcon />,
-  'Design':        <PaletteIcon />,
-  'Planning':      <CalendarIcon />,
-  'Communication': <MessageIcon />,
-  'Productivity':  <ZapIcon />,
-  'DevOps':        <ServerIcon />,
-  'AI & ML':       <CpuIcon />,
-  'Security':      <ShieldIcon />,
-  'Business':      <BriefcaseIcon />,
+  'Design':           <PaletteIcon />,
+  'Business':         <BriefcaseIcon />,
 }
 
 /* ── Creator icon ── */

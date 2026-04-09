@@ -42,19 +42,21 @@ export function usePlan(): { tier: PlanTier; loading: boolean } {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Check localStorage cache first for instant render
-    const cached = readCache()
-    if (cached !== null) {
-      setTier(cached)
-      setLoading(false)
-      return
-    }
-
-    // Need user email to call usage API
+    // Always check session first — cache is only valid if user is logged in
     supabaseBrowser.auth.getSession().then(async ({ data }) => {
       const email = data.session?.user?.email
       if (!email) {
+        // Not logged in — clear cache and show nothing
+        localStorage.removeItem(CACHE_KEY)
         setTier(null)
+        setLoading(false)
+        return
+      }
+
+      // Check localStorage cache for instant render
+      const cached = readCache()
+      if (cached !== null) {
+        setTier(cached)
         setLoading(false)
         return
       }

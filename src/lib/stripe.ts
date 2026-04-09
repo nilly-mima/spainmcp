@@ -10,16 +10,10 @@ let _stripe: Stripe | null = null
 
 export function getStripe(): Stripe {
   if (!_stripe) {
-    _stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? '')
+    if (!process.env.STRIPE_SECRET_KEY) {
+      throw new Error('STRIPE_SECRET_KEY not configured')
+    }
+    _stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
   }
   return _stripe
 }
-
-// Re-export as lazy singleton — import { stripe } from '@/lib/stripe' then use stripe.xxx
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const stripe: Stripe = new Proxy({} as any, {
-  get(_, prop) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (getStripe() as any)[prop]
-  },
-})

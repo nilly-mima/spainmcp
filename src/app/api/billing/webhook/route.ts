@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { stripe } from '@/lib/stripe'
+import { getStripe } from '@/lib/stripe'
 import type Stripe from 'stripe'
 
 // Next.js App Router: disable body parsing so we can verify Stripe signature
@@ -21,7 +21,7 @@ async function setTier(email: string, tier: 'free' | 'pro') {
 
 async function emailFromCustomer(customerId: string): Promise<string | null> {
   try {
-    const customer = await stripe.customers.retrieve(customerId)
+    const customer = await getStripe().customers.retrieve(customerId)
     if (customer.deleted) return null
     return (customer as Stripe.Customer).email ?? null
   } catch {
@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
 
   let event: Stripe.Event
   try {
-    event = stripe.webhooks.constructEvent(
+    event = getStripe().webhooks.constructEvent(
       Buffer.from(rawBody),
       sig,
       process.env.STRIPE_WEBHOOK_SECRET!

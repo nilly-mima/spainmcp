@@ -2,6 +2,7 @@ import Link from 'next/link'
 import PublishDropdown from './PublishDropdown'
 import UserMenu from './UserMenu'
 import HeaderSearch from './HeaderSearch'
+import HeaderProBadge from './HeaderProBadge'
 import { getAllMcps } from '@/lib/mcps'
 
 async function getGitHubStars(): Promise<number> {
@@ -26,15 +27,18 @@ export default async function Header() {
       <div className="max-w-6xl mx-auto px-6 h-14 flex items-center gap-4">
 
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 font-bold text-base text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors shrink-0">
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <rect x="1"  y="1"  width="8" height="8" rx="2" fill="#2563EB"/>
-            <rect x="11" y="1"  width="8" height="8" rx="2" fill="#2563EB"/>
-            <rect x="1"  y="11" width="8" height="8" rx="2" fill="#2563EB"/>
-            <rect x="11" y="11" width="8" height="8" rx="2" fill="#2563EB"/>
-          </svg>
-          SpainMCP
-        </Link>
+        <div className="flex items-center gap-1 shrink-0">
+          <Link href="/" className="flex items-center gap-2 font-bold text-base text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <rect x="1"  y="1"  width="8" height="8" rx="2" fill="#2563EB"/>
+              <rect x="11" y="1"  width="8" height="8" rx="2" fill="#2563EB"/>
+              <rect x="1"  y="11" width="8" height="8" rx="2" fill="#2563EB"/>
+              <rect x="11" y="11" width="8" height="8" rx="2" fill="#2563EB"/>
+            </svg>
+            SpainMCP
+          </Link>
+          <HeaderProBadge />
+        </div>
 
         {/* Centro contextual: GitHub en home, buscador en MCPs/Skills, nada en el resto */}
         <HeaderSearch stars={stars} namespaces={namespaces} />

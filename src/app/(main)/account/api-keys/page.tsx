@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { supabaseBrowser } from '@/lib/supabase-client'
+import { usePlan } from '@/hooks/usePlan'
 
 type ApiKey = {
   id: string
@@ -14,11 +16,13 @@ type ApiKey = {
 
 export default function ApiKeysPage() {
   const router = useRouter()
+  const { tier } = usePlan()
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(true)
   const [keys, setKeys] = useState<ApiKey[]>([])
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editName, setEditName] = useState('')
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false)
 
   useEffect(() => {
     supabaseBrowser.auth.getSession().then(async ({ data }) => {
@@ -48,12 +52,21 @@ export default function ApiKeysPage() {
   }
 
   async function handleCreate() {
+    if (tier === 'free' && keys.length >= 3) {
+      setShowUpgradeModal(true)
+      return
+    }
     setLoading(true)
     const res = await fetch('/api/keys/request', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email }),
     })
+    if (res.status === 403) {
+      setShowUpgradeModal(true)
+      setLoading(false)
+      return
+    }
     const json = await res.json()
     if (json.success) {
       alert(`Tu nueva API key: ${json.key}\n\nGuardala ahora — no se mostrara de nuevo.`)
@@ -126,6 +139,18 @@ export default function ApiKeysPage() {
         </p>
       </div>
 
+      {/* Plan limit notice */}
+      {tier === 'free' && (
+        <div className="mt-4 flex items-center justify-between p-3 rounded-xl border border-amber-200 dark:border-amber-800/50 bg-amber-50 dark:bg-amber-950/20 text-sm">
+          <span className="text-amber-700 dark:text-amber-400">
+            Maximo 3 keys en plan gratuito ({keys.length}/3 usadas).
+          </span>
+          <Link href="/account/billing" className="text-xs font-semibold text-amber-700 dark:text-amber-400 hover:text-amber-900 dark:hover:text-amber-200 underline underline-offset-2 transition-colors">
+            Actualizar a Pro →
+          </Link>
+        </div>
+      )}
+
       {/* Count + Create button */}
       <div className="flex items-center justify-between mb-4 mt-6">
         <p className="text-sm text-[var(--muted)]">{keys.length} key{keys.length !== 1 ? 's' : ''}</p>
@@ -182,6 +207,49 @@ export default function ApiKeysPage() {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Upgrade modal */}
+      {showUpgradeModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+          onClick={() => setShowUpgradeModal(false)}
+        >
+          <div
+            className="bg-[var(--card)] border border-[var(--border)] rounded-2xl shadow-xl w-full max-w-sm p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-lg font-bold text-[var(--foreground)]">Limite alcanzado</h2>
+              <button
+                onClick={() => setShowUpgradeModal(false)}
+                className="text-[var(--muted)] hover:text-[var(--foreground)] transition-colors"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
+            </div>
+            <p className="text-sm text-[var(--muted)] mb-5">
+              Has alcanzado el limite del plan gratuito. Actualiza a Pro para crear API keys ilimitadas.
+            </p>
+            <div className="flex flex-col gap-2">
+              <Link
+                href="/account/billing"
+                className="w-full px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold text-center transition-colors"
+                onClick={() => setShowUpgradeModal(false)}
+              >
+                Actualizar a Pro — €29/mes
+              </Link>
+              <button
+                onClick={() => setShowUpgradeModal(false)}
+                className="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] text-sm font-medium text-[var(--foreground)] hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
         </div>
       )}
 

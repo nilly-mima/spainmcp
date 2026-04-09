@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabaseBrowser } from '@/lib/supabase-client'
+import { usePlan } from '@/hooks/usePlan'
 
 type Range = '7d' | '30d' | '90d'
 
@@ -24,6 +25,7 @@ type ActivityRow = {
 
 export default function DashboardPage() {
   const router = useRouter()
+  const { tier } = usePlan()
   const [email, setEmail] = useState('')
   const [range, setRange] = useState<Range>('30d')
   const [loading, setLoading] = useState(true)
@@ -91,7 +93,17 @@ export default function DashboardPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-[var(--foreground)]">Dashboard</h1>
+          <div className="flex items-center gap-2.5">
+            <h1 className="text-2xl font-bold text-[var(--foreground)]">Dashboard</h1>
+            {tier === 'pro' && (
+              <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-blue-600 text-white">Plan Pro</span>
+            )}
+            {tier === 'free' && (
+              <Link href="/account/billing" className="text-xs font-medium px-2 py-0.5 rounded-full border border-[var(--border)] text-[var(--muted)] hover:text-blue-600 hover:border-blue-400 transition-colors">
+                Plan gratuito
+              </Link>
+            )}
+          </div>
           <p className="text-sm text-[var(--muted)] mt-0.5">Resumen de actividad y uso de tu cuenta.</p>
         </div>
         <div className="flex items-center gap-1 bg-[var(--card)] border border-[var(--border)] rounded-xl p-1">
@@ -143,19 +155,34 @@ export default function DashboardPage() {
         {/* Quota used */}
         <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5">
           <p className="text-xs font-medium text-[var(--muted)] uppercase tracking-wide mb-2">Cuota mensual</p>
-          <p className="text-2xl font-bold text-[var(--foreground)] mb-2">
-            {loading ? '—' : (stats?.quota_used ?? 0).toLocaleString('es-ES')}
-            <span className="text-sm font-normal text-[var(--muted)]">
-              {' '}/ {(stats?.quota_limit ?? 25000).toLocaleString('es-ES')}
-            </span>
-          </p>
-          <div className="w-full h-1.5 bg-stone-100 dark:bg-stone-800 rounded-full overflow-hidden">
-            <div
-              className={`h-full rounded-full transition-all ${quotaColor}`}
-              style={{ width: `${quotaPct}%` }}
-            />
-          </div>
-          <p className="text-xs text-[var(--muted)] mt-1">{quotaPct}% usado este mes</p>
+          {tier === 'pro' ? (
+            <>
+              <p className="text-2xl font-bold text-[var(--foreground)] mb-2">
+                {loading ? '—' : (stats?.quota_used ?? 0).toLocaleString('es-ES')}
+                <span className="text-sm font-normal text-blue-500"> / Ilimitados</span>
+              </p>
+              <div className="w-full h-1.5 bg-blue-100 dark:bg-blue-950/40 rounded-full overflow-hidden">
+                <div className="h-full rounded-full bg-blue-500" style={{ width: '2%' }} />
+              </div>
+              <p className="text-xs text-blue-500 mt-1 font-medium">Sin limite en plan Pro</p>
+            </>
+          ) : (
+            <>
+              <p className="text-2xl font-bold text-[var(--foreground)] mb-2">
+                {loading ? '—' : (stats?.quota_used ?? 0).toLocaleString('es-ES')}
+                <span className="text-sm font-normal text-[var(--muted)]">
+                  {' '}/ {(stats?.quota_limit ?? 25000).toLocaleString('es-ES')}
+                </span>
+              </p>
+              <div className="w-full h-1.5 bg-stone-100 dark:bg-stone-800 rounded-full overflow-hidden">
+                <div
+                  className={`h-full rounded-full transition-all ${quotaColor}`}
+                  style={{ width: `${quotaPct}%` }}
+                />
+              </div>
+              <p className="text-xs text-[var(--muted)] mt-1">{quotaPct}% usado este mes</p>
+            </>
+          )}
         </div>
       </div>
 

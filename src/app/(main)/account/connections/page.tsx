@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabaseBrowser } from '@/lib/supabase-client'
 import Link from 'next/link'
+import { usePlan } from '@/hooks/usePlan'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -115,12 +116,14 @@ const STATUS_BADGE: Record<string, string> = {
 
 export default function ConnectionsPage() {
   const router = useRouter()
+  const { tier } = usePlan()
   const [apiKey, setApiKey] = useState<string | null>(null)
   const [namespaces, setNamespaces] = useState<Namespace[]>([])
   const [selectedNs, setSelectedNs] = useState<string | null>(null)
   const [connections, setConnections] = useState<Connection[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false)
   // Per-MCP loading state: id → 'connecting' | 'disconnecting' | null
   const [actionPending, setActionPending] = useState<Record<string, string>>({})
 
@@ -212,7 +215,11 @@ export default function ConnectionsPage() {
       })
       const data = await res.json()
       if (!res.ok) {
-        setError(data.error ?? 'Error al conectar')
+        if (res.status === 403) {
+          setShowUpgradeModal(true)
+        } else {
+          setError(data.error ?? 'Error al conectar')
+        }
         return
       }
       // If OAuth and there's an authorizationUrl, open it
@@ -321,7 +328,7 @@ export default function ConnectionsPage() {
   return (
     <div className="max-w-4xl mx-auto py-8 px-4">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Conexiones</h1>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
@@ -347,6 +354,24 @@ export default function ConnectionsPage() {
           </div>
         )}
       </div>
+
+      {/* Plan banner */}
+      {tier === 'free' && (
+        <div className="mb-6 flex items-center justify-between p-3 rounded-xl border border-amber-200 dark:border-amber-800/50 bg-amber-50 dark:bg-amber-950/20 text-sm">
+          <span className="text-amber-700 dark:text-amber-400">
+            Plan gratuito: maximo 3 conexiones.
+          </span>
+          <Link href="/account/billing" className="text-xs font-semibold text-amber-700 dark:text-amber-400 hover:text-amber-900 dark:hover:text-amber-200 underline underline-offset-2 transition-colors">
+            Actualizar a Pro →
+          </Link>
+        </div>
+      )}
+      {tier === 'pro' && (
+        <div className="mb-6 flex items-center gap-2 p-3 rounded-xl border border-green-200 dark:border-green-800/50 bg-green-50 dark:bg-green-950/20 text-sm text-green-700 dark:text-green-400">
+          <span className="w-2 h-2 rounded-full bg-green-500 shrink-0" />
+          Plan Pro — conexiones ilimitadas
+        </div>
+      )}
 
       {error && (
         <div className="mb-6 p-3 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm">
@@ -550,6 +575,49 @@ export default function ConnectionsPage() {
           </p>
         )}
       </section>
+
+      {/* Upgrade modal */}
+      {showUpgradeModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+          onClick={() => setShowUpgradeModal(false)}
+        >
+          <div
+            className="bg-[var(--card)] border border-[var(--border)] rounded-2xl shadow-xl w-full max-w-sm p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-lg font-bold text-[var(--foreground)]">Limite alcanzado</h2>
+              <button
+                onClick={() => setShowUpgradeModal(false)}
+                className="text-[var(--muted)] hover:text-[var(--foreground)] transition-colors"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
+            </div>
+            <p className="text-sm text-[var(--muted)] mb-5">
+              Has alcanzado el limite del plan gratuito. Actualiza a Pro para conexiones ilimitadas.
+            </p>
+            <div className="flex flex-col gap-2">
+              <Link
+                href="/account/billing"
+                className="w-full px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold text-center transition-colors"
+                onClick={() => setShowUpgradeModal(false)}
+              >
+                Actualizar a Pro — €29/mes
+              </Link>
+              <button
+                onClick={() => setShowUpgradeModal(false)}
+                className="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] text-sm font-medium text-[var(--foreground)] hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

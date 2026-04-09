@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from 'react'
 import Link from 'next/link'
 import { supabaseBrowser } from '@/lib/supabase-client'
+import { usePlan } from '@/hooks/usePlan'
 
 type User = { email?: string } | null
 
@@ -10,6 +11,7 @@ export default function UserMenu() {
   const [user, setUser] = useState<User | undefined>(undefined)
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
+  const { tier } = usePlan()
 
   useEffect(() => {
     supabaseBrowser.auth.getSession().then(({ data }) => {
@@ -56,17 +58,29 @@ export default function UserMenu() {
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(v => !v)}
-        className="w-8 h-8 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold flex items-center justify-center transition-colors"
+        className="flex items-center gap-1.5"
         title={user.email}
       >
-        {initial}
+        <div className="w-8 h-8 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold flex items-center justify-center transition-colors">
+          {initial}
+        </div>
+        {tier === 'pro' && (
+          <span className="text-xs font-bold px-1.5 py-0.5 rounded-full bg-purple-600 text-white leading-none">
+            Pro
+          </span>
+        )}
       </button>
 
       {open && (
         <div className="absolute right-0 top-full mt-2 w-56 bg-[var(--card)] border border-[var(--border)] rounded-xl shadow-lg py-1 z-50">
           {/* User info */}
           <div className="px-3 py-2.5 border-b border-[var(--border)]">
-            <p className="text-sm font-semibold text-[var(--foreground)]">@{username}</p>
+            <div className="flex items-center gap-2">
+              <p className="text-sm font-semibold text-[var(--foreground)]">@{username}</p>
+              {tier === 'pro' && (
+                <span className="text-xs font-bold px-1.5 py-0.5 rounded-full bg-purple-600 text-white leading-none">Pro</span>
+              )}
+            </div>
             <p className="text-xs text-[var(--muted)] truncate">{user.email}</p>
           </div>
 

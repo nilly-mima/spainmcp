@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { authenticateRequest } from '@/lib/api-auth'
+import { checkPlanLimit } from '@/lib/plan-limits'
 
 function getServiceClient() {
   return createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
@@ -38,6 +39,17 @@ export async function POST(req: NextRequest) {
   }
 
   const supabase = getServiceClient()
+
+  const planCheck = await checkPlanLimit(supabase, auth.userId, 'namespaces')
+  if (!planCheck.allowed) {
+    return NextResponse.json(
+      {
+        error: `Has alcanzado el límite de ${planCheck.limit} namespaces en el plan gratuito. Actualiza a Pro para ilimitados.`,
+      },
+      { status: 403 }
+    )
+  }
+
   const { data, error } = await supabase
     .from('namespaces')
     .insert({ name, owner_id: auth.userId })

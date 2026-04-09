@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { authenticateRequest } from '@/lib/api-auth'
 
 function getServiceClient() {
   return createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
@@ -13,14 +14,24 @@ export async function GET(req: NextRequest) {
   const pageSize = Math.min(100, Math.max(1, parseInt(searchParams.get('pageSize') ?? '20', 10) || 20))
   const offset = (page - 1) * pageSize
 
+  const auth = await authenticateRequest(req)
+  const requestorEmail = auth?.email ?? auth?.userId ?? null
+
   const supabase = getServiceClient()
 
   let query = supabase
     .from('mcp_servers')
-    .select('namespace, display_name, description, is_verified, install_count, owner_email, created_at', { count: 'exact' })
+    .select('namespace, display_name, description, is_verified, is_private, install_count, owner_email, created_at', { count: 'exact' })
     .eq('is_active', true)
     .order('created_at', { ascending: false })
     .range(offset, offset + pageSize - 1)
+
+  // Unauthenticated: only public servers. Authenticated: public + own private servers.
+  if (requestorEmail) {
+    query = query.or(`is_private.eq.false,owner_email.eq.${requestorEmail}`)
+  } else {
+    query = query.eq('is_private', false)
+  }
 
   if (q) {
     query = query.or(`display_name.ilike.%${q}%,description.ilike.%${q}%`)

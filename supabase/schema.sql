@@ -5,6 +5,10 @@
 
 -- Tabla existente: api_keys
 -- (ya creada en sesiones anteriores)
+-- Columnas nuevas — ejecutar si no existen:
+--   ALTER TABLE api_keys ADD COLUMN IF NOT EXISTS tier TEXT NOT NULL DEFAULT 'free';
+--   ALTER TABLE api_keys ADD COLUMN IF NOT EXISTS stripe_customer_id TEXT;
+--   CREATE INDEX IF NOT EXISTS idx_api_keys_stripe_customer ON api_keys(stripe_customer_id);
 
 -- ── Nueva tabla: mcp_servers (registry de MCPs publicados) ──
 

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { authenticateRequest } from '@/lib/api-auth'
+import { checkPlanLimit } from '@/lib/plan-limits'
 import { randomUUID } from 'crypto'
 
 function getServiceClient() {
@@ -66,6 +67,16 @@ export async function POST(
   const supabase = getServiceClient()
   const { ns, err, status } = await resolveNamespace(supabase, namespace, auth.userId)
   if (!ns) return NextResponse.json({ error: err }, { status })
+
+  const planCheck = await checkPlanLimit(supabase, auth.userId, 'connections')
+  if (!planCheck.allowed) {
+    return NextResponse.json(
+      {
+        error: `Has alcanzado el límite de ${planCheck.limit} connections en el plan gratuito. Actualiza a Pro para ilimitados.`,
+      },
+      { status: 403 }
+    )
+  }
 
   const connectionId = body.connectionId ?? randomUUID().replace(/-/g, '').slice(0, 12)
 

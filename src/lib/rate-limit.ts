@@ -96,11 +96,27 @@ export async function checkRateLimit(userId: string): Promise<RateLimitResult> {
   // for the response headers, so we fire-and-forget only when we already have a
   // cached entry. On a true cold miss we do the query.
 
-  const plan = 'free'
-  const limit = plan === 'free' ? FREE_LIMIT : PRO_LIMIT
+  const supabase = getServiceClient()
+
+  // Resolve tier from api_keys (email-based) or default free for UUID auth
+  let plan = 'free'
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(userId)
+  if (!isUuid) {
+    const { data: keyData } = await supabase
+      .from('api_keys')
+      .select('tier')
+      .eq('email', userId)
+      .eq('is_active', true)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    plan = (keyData?.tier as string) ?? 'free'
+  }
+
+  const limit = plan === 'pro' ? PRO_LIMIT : FREE_LIMIT
 
   const used = await countRpcs(userId)
-  const allowed = used < limit
+  const allowed = plan === 'pro' || used < limit
 
   const result: RateLimitResult = { allowed, used, limit, plan }
   cache.set(userId, { result, expiresAt: now + 60_000 })
@@ -111,4 +127,25 @@ export async function checkRateLimit(userId: string): Promise<RateLimitResult> {
 // reflects the new count. This is a best-effort invalidation — not guaranteed.
 export function invalidateRateLimitCache(userId: string): void {
   cache.delete(userId)
+}
+
+export async function logRpc(
+  supabase: ReturnType<typeof getServiceClient>,
+  params: {
+    connectionId: string
+    namespaceId: string
+    tool: string
+    latencyMs: number
+    status: 'success' | 'error'
+  }
+): Promise<void> {
+  await supabase.from('connection_logs').insert({
+    connection_id: params.connectionId,
+    namespace_id: params.namespaceId,
+    method: 'tools/call',
+    tool_name: params.tool,
+    duration_ms: params.latencyMs,
+    status_code: params.status === 'success' ? 200 : 500,
+    error: params.status === 'error' ? 'error' : null,
+  })
 }

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { authenticateRequest } from '@/lib/api-auth'
+import { checkPlanLimit } from '@/lib/plan-limits'
 
 function getServiceClient() {
   return createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
@@ -62,6 +63,7 @@ export async function PUT(
     description?: string
     upstreamUrl?: string
     configSchema?: Record<string, unknown>
+    isPrivate?: boolean
   }
   try {
     body = await req.json()
@@ -69,7 +71,7 @@ export async function PUT(
     return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
   }
 
-  const { displayName, description, upstreamUrl, configSchema } = body
+  const { displayName, description, upstreamUrl, configSchema, isPrivate } = body
 
   if (!displayName || typeof displayName !== 'string') {
     return NextResponse.json({ error: 'displayName is required' }, { status: 400 })
@@ -82,6 +84,28 @@ export async function PUT(
   }
 
   const supabase = getServiceClient()
+
+  const ownerEmail = auth.email ?? auth.userId
+
+  const planCheck = await checkPlanLimit(supabase, ownerEmail, 'servers')
+  if (!planCheck.allowed) {
+    // Only block if this is a new server (not an upsert update of an existing one)
+    const { data: existing } = await supabase
+      .from('mcp_servers')
+      .select('namespace')
+      .eq('namespace', qualifiedName)
+      .eq('owner_email', ownerEmail)
+      .maybeSingle()
+
+    if (!existing) {
+      return NextResponse.json(
+        {
+          error: `Has alcanzado el límite de ${planCheck.limit} servers en el plan gratuito. Actualiza a Pro para ilimitados.`,
+        },
+        { status: 403 }
+      )
+    }
+  }
 
   // If qualifiedName contains "/", verify namespace ownership
   if (qualifiedName.includes('/')) {
@@ -105,8 +129,9 @@ export async function PUT(
     display_name: displayName,
     description: description ?? '',
     upstream_url: upstreamUrl,
-    owner_email: auth.email ?? auth.userId,
+    owner_email: ownerEmail,
     is_active: true,
+    is_private: isPrivate === true,
   }
   if (configSchema !== undefined) {
     upsertPayload.config_schema = configSchema
@@ -144,17 +169,26 @@ export async function GET(
   const { qualifiedName: rawParam } = await params
   const qualifiedName = decodeURIComponent(rawParam)
 
+  const auth = await authenticateRequest(req)
   const supabase = getServiceClient()
 
   const { data, error } = await supabase
     .from('mcp_servers')
-    .select('namespace, display_name, description, upstream_url, owner_email, is_active, is_verified, install_count, last_used_at, created_at')
+    .select('namespace, display_name, description, upstream_url, owner_email, is_active, is_verified, is_private, install_count, last_used_at, created_at')
     .eq('namespace', qualifiedName)
     .eq('is_active', true)
     .single()
 
   if (error || !data) {
     return NextResponse.json({ error: 'Server not found' }, { status: 404 })
+  }
+
+  // Private servers are only visible to their owner
+  if (data.is_private) {
+    const requestorEmail = auth?.email ?? auth?.userId
+    if (!requestorEmail || requestorEmail !== data.owner_email) {
+      return NextResponse.json({ error: 'Server not found' }, { status: 404 })
+    }
   }
 
   return NextResponse.json({
@@ -165,6 +199,7 @@ export async function GET(
     ownerEmail: data.owner_email,
     isActive: data.is_active,
     isVerified: data.is_verified,
+    isPrivate: data.is_private ?? false,
     useCount: data.install_count,
     lastUsedAt: data.last_used_at,
     createdAt: data.created_at,

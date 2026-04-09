@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { supabaseBrowser } from '@/lib/supabase-client'
 import { usePlan } from '@/hooks/usePlan'
 
-type User = { email?: string } | null
+type User = { email?: string; user_metadata?: { avatar_url?: string; full_name?: string; name?: string; picture?: string } } | null
 
 export default function UserMenu() {
   const [user, setUser] = useState<User | undefined>(undefined)
@@ -51,7 +51,8 @@ export default function UserMenu() {
   }
 
   const initial = (user.email ?? '?')[0].toUpperCase()
-  const username = user.email?.split('@')[0] ?? 'user'
+  const avatarUrl = user.user_metadata?.avatar_url ?? user.user_metadata?.picture ?? null
+  const username = user.user_metadata?.name ?? user.user_metadata?.full_name ?? user.email?.split('@')[0] ?? 'user'
   const linkClass = "flex items-center gap-2.5 px-3 py-2 text-sm text-[var(--foreground)] hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
 
   return (
@@ -61,9 +62,14 @@ export default function UserMenu() {
         className="flex items-center gap-1.5"
         title={user.email}
       >
-        <div className="w-8 h-8 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold flex items-center justify-center transition-colors">
-          {initial}
-        </div>
+        {avatarUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={avatarUrl} alt="" className="w-8 h-8 rounded-full object-cover border border-stone-200 dark:border-stone-700" referrerPolicy="no-referrer" />
+        ) : (
+          <div className="w-8 h-8 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold flex items-center justify-center transition-colors">
+            {initial}
+          </div>
+        )}
       </button>
 
       {open && (
@@ -71,7 +77,7 @@ export default function UserMenu() {
           {/* User info */}
           <div className="px-3 py-2.5 border-b border-[var(--border)]">
             <div className="flex items-center gap-2">
-              <p className="text-sm font-semibold text-[var(--foreground)]">@{username}</p>
+              <p className="text-sm font-semibold text-[var(--foreground)]">{username}</p>
               {tier === 'pro' && (
                 <span className="text-xs font-bold px-1.5 py-0.5 rounded-full bg-purple-600 text-white leading-none">Pro</span>
               )}

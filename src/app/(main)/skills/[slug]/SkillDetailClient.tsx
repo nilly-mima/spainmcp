@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import type { SkillFull } from './page'
+import type { SkillFull, FileNode } from './page'
 
 /* ── Icons ── */
 const StarIcon = () => <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
@@ -202,6 +202,83 @@ const AGENTS = [
   { label: 'Antigravity',    color: '#2563EB', flag: 'antigravity',  path: '.antigravity/skills', logo: gfav('antigravity.google') },
 ]
 
+/* ── GitHub file tree icons ── */
+const TreeFolderIcon = ({ open }: { open?: boolean }) => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0 text-blue-500">
+    {open
+      ? <path d="M5 19a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h4l2 2h6a2 2 0 0 1 2 2v1M5 19h14a2 2 0 0 0 2-2l-2-7H5l-2 7a2 2 0 0 0 2 2z"/>
+      : <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+    }
+  </svg>
+)
+const TreeFileIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="shrink-0 text-stone-400">
+    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
+  </svg>
+)
+
+/* ── FileTree component (pre-loaded, no client fetches) ── */
+function FileTree({ nodes, repoUrl }: { nodes: FileNode[]; repoUrl: string }) {
+  const [expanded, setExpanded] = useState<Set<string>>(new Set())
+
+  const toggle = (path: string) => {
+    setExpanded(prev => {
+      const next = new Set(prev)
+      next.has(path) ? next.delete(path) : next.add(path)
+      return next
+    })
+  }
+
+  // Extract owner/repo from repoUrl for building file links
+  const repoMatch = repoUrl.match(/github\.com\/([^/]+\/[^/]+)\/tree\/main\/(.+)/)
+  const repoSlug = repoMatch?.[1] ?? ''
+  const basePath = repoMatch?.[2] ?? ''
+
+  const renderNodes = (items: FileNode[], depth: number): React.ReactNode => {
+    return items.map(node => (
+      <div key={node.path}>
+        {node.type === 'dir' ? (
+          <button
+            onClick={() => toggle(node.path)}
+            className="flex items-center gap-2 w-full text-left py-1 px-1 rounded hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors text-sm text-[var(--foreground)]"
+            style={{ paddingLeft: `${depth * 16 + 4}px` }}
+          >
+            <span className="text-[10px] text-stone-400 w-3">{expanded.has(node.path) ? '▼' : '▶'}</span>
+            <TreeFolderIcon open={expanded.has(node.path)} />
+            <span>{node.name}</span>
+          </button>
+        ) : (
+          <a
+            href={`https://github.com/${repoSlug}/blob/main/${basePath}/${node.path}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 py-1 px-1 rounded hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors text-sm text-[var(--foreground)] hover:text-blue-600 dark:hover:text-blue-400"
+            style={{ paddingLeft: `${depth * 16 + 20}px` }}
+          >
+            <TreeFileIcon />
+            <span>{node.name}</span>
+          </a>
+        )}
+        {node.type === 'dir' && expanded.has(node.path) && node.children && (
+          renderNodes(node.children, depth + 1)
+        )}
+      </div>
+    ))
+  }
+
+  return (
+    <div className="flex flex-col gap-1">
+      <div className="flex items-center gap-2 text-xs text-[var(--muted)] mb-1">
+        <span>Repository</span>
+        <a href={repoUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline font-mono">
+          {repoSlug}
+        </a>
+      </div>
+      {renderNodes(nodes, 0)}
+    </div>
+  )
+}
+
 export default function SkillDetailClient({ skill }: { skill: SkillFull }) {
   const [copied, setCopied] = useState(false)
   const [agentQ, setAgentQ] = useState('')
@@ -269,7 +346,7 @@ export default function SkillDetailClient({ skill }: { skill: SkillFull }) {
             </div>
             <div className="flex items-center gap-3 text-xs text-[var(--muted)] mt-0.5 flex-wrap">
               <span className="flex items-center gap-1">
-                <DownloadIcon /> {(skill.installs ?? 0).toLocaleString()} installs
+                <DownloadIcon /> {new Intl.NumberFormat('es-ES').format(skill.installs ?? 0)} installs
               </span>
             </div>
           </div>
@@ -453,12 +530,16 @@ export default function SkillDetailClient({ skill }: { skill: SkillFull }) {
             <h3 className="flex items-center gap-2 text-sm font-semibold text-[var(--foreground)]">
               <FolderIcon /> Archivos
             </h3>
-            <button
-              onClick={downloadSkill}
-              className="flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 hover:underline w-fit"
-            >
-              <FileIcon /> SKILL.md
-            </button>
+            {skill.fileTree && skill.repoUrl ? (
+              <FileTree nodes={skill.fileTree} repoUrl={skill.repoUrl} />
+            ) : (
+              <button
+                onClick={downloadSkill}
+                className="flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 hover:underline w-fit"
+              >
+                <TreeFileIcon /> SKILL.md
+              </button>
+            )}
           </div>
         </div>
       </div>

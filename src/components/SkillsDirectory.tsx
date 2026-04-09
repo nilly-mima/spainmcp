@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect } from 'react'
 import Link from 'next/link'
 import { Skill } from '@/lib/skills'
 
-const PAGE_SIZE = 15
+const PAGE_SIZE = 24
 
 const CATS = [
   { id: null,               label: 'Todos' },
@@ -435,46 +435,44 @@ export default function SkillsDirectory({ skills, total, initialSearch = '' }: {
               Sin resultados para &ldquo;{query}&rdquo;
             </p>
           ) : (
-            <div className="flex flex-col gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 items-stretch">
               {visible.map((skill) => (
-                <div
+                <Link
                   key={skill.id}
-                  className="flex items-start gap-4 px-5 py-4 rounded-xl border border-gray-200 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
+                  href={skill.slug ? `/skills/${skill.slug}` : `/guias/${skill.id}`}
+                  className="group block h-full"
                 >
-                  {/* Creator icon */}
-                  <CreatorIcon creator={skill.creator} iconUrl={skill.icon_url} />
-
-                  {/* Content */}
-                  <div className="flex-1 min-w-0">
-                    {/* Top row: name + stars */}
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex items-center gap-1.5 min-w-0 flex-wrap">
-                        <Link
-                          href={skill.slug ? `/skills/${skill.slug}` : `/guias/${skill.id}`}
-                          className="text-stone-900 dark:text-white font-semibold text-sm hover:underline"
-                        >
-                          {skill.creator}/{skill.nombre}
-                        </Link>
-                        {skill.verified && <VerifiedIcon />}
-                      </div>
-                      <div className="flex items-center gap-1 text-stone-400 dark:text-stone-500 text-xs shrink-0">
-                        <DownloadIcon />
-                        <span>{fmtNum(skill.installs)}</span>
+                  <div className="bg-transparent rounded-xl p-3 h-full flex flex-col gap-2 transition-colors hover:bg-gray-50 dark:hover:bg-white/5 cursor-pointer border border-gray-200 dark:border-gray-700/50">
+                    <div className="flex items-start gap-3">
+                      <CreatorIcon creator={skill.creator} iconUrl={skill.icon_url} />
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-bold text-blue-600 dark:text-white text-sm leading-tight truncate group-hover:underline">
+                          {skill.nombre}
+                        </h3>
+                        <p className="text-xs text-stone-400 dark:text-stone-500 truncate mt-0.5 flex items-center gap-1">
+                          {skill.creator}/{skill.slug ?? skill.nombre.toLowerCase()}
+                          {skill.verified && <VerifiedIcon />}
+                        </p>
                       </div>
                     </div>
 
-                    {/* Description */}
-                    <p className="text-stone-600 dark:text-stone-400 text-sm mt-1 leading-relaxed line-clamp-2">
+                    <p className="text-xs text-stone-500 dark:text-stone-400 leading-relaxed flex-1 line-clamp-2">
                       {skill.descripcion}
                     </p>
 
-                    {/* Installs */}
-                    <div className="flex items-center gap-1 text-stone-400 dark:text-stone-500 text-xs mt-2">
-                      <DownloadIcon />
-                      <span>{fmtNum(skill.installs)} installs</span>
+                    <div className="flex items-center justify-between pt-1.5" style={{ borderTop: '1px solid var(--border)' }}>
+                      <span className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full text-stone-500 font-medium bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                        {skill.categoria}
+                      </span>
+                      {skill.installs > 0 && (
+                        <span className="text-xs text-stone-400 flex items-center gap-1">
+                          <DownloadIcon />
+                          {fmtNum(skill.installs)}
+                        </span>
+                      )}
                     </div>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           )}

@@ -43,7 +43,7 @@ function SkillIcon({ iconUrl, nombre, author }: { iconUrl: string | null; nombre
         alt={nombre}
         width={64}
         height={64}
-        className="w-16 h-16 rounded-xl object-contain border border-[var(--border)] shrink-0"
+        className="w-[40px] h-[40px] rounded-xl object-contain border border-[var(--border)] shrink-0"
         onError={() => setImgFailed(true)}
       />
     )
@@ -51,7 +51,7 @@ function SkillIcon({ iconUrl, nombre, author }: { iconUrl: string | null; nombre
 
   return (
     <div
-      className="w-16 h-16 rounded-xl flex items-center justify-center text-xl font-bold shrink-0"
+      className="w-[40px] h-[40px] rounded-xl flex items-center justify-center text-sm font-bold shrink-0"
       style={{ background: p.bg, color: p.text }}
     >
       {initials || '?'}
@@ -176,19 +176,30 @@ function SkillMd({ content }: { content: string }) {
   return <div className="flex flex-col gap-0.5">{nodes}</div>
 }
 
-/* ── Agents list ── */
+/* ── Agents list — logos via Google Favicon API (reliable, no CORS) ── */
+const gfav = (domain: string, size = 24) => `https://www.google.com/s2/favicons?domain=${domain}&sz=${size}`
 const AGENTS = [
-  { label: 'Claude Code',    color: '#D97706', flag: 'claude-code',  path: '.claude/skills',    logo: 'https://cdn.simpleicons.org/anthropic/white' },
-  { label: 'Cursor',         color: '#1A1A2E', flag: 'cursor',       path: '.cursor/skills',    logo: 'https://cursor.sh/favicon.ico' },
-  { label: 'Gemini CLI',     color: '#4285F4', flag: 'gemini',       path: '.gemini/skills',    logo: 'https://cdn.simpleicons.org/google/white' },
-  { label: 'Codex',          color: '#10A37F', flag: 'codex',        path: '.codex/skills',     logo: 'https://cdn.simpleicons.org/openai/white' },
-  { label: 'Windsurf',       color: '#06B6D4', flag: 'windsurf',     path: '.windsurf/skills',  logo: 'https://codeium.com/favicon.ico' },
-  { label: 'GitHub Copilot', color: '#24292F', flag: 'copilot',      path: '.vscode/skills',    logo: 'https://cdn.simpleicons.org/github/white' },
-  { label: 'Amp',            color: '#E85D2F', flag: 'amp',          path: '.amp/skills',       logo: 'https://cdn.simpleicons.org/amp/white' },
-  { label: 'Kilo Code',      color: '#7C3AED', flag: 'kilo-code',    path: '.kilocode/skills',  logo: 'https://cdn.simpleicons.org/visualstudiocode/white' },
-  { label: 'Cline',          color: '#F97316', flag: 'cline',        path: '.cline/skills',     logo: 'https://cdn.simpleicons.org/cline/white' },
-  { label: 'Roo Code',       color: '#8B5CF6', flag: 'roo-code',     path: '.roocode/skills',   logo: 'https://cdn.simpleicons.org/visualstudiocode/white' },
-  { label: 'VS Code',        color: '#0078D4', flag: 'vscode',       path: '.vscode/skills',    logo: 'https://cdn.simpleicons.org/visualstudiocode/white' },
+  { label: 'Claude Code',    color: '#D97706', flag: 'claude-code',  path: '.claude/skills',    logo: gfav('claude.ai') },
+  { label: 'Codex',          color: '#10A37F', flag: 'codex',        path: '.codex/skills',     logo: gfav('openai.com') },
+  { label: 'OpenClaw',       color: '#DC2626', flag: 'openclaw',     path: '.openclaw/skills',  logo: gfav('openclaw.ai') },
+  { label: 'Cursor',         color: '#000000', flag: 'cursor',       path: '.cursor/skills',    logo: gfav('cursor.com') },
+  { label: 'Amp',            color: '#FF4500', flag: 'amp',          path: '.amp/skills',       logo: gfav('ampcode.com') },
+  { label: 'GitHub Copilot', color: '#24292F', flag: 'copilot',      path: '.vscode/skills',    logo: gfav('github.com') },
+  { label: 'Gemini CLI',     color: '#4285F4', flag: 'gemini',       path: '.gemini/skills',    logo: gfav('gemini.google.com') },
+  { label: 'Kilo Code',      color: '#7C3AED', flag: 'kilo-code',    path: '.kilocode/skills',  logo: gfav('kilocode.ai') },
+  { label: 'Junie',          color: '#22C55E', flag: 'junie',        path: '.junie/skills',     logo: gfav('junie.jetbrains.com') },
+  { label: 'Replit',         color: '#F26207', flag: 'replit',       path: '.replit/skills',    logo: gfav('replit.com') },
+  { label: 'Windsurf',       color: '#06B6D4', flag: 'windsurf',     path: '.windsurf/skills',  logo: gfav('codeium.com') },
+  { label: 'Cline',          color: '#F97316', flag: 'cline',        path: '.cline/skills',     logo: gfav('cline.bot') },
+  { label: 'Continue',       color: '#6B7280', flag: 'continue',     path: '.continue/skills',  logo: gfav('continue.dev') },
+  { label: 'OpenCode',       color: '#3B82F6', flag: 'opencode',     path: '.opencode/skills',  logo: gfav('opencode.ai') },
+  { label: 'OpenHands',      color: '#EAB308', flag: 'openhands',    path: '.openhands/skills', logo: gfav('all-hands.dev') },
+  { label: 'Roo Code',       color: '#8B5CF6', flag: 'roo-code',     path: '.roocode/skills',   logo: gfav('roocode.com') },
+  { label: 'Augment',        color: '#6B7280', flag: 'augment',      path: '.augment/skills',   logo: gfav('augmentcode.com') },
+  { label: 'Goose',          color: '#1D4ED8', flag: 'goose',        path: '.goose/skills',     logo: gfav('block.github.io/goose') },
+  { label: 'Trae',           color: '#0EA5E9', flag: 'trae',         path: '.trae/skills',      logo: gfav('trae.ai') },
+  { label: 'Zencoder',       color: '#F97316', flag: 'zencoder',     path: '.zencoder/skills',  logo: gfav('zencoder.ai') },
+  { label: 'Antigravity',    color: '#2563EB', flag: 'antigravity',  path: '.antigravity/skills', logo: gfav('antigravity.google') },
 ]
 
 export default function SkillDetailClient({ skill }: { skill: SkillFull }) {
@@ -197,6 +208,7 @@ export default function SkillDetailClient({ skill }: { skill: SkillFull }) {
   const [selectedAgent, setSelectedAgent] = useState<typeof AGENTS[0] | null>(null)
   const [agentCopied, setAgentCopied] = useState(false)
   const [aboutExpanded, setAboutExpanded] = useState(false)
+  const [nameCopied, setNameCopied] = useState(false)
 
   const ABOUT_LIMIT = 180
   const author = skill.author ?? 'spainmcp'
@@ -238,15 +250,24 @@ export default function SkillDetailClient({ skill }: { skill: SkillFull }) {
               {skill.nombre}
             </h1>
             <div className="flex items-center gap-2 text-sm text-[var(--muted)]">
-              <span className="text-blue-600 dark:text-blue-400 font-medium font-mono">
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(`${author}/${skill.slug}`)
+                  setNameCopied(true)
+                  setTimeout(() => setNameCopied(false), 1500)
+                }}
+                className="text-blue-600 dark:text-blue-400 font-medium font-mono hover:underline cursor-pointer relative"
+              >
                 {author}/{skill.slug}
-              </span>
+                {nameCopied && (
+                  <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-stone-800 text-white text-xs px-2.5 py-1 rounded-md whitespace-nowrap pointer-events-none animate-fade-in">
+                    Copiado!
+                  </span>
+                )}
+              </button>
               {isVerified && <VerifiedIcon />}
             </div>
             <div className="flex items-center gap-3 text-xs text-[var(--muted)] mt-0.5 flex-wrap">
-              <span className="px-2 py-0.5 rounded-full bg-blue-600/10 text-blue-600 dark:text-blue-400 font-medium text-[11px]">
-                {catLabel}
-              </span>
               <span className="flex items-center gap-1">
                 <StarIcon /> {(skill.stars ?? 0).toLocaleString()}
               </span>
@@ -269,7 +290,7 @@ export default function SkillDetailClient({ skill }: { skill: SkillFull }) {
       {/* ── Tab bar ── */}
       <div className="border-b border-[var(--border)]">
         <button className="flex items-center gap-1.5 px-1 pb-2.5 text-sm font-medium border-b-2 border-blue-600 text-[var(--foreground)] -mb-px">
-          <InfoIcon /> Overview
+          <InfoIcon /> Resumen
         </button>
       </div>
 
@@ -282,7 +303,7 @@ export default function SkillDetailClient({ skill }: { skill: SkillFull }) {
           {/* About */}
           <div className="flex flex-col gap-2">
             <h2 className="flex items-center gap-2 text-base font-semibold text-[var(--foreground)]">
-              <InfoIcon /> About
+              <InfoIcon /> Acerca de
             </h2>
             <p className="text-sm text-[var(--muted)] leading-relaxed">
               {skill.descripcion && skill.descripcion.length > ABOUT_LIMIT && !aboutExpanded
@@ -306,7 +327,7 @@ export default function SkillDetailClient({ skill }: { skill: SkillFull }) {
                 <FileIcon /> SKILL.md
               </h2>
               <div
-                className="rounded-xl p-5 overflow-y-auto border border-[var(--border)] bg-[var(--card)]"
+                className="rounded-xl p-5 overflow-y-auto border border-[var(--border)] bg-[var(--card)] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-stone-200 dark:[&::-webkit-scrollbar-thumb]:bg-stone-700 [&::-webkit-scrollbar-thumb]:rounded-full"
                 style={{ maxHeight: '520px' }}
               >
                 <SkillMd content={skill.content} />
@@ -404,22 +425,23 @@ export default function SkillDetailClient({ skill }: { skill: SkillFull }) {
                       className="flex-1 text-sm bg-transparent outline-none text-[var(--foreground)] placeholder:text-[var(--muted)]"
                     />
                   </div>
-                  <div className="flex flex-col max-h-48 overflow-y-auto">
+                  <div className="flex flex-col max-h-48 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-stone-200 dark:[&::-webkit-scrollbar-thumb]:bg-stone-700 [&::-webkit-scrollbar-thumb]:rounded-full">
                     {filteredAgents.map(a => (
                       <button
                         key={a.flag}
                         onClick={() => setSelectedAgent(a)}
                         className="flex items-center gap-3 px-4 py-3 hover:bg-blue-50 dark:hover:bg-blue-950/20 transition-colors text-left"
                       >
-                        <div
-                          className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-xs font-bold shrink-0 overflow-hidden"
-                          style={{ background: a.color }}
-                        >
-                          {a.logo ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img src={a.logo} alt={a.label} className="w-4 h-4 object-contain" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; const p = (e.target as HTMLImageElement).parentElement; if (p) p.textContent = a.label[0] }} />
-                          ) : a.label[0]}
-                        </div>
+                        {a.logo ? (
+                          <div className="w-6 h-6 rounded-md flex items-center justify-center shrink-0 overflow-hidden bg-stone-100 dark:bg-stone-800 border border-stone-200 dark:border-stone-700">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={a.logo} alt={a.label} className="w-4 h-4 object-contain" onError={(e) => { const el = e.target as HTMLImageElement; el.style.display = 'none'; const p = el.parentElement; if (p) { p.style.background = a.color; p.classList.add('text-white', 'font-bold', 'text-xs'); p.textContent = a.label[0] } }} />
+                          </div>
+                        ) : (
+                          <div className="w-6 h-6 rounded-md flex items-center justify-center shrink-0 text-white font-bold text-[10px]" style={{ background: a.color }}>
+                            {a.label[0]}
+                          </div>
+                        )}
                         <span className="text-sm text-[var(--foreground)]">{a.label}</span>
                       </button>
                     ))}

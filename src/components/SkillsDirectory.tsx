@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import Link from 'next/link'
 import { Skill } from '@/lib/skills'
 
@@ -14,14 +14,39 @@ const CATS = [
   { id: 'datos',            label: 'Datos y Análisis' },
   { id: 'automatización',   label: 'Automatización' },
   { id: 'general',          label: 'General' },
-  // Legacy English IDs (for imported skills)
-  { id: 'Research',         label: 'Research' },
-  { id: 'Coding',           label: 'Coding' },
-  { id: 'Writing',          label: 'Writing' },
-  { id: 'Data & Analytics', label: 'Data & Analytics' },
-  { id: 'Design',           label: 'Diseño' },
-  { id: 'Business',         label: 'Negocio' },
+  { id: 'diseño',           label: 'Diseño' },
+  { id: 'negocio',          label: 'Negocio' },
+  { id: 'seguridad',        label: 'Seguridad' },
+  { id: 'productividad',    label: 'Productividad' },
+  { id: 'comunicación',     label: 'Comunicación' },
 ]
+
+/* ── Query parsing ── */
+function parseQuery(q: string) {
+  const tokens = q.split(/\s+/)
+  let verified = false
+  let category: string | null = null
+  let namespace: string | null = null
+  let ownerMe = false
+  const textParts: string[] = []
+
+  for (const t of tokens) {
+    if (t === 'is:verified') verified = true
+    else if (t === 'owner:me') ownerMe = true
+    else if (t.startsWith('category:')) category = t.slice('category:'.length)
+    else if (t.startsWith('namespace:')) namespace = t.slice('namespace:'.length)
+    else if (t.trim()) textParts.push(t)
+  }
+
+  return { verified, category, namespace, ownerMe, text: textParts.join(' ') }
+}
+
+function toggleToken(query: string, token: string): string {
+  if (query.includes(token)) {
+    return query.replace(token, '').replace(/\s+/g, ' ').trim()
+  }
+  return (query + ' ' + token).trim()
+}
 
 /* ── Icons ── */
 function SearchIcon() {
@@ -98,13 +123,11 @@ const CAT_ICONS: Record<string, React.ReactNode> = {
   'datos':            <BarChartIcon />,
   'automatización':   <ZapIcon />,
   'general':          <GridIcon />,
-  // Legacy English
-  'Research':         <SearchIcon />,
-  'Coding':           <CodeIcon />,
-  'Writing':          <PencilIcon />,
-  'Data & Analytics': <BarChartIcon />,
-  'Design':           <PaletteIcon />,
-  'Business':         <BriefcaseIcon />,
+  'diseño':           <PaletteIcon />,
+  'negocio':          <BriefcaseIcon />,
+  'seguridad':        <ShieldIcon />,
+  'productividad':    <ZapIcon />,
+  'comunicación':     <MessageIcon />,
 }
 
 /* ── Creator icon ── */
@@ -186,44 +209,90 @@ function Pagination({ page, totalPages, onPage }: { page: number; totalPages: nu
   )
 }
 
+/* ── Filter chip ── */
+function Chip({ label, onRemove }: { label: string; onRemove: () => void }) {
+  return (
+    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs font-medium">
+      {label}
+      <button
+        onClick={onRemove}
+        className="hover:text-blue-800 dark:hover:text-blue-200 leading-none"
+        aria-label={`Eliminar filtro ${label}`}
+      >
+        ×
+      </button>
+    </span>
+  )
+}
+
 /* ── Main component ── */
 export default function SkillsDirectory({ skills, total, initialSearch = '' }: { skills: Skill[]; total: number; initialSearch?: string }) {
-  const isOwnerMe = initialSearch.toLowerCase().trim() === 'owner:me'
-  const [search, setSearch]       = useState(isOwnerMe ? '' : initialSearch)
-  const [selectedCat, setSelectedCat] = useState<string | null>(null)
-  const [page, setPage]           = useState(1)
-  const [ms, setMs]               = useState<number | null>(null)
-  const [ownerFilter, setOwnerFilter] = useState(isOwnerMe)
-  const [verifiedFilter, setVerifiedFilter] = useState(false)
+  const normalised = initialSearch.toLowerCase().trim() === 'owner:me' ? 'owner:me' : initialSearch
+  const [query, setQuery] = useState(normalised)
+  const [page, setPage]   = useState(1)
+  const [ms, setMs]       = useState<number | null>(null)
+
+  // Sync when parent re-mounts with new initialSearch (URL navigation)
+  useEffect(() => {
+    const n = initialSearch.toLowerCase().trim() === 'owner:me' ? 'owner:me' : initialSearch
+    setQuery(n)
+    setPage(1)
+  }, [initialSearch])
+
+  // Listen for header-search-set events (e.g. namespace button in sidebar)
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent<string>).detail
+      // Append namespace: prefix to current query if not already present
+      setQuery(prev => {
+        if (prev.includes(detail.trim())) return prev
+        return (prev + ' ' + detail).trim()
+      })
+      setPage(1)
+    }
+    window.addEventListener('header-search-set', handler)
+    return () => window.removeEventListener('header-search-set', handler)
+  }, [])
+
+  // Sync URL when query changes
+  useEffect(() => {
+    const params = query.trim() ? `?q=${encodeURIComponent(query.trim())}` : ''
+    window.history.replaceState({}, '', `/guias${params}`)
+  }, [query])
+
+  const parsed = useMemo(() => parseQuery(query), [query])
 
   const filtered = useMemo(() => {
+    const t = performance.now()
+    const { verified, category, namespace, ownerMe, text } = parsed
     let result = skills
-    if (verifiedFilter) result = result.filter(s => s.verified)
-    if (selectedCat) result = result.filter(s => s.categoria === selectedCat)
-    if (search.trim()) {
-      const q = search.toLowerCase()
+    if (verified) result = result.filter(s => s.verified)
+    if (ownerMe) result = result.filter(s => s.creator === 'spainmcp')
+    if (category) result = result.filter(s => s.categoria === category)
+    if (namespace) result = result.filter(s => s.creator.toLowerCase().includes(namespace.toLowerCase()))
+    if (text) {
+      const q = text.toLowerCase()
       result = result.filter(s =>
         s.nombre.toLowerCase().includes(q) ||
         s.creator.toLowerCase().includes(q) ||
         s.descripcion.toLowerCase().includes(q)
       )
     }
+    setTimeout(() => setMs(Math.round(performance.now() - t)), 0)
     return result
-  }, [skills, selectedCat, search, verifiedFilter])
+  }, [skills, parsed])
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
   const safePage   = Math.min(page, totalPages)
   const visible    = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE)
 
-  const reset = () => setPage(1)
-  const handleSearch = (v: string) => { setSearch(v); reset(); const t = performance.now(); setTimeout(() => setMs(Math.round(performance.now() - t)), 0) }
-  const handleCat    = (v: string | null) => { setSelectedCat(v); reset(); const t = performance.now(); setTimeout(() => setMs(Math.round(performance.now() - t)), 0) }
+  const updateQuery = (newQuery: string) => { setQuery(newQuery); setPage(1) }
 
-  const sideLabel = 'text-xs font-bold text-stone-600 dark:text-stone-400 uppercase tracking-widest mb-2'
-  const sideBtn   = 'flex items-center gap-2 px-2 py-1.5 rounded-lg text-sm transition-colors text-left w-full'
+  const sideLabel       = 'text-xs font-bold text-stone-600 dark:text-stone-400 uppercase tracking-widest mb-2'
+  const sideBtn         = 'flex items-center gap-2 px-2 py-1.5 rounded-lg text-sm transition-colors text-left w-full'
   const sideBtnInactive = 'text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-800/50'
   const sideBtnActive   = 'text-blue-600 dark:text-blue-500 bg-blue-50 dark:bg-blue-950/30 font-medium'
-  const divider = <div className="h-px bg-stone-200 dark:bg-stone-700 my-1" />
+  const divider         = <div className="h-px bg-stone-200 dark:bg-stone-700 my-1" />
 
   return (
     <div className="py-6 flex flex-col gap-5">
@@ -237,7 +306,10 @@ export default function SkillsDirectory({ skills, total, initialSearch = '' }: {
           {/* Estado */}
           <div className="py-4">
             <p className={sideLabel}>Estado</p>
-            <button onClick={() => { setVerifiedFilter(v => !v); setPage(1) }} className={`${sideBtn} ${verifiedFilter ? sideBtnActive : sideBtnInactive}`}>
+            <button
+              onClick={() => updateQuery(toggleToken(query, 'is:verified'))}
+              className={`${sideBtn} ${parsed.verified ? sideBtnActive : sideBtnInactive}`}
+            >
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/>
               </svg>
@@ -250,7 +322,10 @@ export default function SkillsDirectory({ skills, total, initialSearch = '' }: {
           {/* Propiedad */}
           <div className="py-4">
             <p className={sideLabel}>Propiedad</p>
-            <button onClick={() => { setOwnerFilter((v: boolean) => !v); setPage(1) }} className={`${sideBtn} ${ownerFilter ? sideBtnActive : sideBtnInactive}`}>
+            <button
+              onClick={() => updateQuery(toggleToken(query, 'owner:me'))}
+              className={`${sideBtn} ${parsed.ownerMe ? sideBtnActive : sideBtnInactive}`}
+            >
               <PersonIcon />
               <span>Mis Skills</span>
             </button>
@@ -258,10 +333,15 @@ export default function SkillsDirectory({ skills, total, initialSearch = '' }: {
 
           {divider}
 
-          {/* Avanzado */}
+          {/* Avanzado — Namespace */}
           <div className="py-4">
             <p className={sideLabel}>Avanzado</p>
-            <button className={`${sideBtn} ${sideBtnInactive} opacity-50 cursor-not-allowed`}>
+            <button
+              onClick={() => {
+                window.dispatchEvent(new CustomEvent('header-search-set', { detail: 'namespace:' }))
+              }}
+              className={`${sideBtn} ${parsed.namespace !== null ? sideBtnActive : sideBtnInactive}`}
+            >
               <PlusCircleIcon />
               <span>Espacio de nombres</span>
             </button>
@@ -273,18 +353,35 @@ export default function SkillsDirectory({ skills, total, initialSearch = '' }: {
           <div className="py-4">
             <p className={sideLabel}>Categorías</p>
             <div className="flex flex-col gap-0.5">
-              {CATS.map(cat => (
-                <button
-                  key={cat.label}
-                  onClick={() => handleCat(cat.id)}
-                  className={`${sideBtn} ${selectedCat === cat.id ? sideBtnActive : sideBtnInactive}`}
-                >
-                  <span className="shrink-0">
-                    {cat.id === null ? <GridIcon /> : CAT_ICONS[cat.id]}
-                  </span>
-                  <span>{cat.label}</span>
-                </button>
-              ))}
+              {CATS.map(cat => {
+                const isActive = cat.id === null
+                  ? parsed.category === null
+                  : query.includes(`category:${cat.id}`)
+                return (
+                  <button
+                    key={cat.label}
+                    onClick={() => {
+                      if (cat.id === null) {
+                        // "Todos" — remove any category: token
+                        const newQ = query.replace(/category:\S+/g, '').replace(/\s+/g, ' ').trim()
+                        updateQuery(newQ)
+                      } else {
+                        updateQuery(toggleToken(
+                          // Remove existing category: token first, then add/remove target
+                          query.replace(/category:\S+/g, '').replace(/\s+/g, ' ').trim(),
+                          `category:${cat.id}`
+                        ))
+                      }
+                    }}
+                    className={`${sideBtn} ${isActive ? sideBtnActive : sideBtnInactive}`}
+                  >
+                    <span className="shrink-0">
+                      {cat.id === null ? <GridIcon /> : CAT_ICONS[cat.id]}
+                    </span>
+                    <span>{cat.label}</span>
+                  </button>
+                )
+              })}
             </div>
           </div>
 
@@ -293,19 +390,48 @@ export default function SkillsDirectory({ skills, total, initialSearch = '' }: {
         {/* ── Contenido principal ── */}
         <div className="flex-1 min-w-0 pr-10">
 
-          {/* Conteo */}
-          <p className="text-sm text-stone-400 dark:text-stone-500 mb-4">
-            <span className="text-stone-700 dark:text-stone-300 font-medium">{fmtNum(filtered.length)}</span> skills encontradas{ms !== null && <span className="ml-1">({ms}ms)</span>}
-          </p>
+          {/* Conteo + chips */}
+          <div className="flex items-center flex-wrap gap-2 mb-4">
+            <p className="text-sm text-stone-400 dark:text-stone-500">
+              <span className="text-stone-700 dark:text-stone-300 font-medium">{fmtNum(filtered.length)}</span> skills encontradas <span>({ms ?? 0}ms)</span>
+            </p>
+            {parsed.verified && (
+              <Chip label="is:verified" onRemove={() => updateQuery(toggleToken(query, 'is:verified'))} />
+            )}
+            {parsed.category && (
+              <Chip
+                label={`category:${parsed.category}`}
+                onRemove={() => updateQuery(query.replace(`category:${parsed.category}`, '').replace(/\s+/g, ' ').trim())}
+              />
+            )}
+            {parsed.namespace && (
+              <Chip
+                label={`namespace:${parsed.namespace}`}
+                onRemove={() => updateQuery(query.replace(`namespace:${parsed.namespace}`, '').replace(/\s+/g, ' ').trim())}
+              />
+            )}
+            {parsed.ownerMe && (
+              <Chip label="owner:me" onRemove={() => updateQuery(toggleToken(query, 'owner:me'))} />
+            )}
+            {parsed.text && (
+              <Chip
+                label={`"${parsed.text}"`}
+                onRemove={() => {
+                  const newQ = parsed.text.split(' ').reduce((acc, word) => toggleToken(acc, word), query)
+                  updateQuery(newQ)
+                }}
+              />
+            )}
+          </div>
 
           {/* Lista */}
           {visible.length === 0 ? (
             <p className="text-stone-400 text-sm py-16 text-center">
-              Sin resultados para &ldquo;{search}&rdquo;
+              Sin resultados para &ldquo;{query}&rdquo;
             </p>
           ) : (
             <div className="flex flex-col gap-3">
-              {visible.map((skill, i) => (
+              {visible.map((skill) => (
                 <div
                   key={skill.id}
                   className="flex items-start gap-4 px-5 py-4 rounded-xl border border-gray-200 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
@@ -320,7 +446,7 @@ export default function SkillsDirectory({ skills, total, initialSearch = '' }: {
                       <div className="flex items-center gap-1.5 min-w-0 flex-wrap">
                         <Link
                           href={skill.slug ? `/skills/${skill.slug}` : `/guias/${skill.id}`}
-                          className="text-blue-600 dark:text-white font-semibold text-sm hover:underline"
+                          className="text-stone-900 dark:text-white font-semibold text-sm hover:underline"
                         >
                           {skill.creator}/{skill.nombre}
                         </Link>

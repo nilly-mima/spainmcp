@@ -26,13 +26,28 @@ export default function HeaderSearch({ stars, namespaces }: Props) {
   const [showDrop, setShowDrop]   = useState(false)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // Escucha evento del sidebar (Namespace button)
+  // Sync header value from URL on mount when on /guias or /mcps
+  useEffect(() => {
+    if (typeof window !== 'undefined' && (pathname.startsWith('/guias') || pathname.startsWith('/mcps'))) {
+      const params = new URLSearchParams(window.location.search)
+      const q = params.get('q')
+      if (q) setValue(q)
+    }
+  }, [pathname])
+
+  // Escucha evento del sidebar (Namespace button) — sólo foca el input
   useEffect(() => {
     const handler = (e: Event) => {
       const detail = (e as CustomEvent<string>).detail
-      setValue(detail)
-      setShowDrop(true)
-      setTimeout(() => inputRef.current?.focus(), 50)
+      // Only show the namespace dropdown prompt; SkillsDirectory owns the query state
+      if (detail.startsWith('namespace:')) {
+        setValue(prev => {
+          const base = prev.includes('namespace:') ? prev : (prev + ' ' + detail).trim()
+          return base
+        })
+        setShowDrop(true)
+        setTimeout(() => inputRef.current?.focus(), 50)
+      }
     }
     window.addEventListener('header-search-set', handler)
     return () => window.removeEventListener('header-search-set', handler)
@@ -60,15 +75,16 @@ export default function HeaderSearch({ stars, namespaces }: Props) {
   const onGuias = pathname.startsWith('/guias')
   const onHome  = pathname === '/'
 
-  const isNamespace = value.startsWith('namespace:')
-  const nsQuery     = isNamespace ? value.slice('namespace:'.length).toLowerCase() : ''
+  const nsMatch     = value.match(/(?:^|\s)namespace:(\S*)/)
+  const isNamespace = nsMatch !== null
+  const nsQuery     = nsMatch ? nsMatch[1].toLowerCase() : ''
   const filteredNs  = namespaces.filter(n =>
     !nsQuery || n.toLowerCase().includes(nsQuery)
   )
 
   const handleChange = (v: string) => {
     setValue(v)
-    setShowDrop(v.startsWith('namespace:'))
+    setShowDrop(/(?:^|\s)namespace:/.test(v))
     if (debounceRef.current) clearTimeout(debounceRef.current)
     const base = onGuias ? '/guias' : '/mcps'
     debounceRef.current = setTimeout(() => {
@@ -78,10 +94,12 @@ export default function HeaderSearch({ stars, namespaces }: Props) {
   }
 
   const selectNamespace = (ns: string) => {
-    const val = `namespace:${ns}`
+    const replaced = value.replace(/(?:^|\s)namespace:\S*/g, '').replace(/\s+/g, ' ').trim()
+    const val = replaced ? `${replaced} namespace:${ns}` : `namespace:${ns}`
     setValue(val)
     setShowDrop(false)
-    router.push(`/mcps?q=${encodeURIComponent(val)}`)
+    const base = onGuias ? '/guias' : '/mcps'
+    router.push(`${base}?q=${encodeURIComponent(val)}`)
   }
 
   const handleClear = () => {
@@ -130,6 +148,7 @@ export default function HeaderSearch({ stars, namespaces }: Props) {
           value={value}
           onChange={e => handleChange(e.target.value)}
           onFocus={() => { if (isNamespace) setShowDrop(true) }}
+          onKeyDown={(e) => { if (e.key === 'Enter') { setShowDrop(false); inputRef.current?.blur() } }}
           className="w-full pl-10 pr-8 py-2 rounded-xl text-sm text-stone-700 dark:text-stone-200 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
           style={{ background: 'var(--background)', border: '1px solid var(--border)' }}
         />

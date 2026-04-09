@@ -184,9 +184,11 @@ export default function SkillsDirectory({ skills, total, initialSearch = '' }: {
   const [page, setPage]           = useState(1)
   const [ms, setMs]               = useState<number | null>(null)
   const [ownerFilter, setOwnerFilter] = useState(isOwnerMe)
+  const [verifiedFilter, setVerifiedFilter] = useState(false)
 
   const filtered = useMemo(() => {
     let result = skills
+    if (verifiedFilter) result = result.filter(s => s.verified)
     if (selectedCat) result = result.filter(s => s.categoria === selectedCat)
     if (search.trim()) {
       const q = search.toLowerCase()
@@ -197,7 +199,7 @@ export default function SkillsDirectory({ skills, total, initialSearch = '' }: {
       )
     }
     return result
-  }, [skills, selectedCat, search])
+  }, [skills, selectedCat, search, verifiedFilter])
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
   const safePage   = Math.min(page, totalPages)
@@ -225,7 +227,7 @@ export default function SkillsDirectory({ skills, total, initialSearch = '' }: {
           {/* Estado */}
           <div className="py-4">
             <p className={sideLabel}>Estado</p>
-            <button className={`${sideBtn} ${sideBtnInactive} opacity-50 cursor-not-allowed`}>
+            <button onClick={() => { setVerifiedFilter(v => !v); setPage(1) }} className={`${sideBtn} ${verifiedFilter ? sideBtnActive : sideBtnInactive}`}>
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/>
               </svg>

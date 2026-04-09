@@ -102,6 +102,31 @@ export async function POST(req: Request) {
     return Response.json({ error: "Error guardando el servidor" }, { status: 500 })
   }
 
+  // Also insert into mcp_catalog so it appears in the directory
+  const slug = namespace.replace(/^@/, '').replace('/', '-') // @nilly/test-mcp → nilly-test-mcp
+  const { error: catalogError } = await supabase
+    .from("mcp_catalog")
+    .upsert(
+      {
+        nombre: display_name,
+        slug,
+        descripcion_es: description ?? "",
+        descripcion_en: description ?? "",
+        scope: "remote",
+        icon_url: null,
+        upstream_url,
+        downloads: 0,
+        is_active: true,
+        categoria: "desarrollo",
+      },
+      { onConflict: "slug" }
+    )
+
+  if (catalogError) {
+    console.error("mcp_catalog insert error:", catalogError)
+    // Non-blocking — server is registered even if catalog fails
+  }
+
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "https://spainmcp-fngo.vercel.app"
   const gatewayUrl = `${baseUrl}/api/gateway/${namespace}`
 

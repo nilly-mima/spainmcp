@@ -148,7 +148,7 @@ export default function HeaderSearch({ stars, namespaces }: Props) {
           value={value}
           onChange={e => handleChange(e.target.value)}
           onFocus={() => { if (isNamespace) setShowDrop(true) }}
-          onKeyDown={(e) => { if (e.key === 'Enter') { setShowDrop(false); inputRef.current?.blur() } }}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === 'Escape') { setShowDrop(false); inputRef.current?.blur() } }}
           className="w-full pl-10 pr-8 py-2 rounded-xl text-sm text-stone-700 dark:text-stone-200 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
           style={{ background: 'var(--background)', border: '1px solid var(--border)' }}
         />

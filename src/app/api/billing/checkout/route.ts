@@ -51,15 +51,20 @@ export async function POST(req: NextRequest) {
       .eq('is_active', true)
   }
 
-  const session = await stripe.checkout.sessions.create({
-    customer: customerId,
-    mode: 'subscription',
-    line_items: [{ price: process.env.STRIPE_PRO_PRICE_ID!, quantity: 1 }],
-    success_url: `${baseUrl}/account/billing?success=true`,
-    cancel_url: `${baseUrl}/account/billing?canceled=true`,
-    metadata: { email },
-    subscription_data: { metadata: { email } },
-  })
+  try {
+    const session = await stripe.checkout.sessions.create({
+      customer: customerId,
+      mode: 'subscription',
+      line_items: [{ price: process.env.STRIPE_PRO_PRICE_ID!, quantity: 1 }],
+      success_url: `${baseUrl}/account/billing?success=true`,
+      cancel_url: `${baseUrl}/account/billing?canceled=true`,
+      metadata: { email },
+      subscription_data: { metadata: { email } },
+    })
 
-  return NextResponse.json({ url: session.url })
+    return NextResponse.json({ url: session.url })
+  } catch (err) {
+    console.error('Stripe checkout error:', err)
+    return NextResponse.json({ error: String(err) }, { status: 500 })
+  }
 }

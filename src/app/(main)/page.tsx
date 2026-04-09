@@ -1,5 +1,4 @@
 import Link from 'next/link'
-import McpCard from '@/components/McpCard'
 import NetworkAnimation from '@/components/NetworkAnimation'
 import FadeIn from '@/components/FadeIn'
 import CopyButton from '@/components/CopyButton'
@@ -8,40 +7,63 @@ import HowToConnect from '@/components/HowToConnect'
 import McpListPreview from '@/components/McpListPreview'
 import PublishSection from '@/components/PublishSection'
 import FireUpSection from '@/components/FireUpSection'
-import { getAllMcps, getAllCategorias, CATEGORIA_LABELS, getImportedTotal } from '@/lib/mcps'
+import { getAllMcps, getImportedTotal } from '@/lib/mcps'
 import { smitheryRow1, smitheryRow2, smitheryRow3 } from '@/data/smithery-featured'
+import { createClient } from '@supabase/supabase-js'
+import type { SmitheryItem } from '@/data/smithery-featured'
 
-const CAT_META: Record<string, { emoji: string; accent: string; bg: string }> = {
-  'archivos':       { emoji: '📁', accent: '#D97706', bg: '#FFFBEB' },
-  'automatizacion': { emoji: '⚡', accent: '#CA8A04', bg: '#FEFCE8' },
-  'bases-de-datos': { emoji: '🗄️', accent: '#2563EB', bg: '#EFF6FF' },
-  'busqueda':       { emoji: '🔍', accent: '#0284C7', bg: '#F0F9FF' },
-  'colaboracion':   { emoji: '🤝', accent: '#16A34A', bg: '#F0FDF4' },
-  'comunicacion':   { emoji: '💬', accent: '#9333EA', bg: '#FAF5FF' },
-  'contenido':      { emoji: '✍️', accent: '#E11D48', bg: '#FFF1F2' },
-  'datos':          { emoji: '📊', accent: '#4F46E5', bg: '#EEF2FF' },
-  'desarrollo':     { emoji: '💻', accent: '#059669', bg: '#ECFDF5' },
-  'documentacion':  { emoji: '📚', accent: '#EA580C', bg: '#FFF7ED' },
-  'empresas':       { emoji: '🏢', accent: '#475569', bg: '#F8FAFC' },
-  'espana':         { emoji: '🇪🇸', accent: '#DC2626', bg: '#FEF2F2' },
-  'gobierno':       { emoji: '🏛️', accent: '#78716C', bg: '#FAFAF9' },
-  'informacion':    { emoji: 'ℹ️', accent: '#0891B2', bg: '#ECFEFF' },
-  'investigacion':  { emoji: '🔬', accent: '#0D9488', bg: '#F0FDFA' },
-  'legal':          { emoji: '⚖️', accent: '#52525B', bg: '#FAFAFA' },
-  'productividad':  { emoji: '📈', accent: '#7C3AED', bg: '#F5F3FF' },
-  'scraping':       { emoji: '🕷️', accent: '#374151', bg: '#F9FAFB' },
+
+function fmtDownloads(n: number): string {
+  if (n >= 1000) return (n / 1000).toFixed(2).replace(/\.?0+$/, '') + 'k'
+  return String(n)
 }
 
-export default function Home() {
+async function getHeroRows(): Promise<{ row1: SmitheryItem[]; row2: SmitheryItem[]; row3: SmitheryItem[] }> {
+  try {
+    const supabase = createClient(
+      process.env.SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
+
+    const { data, error } = await supabase
+      .from('mcp_catalog')
+      .select('nombre, slug, descripcion_en, scope, icon_url, downloads')
+      .eq('is_active', true)
+      .order('downloads', { ascending: false })
+      .limit(21)
+
+    if (error || !data || data.length === 0) throw new Error('empty')
+
+    const items: SmitheryItem[] = data.map(row => ({
+      nombre: row.nombre,
+      slug: row.slug,
+      descripcion_en: row.descripcion_en || '',
+      scope: (row.scope === 'local' ? 'local' : 'remote') as 'remote' | 'local',
+      downloads: fmtDownloads(row.downloads ?? 0),
+      icon_url: row.icon_url || '',
+    }))
+
+    const chunkSize = Math.ceil(items.length / 3)
+    return {
+      row1: items.slice(0, chunkSize),
+      row2: items.slice(chunkSize, chunkSize * 2),
+      row3: items.slice(chunkSize * 2),
+    }
+  } catch {
+    return { row1: smitheryRow1, row2: smitheryRow2, row3: smitheryRow3 }
+  }
+}
+
+export default async function Home() {
   const mcps = getAllMcps()
   const destacados = mcps.filter(m => m.destacado)
-  const categorias = getAllCategorias()
   const totalImportados = getImportedTotal()
+  const { row1, row2, row3 } = await getHeroRows()
 
   return (
     <div className="flex flex-col gap-16">
 
-      {/* ── Hero ── */}
+      {/* Hero */}
       <section className="pt-6 pb-4 flex flex-col lg:flex-row items-center gap-10">
         <div className="flex flex-col gap-7 flex-1 min-w-0 animate-fade-in-up">
           <h1 className="text-[3.375rem] md:text-[4.05rem] lg:text-[5.4rem] font-black text-gray-900 dark:text-white leading-none tracking-tighter">
@@ -81,11 +103,10 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── Hero cards ── */}
-      <HeroCards row1={smitheryRow1} row2={smitheryRow2} row3={smitheryRow3} total={totalImportados} />
+      {/* Hero cards — now from mcp_catalog (fallback: smithery-featured.ts) */}
+      <HeroCards row1={row1} row2={row2} row3={row3} total={totalImportados} />
 
-
-      {/* ── Trust signals ── */}
+      {/* Trust signals */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="rounded-xl p-5 flex flex-col gap-1.5 border" style={{ background: 'var(--card)', borderColor: 'var(--border)' }}>
           <span className="text-2xl font-black text-gray-900 dark:text-gray-100">22+</span>
@@ -104,7 +125,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* ── Cómo conectar + lista MCPs ── */}
+      {/* Cómo conectar + lista MCPs */}
       <FadeIn>
         <div className="flex flex-col items-center gap-8">
           <HowToConnect />
@@ -112,14 +133,12 @@ export default function Home() {
         </div>
       </FadeIn>
 
-
-
-      {/* ── Publish section ── */}
+      {/* Publish section */}
       <FadeIn>
         <PublishSection />
       </FadeIn>
 
-      {/* ── Fire up section ── */}
+      {/* Fire up section */}
       <FadeIn>
         <FireUpSection />
       </FadeIn>

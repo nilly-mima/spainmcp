@@ -9,8 +9,12 @@ const LANG_ICON: Record<string, string> = {
 
 function McpInitials({ nombre }: { nombre: string }) {
   const initials = nombre.split(/[\s\-\/]/).map(w => w[0]).join('').slice(0, 2).toUpperCase()
-  const colors = ['bg-slate-100 text-slate-600', 'bg-zinc-100 text-zinc-600',
-    'bg-stone-100 text-stone-600', 'bg-neutral-100 text-neutral-600']
+  const colors = [
+    'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300',
+    'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300',
+    'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300',
+    'bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300',
+  ]
   const color = colors[nombre.charCodeAt(0) % colors.length]
   return (
     <div className={`w-7 h-7 rounded-md flex items-center justify-center text-xs font-bold shrink-0 ${color}`}>
@@ -34,7 +38,7 @@ export default function ImportedMcpRow({ mcp }: { mcp: ImportedMcp }) {
 
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-stone-800 group-hover:text-blue-600 transition-colors truncate">
+          <span className="text-sm font-medium text-stone-800 dark:text-stone-200 group-hover:text-blue-600 transition-colors truncate">
             {mcp.nombre}
           </span>
           {mcp.lenguaje && (
@@ -50,7 +54,7 @@ export default function ImportedMcpRow({ mcp }: { mcp: ImportedMcp }) {
         >
           {mcp.scope === 'local' ? '🏠 Local' : '☁️ Cloud'}
         </span>
-        <span className="text-stone-300 group-hover:text-blue-500 transition-colors text-sm">↗</span>
+        <span className="text-stone-400 dark:text-stone-500 group-hover:text-blue-500 transition-colors text-sm">↗</span>
       </div>
     </a>
   )

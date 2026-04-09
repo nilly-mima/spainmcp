@@ -78,7 +78,7 @@ export default function PlaygroundPage() {
           value={apiKey}
           onChange={(e) => setApiKey(e.target.value)}
           placeholder="sk-spainmcp-..."
-          className="w-full max-w-md px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-transparent text-sm font-mono"
+          className="w-full max-w-md px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-transparent text-sm font-mono text-[var(--foreground)]"
         />
       </div>
 
@@ -98,7 +98,7 @@ export default function PlaygroundPage() {
                 setResponse(null)
                 setStatus(null)
               }}
-              className="px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm"
+              className="px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-[var(--foreground)]"
             >
               {ENDPOINTS.map((ep, i) => (
                 <option key={i} value={i}>
@@ -120,7 +120,7 @@ export default function PlaygroundPage() {
             <input
               value={pathOverride || ep.path}
               onChange={(e) => setPathOverride(e.target.value)}
-              className="flex-1 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-transparent text-sm font-mono"
+              className="flex-1 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-transparent text-sm font-mono text-[var(--foreground)]"
             />
           </div>
 
@@ -139,7 +139,7 @@ export default function PlaygroundPage() {
                 value={bodyOverride || ep.body || ''}
                 onChange={(e) => setBodyOverride(e.target.value)}
                 rows={6}
-                className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-950 text-gray-100 text-sm font-mono"
+                className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-stone-900 text-gray-100 text-sm font-mono"
               />
             </div>
           )}

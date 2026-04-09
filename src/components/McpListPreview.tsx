@@ -2,12 +2,12 @@ import Link from 'next/link'
 import { Mcp } from '@/lib/mcps'
 
 const COLORS = [
-  'bg-blue-100 text-blue-700',
-  'bg-blue-100 text-blue-700',
-  'bg-green-100 text-green-700',
-  'bg-purple-100 text-purple-700',
-  'bg-amber-100 text-amber-700',
-  'bg-rose-100 text-rose-700',
+  'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300',
+  'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300',
+  'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300',
+  'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300',
+  'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300',
+  'bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300',
 ]
 
 function McpListItem({ mcp }: { mcp: Mcp }) {

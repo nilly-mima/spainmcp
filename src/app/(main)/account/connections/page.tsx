@@ -297,7 +297,7 @@ export default function ConnectionsPage() {
               name="key"
               type="password"
               placeholder="sk-spainmcp-..."
-              className="flex-1 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-transparent text-sm"
+              className="flex-1 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-transparent text-sm text-[var(--foreground)] placeholder-stone-400 dark:placeholder-stone-600"
             />
             <button
               type="submit"

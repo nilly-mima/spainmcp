@@ -1,14 +1,14 @@
 import { ImportedMcp } from '@/lib/mcps'
 
 const COLORS = [
-  'bg-blue-100 text-blue-700',
-  'bg-blue-100 text-blue-700',
-  'bg-green-100 text-green-700',
-  'bg-purple-100 text-purple-700',
-  'bg-yellow-100 text-yellow-700',
-  'bg-rose-100 text-rose-700',
-  'bg-teal-100 text-teal-700',
-  'bg-indigo-100 text-indigo-700',
+  'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300',
+  'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300',
+  'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300',
+  'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300',
+  'bg-yellow-100 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-300',
+  'bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300',
+  'bg-teal-100 dark:bg-teal-900/40 text-teal-700 dark:text-teal-300',
+  'bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300',
 ]
 
 function parseName(nombre: string, githubUrl: string) {

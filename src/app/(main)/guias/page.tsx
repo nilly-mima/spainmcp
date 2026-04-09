@@ -17,7 +17,7 @@ async function getSkillsCatalog(): Promise<{ skills: Skill[]; total: number }> {
 
     const { data, count, error } = await supabase
       .from('skills_catalog')
-      .select('id, nombre, slug, descripcion, categoria, installs, stars, author, is_active, created_at', { count: 'exact' })
+      .select('id, nombre, slug, descripcion, categoria, installs, stars, author, icon_url, is_active, created_at', { count: 'exact' })
       .eq('is_active', true)
       .order('created_at', { ascending: false })
       .limit(500)
@@ -36,6 +36,7 @@ async function getSkillsCatalog(): Promise<{ skills: Skill[]; total: number }> {
       verified: (row.author ?? 'spainmcp') === 'spainmcp',
       slug: row.slug ?? '',
       author: row.author ?? 'spainmcp',
+      icon_url: row.icon_url ?? '',
     }))
 
     return { skills: mapped, total: count ?? mapped.length }

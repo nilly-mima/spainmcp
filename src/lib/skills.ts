@@ -14,6 +14,7 @@ export interface Skill {
   skill_md?: string
   slug?: string
   author?: string
+  icon_url?: string
 }
 
 const SKILLS_FILE = path.join(process.cwd(), 'src/data/skills.json')

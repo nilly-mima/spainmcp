@@ -114,7 +114,15 @@ const CREATOR_COLORS: Record<string, string> = {
   'smithery-ai': '#2563EB',
 }
 
-function CreatorIcon({ creator }: { creator: string }) {
+function CreatorIcon({ creator, iconUrl }: { creator: string; iconUrl?: string }) {
+  if (iconUrl) {
+    return (
+      <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-blue-50 dark:bg-blue-900/30 overflow-hidden">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={iconUrl} alt={creator} className="w-6 h-6 object-contain" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; const p = (e.target as HTMLImageElement).parentElement; if (p) { p.classList.add('text-blue-600', 'font-bold', 'text-sm'); p.textContent = creator[0].toUpperCase() } }} />
+      </div>
+    )
+  }
   if (creator === 'github') {
     return (
       <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 text-white" style={{ background: CREATOR_COLORS['github'] }}>
@@ -303,7 +311,7 @@ export default function SkillsDirectory({ skills, total, initialSearch = '' }: {
                   className="flex items-start gap-4 px-5 py-4 rounded-xl border border-gray-200 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
                 >
                   {/* Creator icon */}
-                  <CreatorIcon creator={skill.creator} />
+                  <CreatorIcon creator={skill.creator} iconUrl={skill.icon_url} />
 
                   {/* Content */}
                   <div className="flex-1 min-w-0">

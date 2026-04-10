@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
+const VERIFIED_AUTHORS = [
+  'spainmcp', 'anthropic', 'openai', 'github', 'pytorch', 'vercel', 'cloudflare', 'google',
+]
+
 function getServiceClient() {
   return createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
 }
@@ -9,15 +13,20 @@ export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl
   const q = searchParams.get('q')?.trim() ?? ''
   const categoria = searchParams.get('categoria')?.trim() ?? ''
+  const namespace = searchParams.get('namespace')?.trim() ?? ''
+  const onlyVerified = searchParams.get('verified') === 'true'
   const page = Math.max(1, parseInt(searchParams.get('page') ?? '1', 10) || 1)
-  const pageSize = Math.min(100, Math.max(1, parseInt(searchParams.get('pageSize') ?? '50', 10) || 50))
+  const pageSize = Math.min(100, Math.max(1, parseInt(searchParams.get('pageSize') ?? '24', 10) || 24))
   const offset = (page - 1) * pageSize
 
   const supabase = getServiceClient()
 
   let query = supabase
     .from('skills_catalog')
-    .select('id, nombre, descripcion, categoria, is_active, created_at', { count: 'exact' })
+    .select(
+      'id, nombre, slug, descripcion, categoria, installs, stars, author, icon_url',
+      { count: 'exact' }
+    )
     .eq('is_active', true)
     .eq('status', 'approved')
     .eq('is_public', true)
@@ -25,11 +34,18 @@ export async function GET(req: NextRequest) {
     .range(offset, offset + pageSize - 1)
 
   if (q) {
-    query = query.or(`nombre.ilike.%${q}%,descripcion.ilike.%${q}%`)
+    // escape special chars for ilike pattern
+    const esc = q.replace(/[%_]/g, '\\$&')
+    query = query.or(`nombre.ilike.%${esc}%,descripcion.ilike.%${esc}%,slug.ilike.%${esc}%`)
   }
-
   if (categoria) {
     query = query.eq('categoria', categoria)
+  }
+  if (namespace) {
+    query = query.eq('author', namespace)
+  }
+  if (onlyVerified) {
+    query = query.in('author', VERIFIED_AUTHORS)
   }
 
   const { data, error, count } = await query
@@ -39,8 +55,22 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Error loading skills catalog' }, { status: 500 })
   }
 
+  const skills = (data ?? []).map(row => ({
+    id: row.id,
+    creator: row.author ?? 'spainmcp',
+    nombre: row.nombre,
+    descripcion: row.descripcion ?? '',
+    categoria: row.categoria ?? 'general',
+    installs: row.installs ?? 0,
+    stars: row.stars ?? 0,
+    verified: VERIFIED_AUTHORS.includes(row.author ?? 'spainmcp'),
+    slug: row.slug ?? '',
+    author: row.author ?? 'spainmcp',
+    icon_url: row.icon_url ?? '',
+  }))
+
   return NextResponse.json({
-    skills: data ?? [],
+    skills,
     pagination: {
       currentPage: page,
       pageSize,

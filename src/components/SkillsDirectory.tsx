@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { Skill } from '@/lib/skills'
 
@@ -228,18 +228,23 @@ function Chip({ label, onRemove }: { label: string; onRemove: () => void }) {
 }
 
 /* ── Main component ── */
-export default function SkillsDirectory({ skills, total, initialSearch = '' }: { skills: Skill[]; total: number; initialSearch?: string }) {
+export default function SkillsDirectory({ initialSearch = '', initialPage = 1 }: { initialSearch?: string; initialPage?: number }) {
   const normalised = initialSearch.toLowerCase().trim() === 'owner:me' ? 'owner:me' : initialSearch
   const [query, setQuery] = useState(normalised)
-  const [page, setPage]   = useState(1)
+  const [page, setPage]   = useState(initialPage)
   const [ms, setMs]       = useState<number | null>(null)
+  const [skills, setSkills]   = useState<Skill[]>([])
+  const [totalCount, setTotalCount] = useState(0)
+  const [loading, setLoading] = useState(true)
+  const [error, setError]     = useState<string | null>(null)
+  const abortRef = useRef<AbortController | null>(null)
 
   // Sync when parent re-mounts with new initialSearch (URL navigation)
   useEffect(() => {
     const n = initialSearch.toLowerCase().trim() === 'owner:me' ? 'owner:me' : initialSearch
     setQuery(n)
-    setPage(1)
-  }, [initialSearch])
+    setPage(initialPage)
+  }, [initialSearch, initialPage])
 
   // Listen for header-search-set events (e.g. namespace button in sidebar)
   useEffect(() => {
@@ -256,42 +261,62 @@ export default function SkillsDirectory({ skills, total, initialSearch = '' }: {
     return () => window.removeEventListener('header-search-set', handler)
   }, [])
 
-  // Sync URL when query changes
-  useEffect(() => {
-    const params = query.trim() ? `?q=${encodeURIComponent(query.trim())}` : ''
-    window.history.replaceState({}, '', `/guias${params}`)
-  }, [query])
-
   const parsed = useMemo(() => parseQuery(query), [query])
 
-  const filtered = useMemo(() => {
-    const { verified, category, namespace, ownerMe, text } = parsed
-    let result = skills
-    if (verified) result = result.filter(s => s.verified)
-    if (ownerMe) result = result.filter(s => s.creator === 'spainmcp')
-    if (category) result = result.filter(s => s.categoria === category)
-    if (namespace) result = result.filter(s => s.creator.toLowerCase().includes(namespace.toLowerCase()))
-    if (text) {
-      const q = text.toLowerCase()
-      result = result.filter(s =>
-        s.nombre.toLowerCase().includes(q) ||
-        s.creator.toLowerCase().includes(q) ||
-        s.descripcion.toLowerCase().includes(q)
-      )
-    }
-    return result
-  }, [skills, parsed])
-
-  // Measure filter time outside useMemo to avoid state update during render
+  // Sync URL + fetch from API when query or page changes
   useEffect(() => {
-    const t = performance.now()
-    parseQuery(query) // re-run parse to measure
-    setMs(Math.round(performance.now() - t))
-  }, [query, skills])
+    // Update URL (no navigation, just history state)
+    const params = new URLSearchParams()
+    if (query.trim()) params.set('q', query.trim())
+    if (page > 1) params.set('page', String(page))
+    const qs = params.toString()
+    window.history.replaceState({}, '', `/guias${qs ? '?' + qs : ''}`)
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
+    // Abort previous inflight fetch
+    if (abortRef.current) abortRef.current.abort()
+    const ac = new AbortController()
+    abortRef.current = ac
+
+    const { verified, category, namespace, ownerMe, text } = parsed
+
+    const apiParams = new URLSearchParams()
+    apiParams.set('page', String(page))
+    apiParams.set('pageSize', String(PAGE_SIZE))
+    if (verified) apiParams.set('verified', 'true')
+    if (category) apiParams.set('categoria', category)
+    if (namespace) apiParams.set('namespace', namespace)
+    // owner:me → treat as namespace spainmcp (until real user auth filter exists)
+    if (ownerMe && !namespace) apiParams.set('namespace', 'spainmcp')
+    if (text) apiParams.set('q', text)
+
+    setLoading(true)
+    setError(null)
+    const t0 = performance.now()
+
+    fetch(`/api/catalog/skills?${apiParams.toString()}`, { signal: ac.signal })
+      .then(r => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`)
+        return r.json()
+      })
+      .then((data: { skills: Skill[]; pagination: { totalCount: number } }) => {
+        setSkills(data.skills || [])
+        setTotalCount(data.pagination?.totalCount ?? 0)
+        setMs(Math.round(performance.now() - t0))
+        setLoading(false)
+      })
+      .catch(err => {
+        if (err.name === 'AbortError') return
+        console.error('skills fetch error', err)
+        setError('No se pudieron cargar las skills')
+        setLoading(false)
+      })
+
+    return () => { ac.abort() }
+  }, [query, page, parsed])
+
+  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE))
   const safePage   = Math.min(page, totalPages)
-  const visible    = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE)
+  const visible    = skills
 
   const updateQuery = (newQuery: string) => { setQuery(newQuery); setPage(1) }
 
@@ -400,7 +425,13 @@ export default function SkillsDirectory({ skills, total, initialSearch = '' }: {
           {/* Conteo + chips */}
           <div className="flex items-center flex-wrap gap-2 mb-4">
             <p className="text-sm text-stone-400 dark:text-stone-500">
-              <span className="text-stone-700 dark:text-stone-300 font-medium">{fmtNum(filtered.length)}</span> skills encontradas <span>({ms ?? 0}ms)</span>
+              {loading ? (
+                <span className="text-stone-500 dark:text-stone-400">Cargando…</span>
+              ) : (
+                <>
+                  <span className="text-stone-700 dark:text-stone-300 font-medium">{fmtNum(totalCount)}</span> skills encontradas <span>({ms ?? 0}ms)</span>
+                </>
+              )}
             </p>
             {parsed.verified && (
               <Chip label="is:verified" onRemove={() => updateQuery(toggleToken(query, 'is:verified'))} />
@@ -432,7 +463,15 @@ export default function SkillsDirectory({ skills, total, initialSearch = '' }: {
           </div>
 
           {/* Lista */}
-          {visible.length === 0 ? (
+          {error ? (
+            <p className="text-red-500 text-sm py-16 text-center">{error}</p>
+          ) : loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 items-stretch">
+              {Array.from({ length: PAGE_SIZE }).map((_, i) => (
+                <div key={i} className="rounded-xl p-3 h-[120px] border border-gray-200 dark:border-gray-700/50 animate-pulse bg-gray-50 dark:bg-white/5" />
+              ))}
+            </div>
+          ) : visible.length === 0 ? (
             <p className="text-stone-400 text-sm py-16 text-center">
               Sin resultados para &ldquo;{query}&rdquo;
             </p>

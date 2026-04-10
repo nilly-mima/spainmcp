@@ -3,7 +3,20 @@ import PublishDropdown from './PublishDropdown'
 import UserMenu from './UserMenu'
 import HeaderSearch from './HeaderSearch'
 import HeaderProBadge from './HeaderProBadge'
-import { getAllMcps } from '@/lib/mcps'
+
+// Namespaces mostrados en el dropdown del header search.
+// Unión de las organizaciones verificadas de skills + mcps curados.
+// Si añades un nuevo namespace oficial al importar, añádelo aquí.
+const HEADER_NAMESPACES = [
+  'anthropic',
+  'cloudflare',
+  'github',
+  'google',
+  'openai',
+  'pytorch',
+  'spainmcp',
+  'vercel',
+]
 
 async function getGitHubStars(): Promise<number> {
   try {
@@ -20,7 +33,7 @@ async function getGitHubStars(): Promise<number> {
 
 export default async function Header() {
   const stars = await getGitHubStars()
-  const namespaces = [...new Set(getAllMcps().map(m => m.creador))].sort()
+  const namespaces = HEADER_NAMESPACES
 
   return (
     <header className="sticky top-0 z-10 bg-[var(--background)] border-b border-[var(--border)]">

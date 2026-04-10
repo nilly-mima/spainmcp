@@ -7,10 +7,14 @@ import HowToConnect from '@/components/HowToConnect'
 import McpListPreview from '@/components/McpListPreview'
 import PublishSection from '@/components/PublishSection'
 import FireUpSection from '@/components/FireUpSection'
-import { getAllMcps, getImportedTotal } from '@/lib/mcps'
+import { getAllMcps } from '@/lib/mcps'
 import { smitheryRow1, smitheryRow2, smitheryRow3 } from '@/data/smithery-featured'
 import { createClient } from '@supabase/supabase-js'
 import type { SmitheryItem } from '@/data/smithery-featured'
+
+// Regenerar la home como máximo cada 5 minutos.
+// Evita queries a Supabase en cada visita.
+export const revalidate = 300
 
 
 function fmtDownloads(n: number): string {
@@ -18,17 +22,24 @@ function fmtDownloads(n: number): string {
   return String(n)
 }
 
-async function getHeroRows(): Promise<{ row1: SmitheryItem[]; row2: SmitheryItem[]; row3: SmitheryItem[] }> {
+async function getHeroRows(): Promise<{
+  row1: SmitheryItem[]
+  row2: SmitheryItem[]
+  row3: SmitheryItem[]
+  total: number
+}> {
   try {
     const supabase = createClient(
       process.env.SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     )
 
-    const { data, error } = await supabase
+    const { data, error, count } = await supabase
       .from('mcp_catalog')
-      .select('nombre, slug, descripcion_en, scope, icon_url, downloads')
+      .select('nombre, slug, descripcion_en, scope, icon_url, downloads', { count: 'exact' })
       .eq('is_active', true)
+      .eq('status', 'approved')
+      .eq('is_public', true)
       .order('downloads', { ascending: false })
       .limit(21)
 
@@ -48,17 +59,22 @@ async function getHeroRows(): Promise<{ row1: SmitheryItem[]; row2: SmitheryItem
       row1: items.slice(0, chunkSize),
       row2: items.slice(chunkSize, chunkSize * 2),
       row3: items.slice(chunkSize * 2),
+      total: count ?? items.length,
     }
   } catch {
-    return { row1: smitheryRow1, row2: smitheryRow2, row3: smitheryRow3 }
+    return {
+      row1: smitheryRow1,
+      row2: smitheryRow2,
+      row3: smitheryRow3,
+      total: smitheryRow1.length + smitheryRow2.length + smitheryRow3.length,
+    }
   }
 }
 
 export default async function Home() {
   const mcps = getAllMcps()
   const destacados = mcps.filter(m => m.destacado)
-  const totalImportados = getImportedTotal()
-  const { row1, row2, row3 } = await getHeroRows()
+  const { row1, row2, row3, total: totalImportados } = await getHeroRows()
 
   return (
     <div className="flex flex-col gap-16">

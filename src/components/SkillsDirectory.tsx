@@ -21,24 +21,26 @@ const CATS = [
   { id: 'comunicación',     label: 'Comunicación' },
 ]
 
-/* ── Query parsing ── */
+/* ── Query parsing ──
+ * Supports both "namespace:openai" and "namespace: openai" (with space).
+ * Same for category: and is:verified / owner:me (exact tokens). */
 function parseQuery(q: string) {
-  const tokens = q.split(/\s+/)
+  let work = q
   let verified = false
   let category: string | null = null
   let namespace: string | null = null
   let ownerMe = false
-  const textParts: string[] = []
 
-  for (const t of tokens) {
-    if (t === 'is:verified') verified = true
-    else if (t === 'owner:me') ownerMe = true
-    else if (t.startsWith('category:')) category = t.slice('category:'.length)
-    else if (t.startsWith('namespace:')) namespace = t.slice('namespace:'.length)
-    else if (t.trim()) textParts.push(t)
-  }
+  // Extract prefix filters (with optional space after colon)
+  const nsMatch = work.match(/\bnamespace:\s*(\S+)/i)
+  if (nsMatch) { namespace = nsMatch[1]; work = work.replace(nsMatch[0], '') }
+  const catMatch = work.match(/\bcategory:\s*(\S+)/i)
+  if (catMatch) { category = catMatch[1]; work = work.replace(catMatch[0], '') }
+  if (/\bis:verified\b/i.test(work)) { verified = true; work = work.replace(/\bis:verified\b/i, '') }
+  if (/\bowner:me\b/i.test(work)) { ownerMe = true; work = work.replace(/\bowner:me\b/i, '') }
 
-  return { verified, category, namespace, ownerMe, text: textParts.join(' ') }
+  const text = work.trim().replace(/\s+/g, ' ')
+  return { verified, category, namespace, ownerMe, text }
 }
 
 function toggleToken(query: string, token: string): string {

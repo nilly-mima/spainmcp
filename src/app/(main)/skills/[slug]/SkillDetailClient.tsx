@@ -269,7 +269,7 @@ function FileTree({ nodes, repoUrl }: { nodes: FileNode[]; repoUrl: string }) {
   return (
     <div className="flex flex-col gap-1">
       <div className="flex items-center gap-2 text-xs text-[var(--muted)] mb-1">
-        <span>Repository</span>
+        <span>Repositorio</span>
         <a href={repoUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline font-mono">
           {repoSlug}
         </a>

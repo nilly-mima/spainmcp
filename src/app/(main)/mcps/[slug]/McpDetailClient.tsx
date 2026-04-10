@@ -540,19 +540,35 @@ function UsageTab({ mcp }: { mcp: Mcp }) {
 }
 
 type Tab = 'overview' | 'api' | 'performance' | 'uso'
-const TABS: { id: Tab; label: string; icon: React.ReactNode; soon?: boolean }[] = [
+const ALL_TABS: { id: Tab; label: string; icon: React.ReactNode; soon?: boolean }[] = [
   { id: 'overview',    label: 'Visión General', icon: <InfoIcon size={13} /> },
   { id: 'performance', label: 'Rendimiento',    icon: <PerfIcon /> },
   { id: 'uso',         label: 'Uso',            icon: <UsageIcon /> },
   { id: 'api',         label: 'API',            icon: <CliIcon /> },
 ]
+// Local MCPs don't have remote performance/usage/api metrics
+const LOCAL_TABS = ALL_TABS.filter(t => t.id === 'overview')
+
+/* ── Download button for local MCPs ── */
+function DownloadBundleIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+      <polyline points="7 10 12 15 17 10"/>
+      <line x1="12" y1="15" x2="12" y2="3"/>
+    </svg>
+  )
+}
 
 /* ── Main ── */
 export default function McpDetailClient({ mcp }: { mcp: Mcp }) {
+  const isLocal = mcp.scope === 'local'
+  const TABS = isLocal ? LOCAL_TABS : ALL_TABS
+
   const [tab, setTab]       = useState<Tab>('overview')
   const [apiTab, setApiTab] = useState<'cli' | 'aisdk' | 'ts'>('cli')
   const [connectTab, setConnectTab] = useState<'agents' | 'humans'>('humans')
-  const [capTab, setCapTab] = useState<'tools'>('tools')
+  const [capTab, setCapTab] = useState<'tools' | 'prompts'>('tools')
   const perfRef = useRef<HTMLDivElement>(null)
   const usoRef  = useRef<HTMLDivElement>(null)
   const apiRef  = useRef<HTMLDivElement>(null)
@@ -603,37 +619,61 @@ const tools = await mcp.tools()`
       {/* ── Header ── */}
       <div className="flex flex-col gap-4">
 
-        {/* Fila 1: icono + título + subtítulo */}
-        <div className="flex items-center gap-4">
-          <McpBigIcon nombre={mcp.nombre} id={mcp.id} />
-          <div className="flex flex-col gap-1">
-            <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100 leading-tight">{mcp.nombre}</h1>
-              {mcp.verificado && <VerifiedIcon />}
+        {/* Fila 1: icono + título + subtítulo + botón download (para locales) */}
+        <div className="flex items-start justify-between gap-4 flex-wrap">
+          <div className="flex items-center gap-4 min-w-0 flex-1">
+            <McpBigIcon nombre={mcp.nombre} id={mcp.id} />
+            <div className="flex flex-col gap-1 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100 leading-tight">{mcp.nombre}</h1>
+                {mcp.verificado && <VerifiedIcon />}
+              </div>
+              <p className="text-sm text-stone-400">
+                <span>{isLocal && mcp.creador ? `${mcp.creador.toLowerCase()}/${mcp.id}` : mcp.creador.toLowerCase()}</span>
+                {mcp.fecha_verificado && (
+                  <>
+                    <span className="mx-1.5">·</span>
+                    <span>{isLocal ? 'publicado' : 'verificado'} {mcp.fecha_verificado}</span>
+                  </>
+                )}
+              </p>
             </div>
-            <p className="text-sm text-stone-400">
-              <span>{mcp.creador.toLowerCase()}</span>
-              <span className="mx-1.5">·</span>
-              <span>verificado {mcp.fecha_verificado}</span>
-            </p>
           </div>
+
+          {/* Botón Download .mcpb para MCPs locales */}
+          {isLocal && mcp.bundle_url && (
+            <a
+              href={mcp.bundle_url}
+              download
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm transition-colors shrink-0 shadow-sm"
+            >
+              <DownloadBundleIcon />
+              Descargar {mcp.bundle_version ? `v${mcp.bundle_version}` : '.mcpb'}
+            </a>
+          )}
         </div>
 
-        {/* Fila 2: 4 stat badges — igual que Smithery */}
+        {/* Fila 2: stat badges — dinámicos según scope */}
         <div className="flex flex-wrap gap-2">
-          {/* Badge 1: verificado / score */}
+          {/* Badge 1: verificado */}
           <span className="flex items-center gap-1.5 text-xs px-3 py-1 rounded-full border border-stone-200 dark:border-stone-700 text-stone-500 dark:text-stone-400">
             <PersonIcon /> {mcp.verificado ? 'Verificado' : 'Sin verificar'}
           </span>
-          {/* Badge 2: remote */}
+          {/* Badge 2: local / remoto */}
           <span className="flex items-center gap-1.5 text-xs px-3 py-1 rounded-full border border-stone-200 dark:border-stone-700 text-stone-500 dark:text-stone-400">
-            <GlobeIcon size={11} /> Remoto
+            <GlobeIcon size={11} /> {isLocal ? 'Local' : 'Remoto'}
           </span>
-          {/* Badge 3: tools como "calls" */}
+          {/* Badge 3: tools */}
           <span className="flex items-center gap-1.5 text-xs px-3 py-1 rounded-full border border-stone-200 dark:border-stone-700 text-stone-500 dark:text-stone-400">
             <UsageIcon /> {mcp.num_tools} tool{mcp.num_tools !== 1 ? 's' : ''}
           </span>
-          {/* Badge 4: gratuito / precio */}
+          {/* Badge 4: prompts (solo si hay) */}
+          {mcp.prompts_list && mcp.prompts_list.length > 0 && (
+            <span className="flex items-center gap-1.5 text-xs px-3 py-1 rounded-full border border-stone-200 dark:border-stone-700 text-stone-500 dark:text-stone-400">
+              <MsgIcon /> {mcp.prompts_list.length} prompts
+            </span>
+          )}
+          {/* Badge 5: gratuito */}
           <span className="flex items-center gap-1.5 text-xs px-3 py-1 rounded-full border border-stone-200 dark:border-stone-700 text-stone-500 dark:text-stone-400">
             <VerifiedBadgeIcon /> {mcp.gratuito ? 'Gratuito' : mcp.precio_info ?? 'De pago'}
           </span>
@@ -675,46 +715,95 @@ const tools = await mcp.tools()`
             </div>
 
             {/* Capabilities */}
-            {mcp.tools_list && mcp.tools_list.length > 0 && (
+            {((mcp.tools_list && mcp.tools_list.length > 0) || (mcp.prompts_list && mcp.prompts_list.length > 0)) && (
               <div className="flex flex-col gap-3">
                 <h2 className="text-base font-semibold text-stone-800 dark:text-stone-200">+ Capacidades</h2>
 
-                {/* Sub-tab */}
-                <div style={{ borderBottom: '1px solid var(--border)' }}>
-                  <button
-                    onClick={() => setCapTab('tools')}
-                    className={`flex items-center gap-1.5 px-1 pb-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
-                      capTab === 'tools' ? 'border-blue-500 text-blue-600' : 'border-transparent text-stone-500'
-                    }`}
-                  >
-                    <ToolIcon size={12} />
-                    Tools
-                    <span className="ml-1 text-xs px-1.5 py-0.5 rounded bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 font-mono">
-                      {mcp.tools_list.length}
-                    </span>
-                  </button>
+                {/* Sub-tabs Tools / Prompts */}
+                <div className="flex gap-4" style={{ borderBottom: '1px solid var(--border)' }}>
+                  {mcp.tools_list && mcp.tools_list.length > 0 && (
+                    <button
+                      onClick={() => setCapTab('tools')}
+                      className={`flex items-center gap-1.5 px-1 pb-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
+                        capTab === 'tools' ? 'border-blue-500 text-blue-600' : 'border-transparent text-stone-500'
+                      }`}
+                    >
+                      <ToolIcon size={12} />
+                      Tools
+                      <span className="ml-1 text-xs px-1.5 py-0.5 rounded bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 font-mono">
+                        {mcp.tools_list.length}
+                      </span>
+                    </button>
+                  )}
+                  {mcp.prompts_list && mcp.prompts_list.length > 0 && (
+                    <button
+                      onClick={() => setCapTab('prompts')}
+                      className={`flex items-center gap-1.5 px-1 pb-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
+                        capTab === 'prompts' ? 'border-blue-500 text-blue-600' : 'border-transparent text-stone-500'
+                      }`}
+                    >
+                      <MsgIcon />
+                      Prompts
+                      <span className="ml-1 text-xs px-1.5 py-0.5 rounded bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 font-mono">
+                        {mcp.prompts_list.length}
+                      </span>
+                    </button>
+                  )}
                 </div>
 
-                <div className="flex flex-col gap-2">
-                  {mcp.tools_list.map(tool => (
-                    <ToolItem key={tool.name} name={tool.name} description={tool.description} parameters={tool.parameters} />
-                  ))}
-                </div>
+                {capTab === 'tools' && mcp.tools_list && (
+                  <div className="flex flex-col gap-2">
+                    {mcp.tools_list.map(tool => (
+                      <ToolItem key={tool.name} name={tool.name} description={tool.description} parameters={tool.parameters} />
+                    ))}
+                  </div>
+                )}
+
+                {capTab === 'prompts' && mcp.prompts_list && (
+                  <div className="flex flex-col gap-2">
+                    {mcp.prompts_list.map(prompt => (
+                      <div key={prompt.name} className="rounded-xl overflow-hidden" style={{ border: '1px solid var(--border)' }}>
+                        <div className="px-4 py-3">
+                          <span className="font-mono text-xs font-semibold tracking-wide uppercase text-stone-700 dark:text-stone-300">
+                            {prompt.name}
+                          </span>
+                          {prompt.description && (
+                            <p className="text-sm text-stone-500 dark:text-stone-400 mt-1.5">{prompt.description}</p>
+                          )}
+                          {prompt.arguments && prompt.arguments.length > 0 && (
+                            <div className="flex flex-col gap-1 mt-3">
+                              <p className="text-xs font-medium text-stone-400 mb-1">Argumentos</p>
+                              {prompt.arguments.map(a => (
+                                <div key={a.name} className="flex items-center gap-2 py-0.5">
+                                  <span className="text-sm font-semibold text-stone-800 dark:text-stone-200">{a.name}</span>
+                                  {a.required && <span className="text-blue-500 text-xs font-bold">*</span>}
+                                  {a.description && <span className="text-xs text-stone-400 dark:text-stone-500">· {a.description}</span>}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 
-            {/* Casos de uso */}
-            <div className="flex flex-col gap-3">
-              <h2 className="text-base font-semibold text-stone-800 dark:text-stone-200">Casos de uso</h2>
-              <ul className="flex flex-col gap-2">
-                {mcp.casos_uso_es.map((caso, i) => (
-                  <li key={i} className="flex items-start gap-2 text-sm text-stone-600 dark:text-stone-400">
-                    <span className="text-blue-500 mt-0.5 shrink-0">→</span>
-                    {caso}
-                  </li>
-                ))}
-              </ul>
-            </div>
+            {/* Casos de uso (solo si existen) */}
+            {mcp.casos_uso_es && mcp.casos_uso_es.length > 0 && (
+              <div className="flex flex-col gap-3">
+                <h2 className="text-base font-semibold text-stone-800 dark:text-stone-200">Casos de uso</h2>
+                <ul className="flex flex-col gap-2">
+                  {mcp.casos_uso_es.map((caso, i) => (
+                    <li key={i} className="flex items-start gap-2 text-sm text-stone-600 dark:text-stone-400">
+                      <span className="text-blue-500 mt-0.5 shrink-0">→</span>
+                      {caso}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
 
           {/* Right — Connect */}
@@ -724,14 +813,14 @@ const tools = await mcp.tools()`
                 <LinkIcon size={15} /> Conectar
               </h2>
 
-              {connectionUrl && (
+              {!isLocal && connectionUrl && (
                 <>
                   <SectionSep label="Obtener URL de conexión" />
                   <UrlBox url={connectionUrl} />
                 </>
               )}
 
-              <SectionSep label="O conecta tu agente" />
+              <SectionSep label={isLocal ? 'Conecta tu agente' : 'O conecta tu agente'} />
 
               {/* Agents / Humans subtabs */}
               <div className="flex gap-0 border-b border-stone-100 dark:border-stone-800">
@@ -764,44 +853,109 @@ const tools = await mcp.tools()`
 
             </div>
 
-            {/* Published + Weekly Tool Calls */}
+            {/* Sidebar meta — Published + Repository + Homepage + License + (Weekly calls solo remotos) */}
             <div className="flex flex-col gap-4 pt-2">
-              <div className="flex flex-col gap-1">
-                <span className="text-sm font-medium text-stone-700 dark:text-stone-300">Publicado</span>
-                <div className="flex items-center gap-1.5 text-sm text-stone-500 dark:text-stone-400">
-                  <CalendarIcon />
-                  {new Date(mcp.fecha_verificado).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' })}
-                </div>
-              </div>
-              <div className="h-px bg-stone-200 dark:bg-stone-700" />
-              <div className="flex flex-col gap-2">
-                <span className="text-sm font-medium text-stone-700 dark:text-stone-300">Llamadas semanales</span>
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-1.5 text-sm text-stone-500 dark:text-stone-400 shrink-0">
-                    <UsageIcon />
-                    <span className="font-mono">{(mcp.num_tools * 47).toLocaleString()}</span>
-                  </div>
-                  <div className="flex-1">
-                    <Sparkline data={[12,28,45,38,52,61,55,48,63,70,58,47,42,38,30,25,22,18,15,14]} />
+              {mcp.fecha_verificado && (
+                <div className="flex flex-col gap-1">
+                  <span className="text-sm font-medium text-stone-700 dark:text-stone-300">Publicado</span>
+                  <div className="flex items-center gap-1.5 text-sm text-stone-500 dark:text-stone-400">
+                    <CalendarIcon />
+                    {new Date(mcp.fecha_verificado).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' })}
                   </div>
                 </div>
-              </div>
+              )}
+
+              {mcp.repository_url && (
+                <>
+                  <div className="h-px bg-stone-200 dark:bg-stone-700" />
+                  <div className="flex flex-col gap-1">
+                    <span className="text-sm font-medium text-stone-700 dark:text-stone-300">Repositorio</span>
+                    <a href={mcp.repository_url} target="_blank" rel="noopener noreferrer"
+                       className="flex items-center gap-1.5 text-sm text-blue-600 dark:text-blue-400 hover:underline break-all">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" className="shrink-0">
+                        <path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.21 11.39.6.11.82-.26.82-.58v-2.02c-3.34.73-4.04-1.61-4.04-1.61-.55-1.38-1.33-1.75-1.33-1.75-1.09-.74.08-.73.08-.73 1.2.08 1.84 1.24 1.84 1.24 1.07 1.83 2.81 1.3 3.49.99.11-.77.42-1.3.76-1.6-2.66-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.12-.3-.54-1.52.12-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.29-1.55 3.3-1.23 3.3-1.23.66 1.66.24 2.88.12 3.18.77.84 1.23 1.91 1.23 3.22 0 4.61-2.81 5.63-5.49 5.92.43.37.81 1.1.81 2.22v3.29c0 .32.22.69.82.58C20.56 21.8 24 17.3 24 12c0-6.63-5.37-12-12-12z"/>
+                      </svg>
+                      <span className="truncate">{mcp.repository_url.replace('https://github.com/', '')}</span>
+                    </a>
+                  </div>
+                </>
+              )}
+
+              {mcp.web_oficial && (
+                <>
+                  <div className="h-px bg-stone-200 dark:bg-stone-700" />
+                  <div className="flex flex-col gap-1">
+                    <span className="text-sm font-medium text-stone-700 dark:text-stone-300">Homepage</span>
+                    <a href={mcp.web_oficial} target="_blank" rel="noopener noreferrer"
+                       className="flex items-center gap-1.5 text-sm text-blue-600 dark:text-blue-400 hover:underline break-all">
+                      <GlobeIcon size={13} />
+                      <span className="truncate">{mcp.web_oficial.replace(/^https?:\/\//, '').replace(/\/$/, '')}</span>
+                    </a>
+                  </div>
+                </>
+              )}
+
+              {mcp.license && (
+                <>
+                  <div className="h-px bg-stone-200 dark:bg-stone-700" />
+                  <div className="flex flex-col gap-1">
+                    <span className="text-sm font-medium text-stone-700 dark:text-stone-300">Licencia</span>
+                    <span className="text-sm text-stone-500 dark:text-stone-400 font-mono">{mcp.license}</span>
+                  </div>
+                </>
+              )}
+
+              {isLocal && mcp.bundle_sha256 && (
+                <>
+                  <div className="h-px bg-stone-200 dark:bg-stone-700" />
+                  <div className="flex flex-col gap-1">
+                    <span className="text-sm font-medium text-stone-700 dark:text-stone-300">SHA256</span>
+                    <span className="text-xs text-stone-500 dark:text-stone-400 font-mono break-all">
+                      {mcp.bundle_sha256.slice(0, 16)}…{mcp.bundle_sha256.slice(-8)}
+                    </span>
+                    {mcp.bundle_source === 'spainmcp' && (
+                      <span className="text-xs text-green-600 dark:text-green-400 mt-0.5">✓ Alojado por SpainMCP</span>
+                    )}
+                  </div>
+                </>
+              )}
+
+              {!isLocal && (
+                <>
+                  <div className="h-px bg-stone-200 dark:bg-stone-700" />
+                  <div className="flex flex-col gap-2">
+                    <span className="text-sm font-medium text-stone-700 dark:text-stone-300">Llamadas semanales</span>
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-1.5 text-sm text-stone-500 dark:text-stone-400 shrink-0">
+                        <UsageIcon />
+                        <span className="font-mono">{(mcp.num_tools * 47).toLocaleString()}</span>
+                      </div>
+                      <div className="flex-1">
+                        <Sparkline data={[12,28,45,38,52,61,55,48,63,70,58,47,42,38,30,25,22,18,15,14]} />
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
 
           </div>
         </div>
 
-        {/* Performance — siempre visible en Overview, con ref para scroll */}
-        <div ref={perfRef}>
-          <PerformanceTab mcp={mcp} />
-        </div>
+        {/* Performance / Usage / API — solo para MCPs remotos (locales no tienen tracking HTTP) */}
+        {!isLocal && (
+          <>
+            <div ref={perfRef}>
+              <PerformanceTab mcp={mcp} />
+            </div>
+            <div ref={usoRef}>
+              <UsageTab mcp={mcp} />
+            </div>
+          </>
+        )}
 
-        {/* Uso — siempre visible en Overview, con ref para scroll */}
-        <div ref={usoRef}>
-          <UsageTab mcp={mcp} />
-        </div>
-
-        {/* API — siempre visible en Overview, con ref para scroll */}
+        {/* API — solo para MCPs remotos (locales no tienen HTTP endpoint) */}
+        {!isLocal && (
         <div ref={apiRef} className="pt-8">
         <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,280px)_1fr] gap-10">
 
@@ -878,6 +1032,7 @@ const tools = await mcp.tools()`
           </div>
         </div>
         </div>
+        )}
         </>
       )}
 

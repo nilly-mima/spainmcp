@@ -26,7 +26,21 @@ export interface Mcp {
   especifico_espana?: boolean
   nota_es?: string
   tools_list?: { name: string; description: string; parameters?: { name: string; type: string; required?: boolean; description?: string }[] }[]
+  prompts_list?: { name: string; description?: string; arguments?: { name: string; description?: string; required?: boolean }[] }[]
   logo_url?: string
+
+  // Local MCP fields (scope='local')
+  scope?: 'local' | 'remote' | 'remoto'
+  bundle_url?: string
+  bundle_sha256?: string
+  bundle_size_bytes?: number
+  bundle_source?: 'spainmcp' | 'smithery-mirror' | 'direct-host'
+  bundle_version?: string
+  runtime?: string
+  npm_package?: string
+  homepage?: string
+  license?: string
+  repository_url?: string
 }
 
 const DATA_DIR = path.join(process.cwd(), 'src/data/mcps')

@@ -34,7 +34,7 @@ async function getSkillsCatalog(): Promise<{ skills: Skill[]; total: number }> {
       .eq('status', 'approved')
       .eq('is_public', true)
       .order('created_at', { ascending: false })
-      .limit(500)
+      .limit(2500)
 
     if (error || !data || data.length === 0) throw new Error('empty')
 

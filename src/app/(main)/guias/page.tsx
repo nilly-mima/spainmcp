@@ -8,6 +8,18 @@ export const metadata = {
   description: 'Directorio de skills para Claude en español. Encuentra y conecta skills de Anthropic, GitHub y la comunidad.',
 }
 
+// Authors considered "verified" — official organizations whose skills come from their own repos
+const VERIFIED_AUTHORS = new Set([
+  'spainmcp',
+  'anthropic',
+  'openai',
+  'github',
+  'pytorch',
+  'vercel',
+  'cloudflare',
+  'google',
+])
+
 async function getSkillsCatalog(): Promise<{ skills: Skill[]; total: number }> {
   try {
     const supabase = createClient(
@@ -35,7 +47,7 @@ async function getSkillsCatalog(): Promise<{ skills: Skill[]; total: number }> {
       categoria: row.categoria ?? 'general',
       installs: row.installs ?? 0,
       stars: row.stars ?? 0,
-      verified: (row.author ?? 'spainmcp') === 'spainmcp',
+      verified: VERIFIED_AUTHORS.has(row.author ?? 'spainmcp'),
       slug: row.slug ?? '',
       author: row.author ?? 'spainmcp',
       icon_url: row.icon_url ?? '',

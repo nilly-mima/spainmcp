@@ -11,6 +11,7 @@ export async function GET(req: NextRequest) {
   const scope = searchParams.get('scope')?.trim() ?? ''
   const categoria = searchParams.get('categoria')?.trim() ?? ''
   const namespace = searchParams.get('namespace')?.trim() ?? ''
+  const onlyVerified = searchParams.get('verified') === 'true'
   const page = Math.max(1, parseInt(searchParams.get('page') ?? '1', 10) || 1)
   const pageSize = Math.min(100, Math.max(1, parseInt(searchParams.get('pageSize') ?? '24', 10) || 24))
   const offset = (page - 1) * pageSize
@@ -20,7 +21,7 @@ export async function GET(req: NextRequest) {
   let query = supabase
     .from('mcp_catalog')
     .select(
-      'id, nombre, slug, descripcion_es, descripcion_en, scope, icon_url, upstream_url, downloads, is_active, created_at, categoria',
+      'id, nombre, slug, descripcion_es, descripcion_en, scope, icon_url, upstream_url, downloads, is_active, created_at, categoria, verified, author',
       { count: 'exact' }
     )
     .eq('is_active', true)
@@ -42,8 +43,10 @@ export async function GET(req: NextRequest) {
     query = query.eq('categoria', categoria)
   }
   if (namespace) {
-    const esc = namespace.replace(/[%_]/g, '\\$&')
-    query = query.ilike('slug', `%${esc}%`)
+    query = query.eq('author', namespace)
+  }
+  if (onlyVerified) {
+    query = query.eq('verified', true)
   }
 
   const { data, error, count } = await query

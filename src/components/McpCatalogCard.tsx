@@ -15,6 +15,8 @@ export interface CatalogMcp {
   is_active: boolean
   created_at: string
   categoria?: string
+  verified?: boolean
+  author?: string | null
 }
 
 const PALETTES = [
@@ -48,6 +50,17 @@ function DownloadIcon() {
       <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
       <polyline points="17 6 23 6 23 12"/>
     </svg>
+  )
+}
+
+function VerifiedBadge() {
+  return (
+    <span title="Verificado" className="inline-flex shrink-0 text-blue-500">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2l2.39 2.32 3.32-.54.94 3.23 3.05 1.47-1.43 3.04 1.43 3.04-3.05 1.47-.94 3.23-3.32-.54L12 22l-2.39-2.32-3.32.54-.94-3.23-3.05-1.47 1.43-3.04-1.43-3.04 3.05-1.47.94-3.23 3.32.54L12 2z"/>
+        <polyline points="8.5 12.5 11 15 16 9" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    </span>
   )
 }
 
@@ -110,7 +123,10 @@ export default function McpCatalogCard({ mcp }: { mcp: CatalogMcp }) {
             <h3 className="font-bold text-blue-600 dark:text-white text-sm leading-tight truncate group-hover:underline">
               {mcp.nombre}
             </h3>
-            <p className="text-xs text-stone-400 dark:text-stone-500 truncate mt-0.5">{mcp.slug}</p>
+            <p className="text-xs text-stone-400 dark:text-stone-500 truncate mt-0.5 flex items-center gap-1">
+              <span className="truncate">{mcp.author ? `${mcp.author}/${mcp.slug}` : mcp.slug}</span>
+              {mcp.verified && <VerifiedBadge />}
+            </p>
           </div>
         </div>
 

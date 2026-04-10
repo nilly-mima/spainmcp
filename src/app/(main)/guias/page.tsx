@@ -18,6 +18,15 @@ const VERIFIED_AUTHORS = new Set([
   'vercel',
   'cloudflare',
   'google',
+  'microsoft',
+  'dotnet',
+  'smithery-ai',
+  'composio',
+  'trailofbits',
+  'danielmiessler',
+  'modu-ai',
+  'mims-harvard',
+  'ruvnet',
 ])
 
 async function getSkillsCatalog(): Promise<{ skills: Skill[]; total: number }> {

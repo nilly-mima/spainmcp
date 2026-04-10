@@ -55,7 +55,24 @@ async function getSkillsCatalog(): Promise<{ skills: Skill[]; total: number }> {
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     )
 
-    // 1) Verified (always all — ensures trusted orgs always reach the client)
+    // Workaround Supabase PostgREST 1000-row cap: paginate in chunks of 1000.
+    const notInFilter = `(${[...VERIFIED_AUTHORS].map(a => `"${a}"`).join(',')})`
+
+    const fetchChunk = async (from: number, to: number) => {
+      const { data, error, count } = await supabase
+        .from('skills_catalog')
+        .select(SELECT_COLS, { count: 'exact' })
+        .eq('is_active', true)
+        .eq('status', 'approved')
+        .eq('is_public', true)
+        .not('author', 'in', notInFilter)
+        .order('created_at', { ascending: false })
+        .range(from, to)
+      if (error) throw error
+      return { data: data ?? [], count: count ?? 0 }
+    }
+
+    // 1) Verified (all — fits in a single <1000 chunk, we have 331 today)
     const { data: verifiedData, error: vErr } = await supabase
       .from('skills_catalog')
       .select(SELECT_COLS)
@@ -65,25 +82,19 @@ async function getSkillsCatalog(): Promise<{ skills: Skill[]; total: number }> {
       .in('author', [...VERIFIED_AUTHORS])
       .order('created_at', { ascending: false })
       .range(0, 999)
+    if (vErr) throw vErr
 
-    // 2) Non-verified (rest)
-    const { data: othersData, error: oErr, count } = await supabase
-      .from('skills_catalog')
-      .select(SELECT_COLS, { count: 'exact' })
-      .eq('is_active', true)
-      .eq('status', 'approved')
-      .eq('is_public', true)
-      .not('author', 'in', `(${[...VERIFIED_AUTHORS].map(a => `"${a}"`).join(',')})`)
-      .order('created_at', { ascending: false })
-      .range(0, 1499)
+    // 2) Non-verified in 3 chunks of 1000 (cover up to 3000 total others)
+    const chunk1 = await fetchChunk(0, 999)
+    const chunk2 = chunk1.data.length === 1000 ? await fetchChunk(1000, 1999) : { data: [], count: chunk1.count }
+    const chunk3 = chunk2.data.length === 1000 ? await fetchChunk(2000, 2999) : { data: [], count: chunk1.count }
 
-    if (vErr || oErr) throw new Error('supabase error')
     const verified = (verifiedData ?? []).map(mapRow)
-    const others = (othersData ?? []).map(mapRow)
+    const others = [...chunk1.data, ...chunk2.data, ...chunk3.data].map(mapRow)
     const all = [...verified, ...others]
     if (all.length === 0) throw new Error('empty')
 
-    return { skills: all, total: (count ?? 0) + verified.length }
+    return { skills: all, total: chunk1.count + verified.length }
   } catch {
     return { skills: getAllSkills(), total: getSkillsTotal() }
   }

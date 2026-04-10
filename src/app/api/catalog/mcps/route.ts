@@ -9,15 +9,20 @@ export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl
   const q = searchParams.get('q')?.trim() ?? ''
   const scope = searchParams.get('scope')?.trim() ?? ''
+  const categoria = searchParams.get('categoria')?.trim() ?? ''
+  const namespace = searchParams.get('namespace')?.trim() ?? ''
   const page = Math.max(1, parseInt(searchParams.get('page') ?? '1', 10) || 1)
-  const pageSize = Math.min(100, Math.max(1, parseInt(searchParams.get('pageSize') ?? '50', 10) || 50))
+  const pageSize = Math.min(100, Math.max(1, parseInt(searchParams.get('pageSize') ?? '24', 10) || 24))
   const offset = (page - 1) * pageSize
 
   const supabase = getServiceClient()
 
   let query = supabase
     .from('mcp_catalog')
-    .select('id, nombre, slug, descripcion_es, descripcion_en, scope, icon_url, upstream_url, downloads, is_active, created_at, categoria', { count: 'exact' })
+    .select(
+      'id, nombre, slug, descripcion_es, descripcion_en, scope, icon_url, upstream_url, downloads, is_active, created_at, categoria',
+      { count: 'exact' }
+    )
     .eq('is_active', true)
     .eq('status', 'approved')
     .eq('is_public', true)
@@ -25,11 +30,20 @@ export async function GET(req: NextRequest) {
     .range(offset, offset + pageSize - 1)
 
   if (q) {
-    query = query.or(`nombre.ilike.%${q}%,descripcion_es.ilike.%${q}%,descripcion_en.ilike.%${q}%,slug.ilike.%${q}%`)
+    const esc = q.replace(/[%_]/g, '\\$&')
+    query = query.or(
+      `nombre.ilike.%${esc}%,descripcion_es.ilike.%${esc}%,descripcion_en.ilike.%${esc}%,slug.ilike.%${esc}%`
+    )
   }
-
   if (scope) {
     query = query.eq('scope', scope)
+  }
+  if (categoria) {
+    query = query.eq('categoria', categoria)
+  }
+  if (namespace) {
+    const esc = namespace.replace(/[%_]/g, '\\$&')
+    query = query.ilike('slug', `%${esc}%`)
   }
 
   const { data, error, count } = await query

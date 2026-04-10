@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import McpCatalogCard, { CatalogMcp } from '@/components/McpCatalogCard'
 
 /* ── Icons ── */
@@ -95,17 +95,25 @@ function Pagination({ page, total, onChange }: { page: number; total: number; on
 const PER_PAGE = 24
 
 export default function McpCatalogPageClient({
-  initialMcps,
   initialQuery = '',
+  initialPage = 1,
 }: {
-  initialMcps: CatalogMcp[]
   initialQuery?: string
+  initialPage?: number
 }) {
   const [query, setQuery] = useState(initialQuery)
-  const [page, setPage] = useState(1)
+  const [page, setPage] = useState(initialPage)
   const [ms, setMs] = useState<number | null>(null)
+  const [mcps, setMcps] = useState<CatalogMcp[]>([])
+  const [totalCount, setTotalCount] = useState(0)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const abortRef = useRef<AbortController | null>(null)
 
-  useEffect(() => { setQuery(initialQuery); setPage(1) }, [initialQuery])
+  useEffect(() => {
+    setQuery(initialQuery)
+    setPage(initialPage)
+  }, [initialQuery, initialPage])
 
   // Listen for header-search-set events
   useEffect(() => {
@@ -121,43 +129,63 @@ export default function McpCatalogPageClient({
     return () => window.removeEventListener('header-search-set', handler)
   }, [])
 
-  // Sync URL
-  useEffect(() => {
-    const params = query.trim() ? `?q=${encodeURIComponent(query.trim())}` : ''
-    window.history.replaceState({}, '', `/mcps${params}`)
-  }, [query])
-
   const parsed = useMemo(() => parseQuery(query), [query])
 
-  const filtered = useMemo(() => {
-    const { verified, category, location, namespace, ownerMe, text } = parsed
-    let result = initialMcps
-    if (location === 'remote') result = result.filter(m => m.scope === 'remote' || m.scope === 'remoto')
-    if (location === 'local') result = result.filter(m => m.scope === 'local')
-    if (category) result = result.filter(m => m.categoria === category)
-    if (namespace) result = result.filter(m => m.slug.toLowerCase().includes(namespace.toLowerCase()))
-    if (ownerMe) result = result.filter(m => m.categoria === 'spainmcp') // placeholder
-    if (verified) result = result // placeholder — no verified flag on MCPs yet
-    if (text) {
-      const q = text.toLowerCase()
-      result = result.filter(m =>
-        m.nombre.toLowerCase().includes(q) ||
-        m.slug.toLowerCase().includes(q) ||
-        (m.descripcion_es || '').toLowerCase().includes(q)
-      )
-    }
-    return result
-  }, [initialMcps, parsed])
-
+  // Fetch from API + sync URL
   useEffect(() => {
-    const t = performance.now()
-    parseQuery(query)
-    setMs(Math.round(performance.now() - t))
-  }, [query, initialMcps])
+    // Update URL without navigation
+    const urlParams = new URLSearchParams()
+    if (query.trim()) urlParams.set('q', query.trim())
+    if (page > 1) urlParams.set('page', String(page))
+    const qs = urlParams.toString()
+    window.history.replaceState({}, '', `/mcps${qs ? '?' + qs : ''}`)
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE))
+    // Abort previous inflight
+    if (abortRef.current) abortRef.current.abort()
+    const ac = new AbortController()
+    abortRef.current = ac
+
+    const { category, location, namespace, text } = parsed
+
+    const api = new URLSearchParams()
+    api.set('page', String(page))
+    api.set('pageSize', String(PER_PAGE))
+    if (category) api.set('categoria', category)
+    if (location === 'remote') api.set('scope', 'remote')
+    if (location === 'local') api.set('scope', 'local')
+    if (namespace) api.set('namespace', namespace)
+    if (text) api.set('q', text)
+    // verified + ownerMe are no-ops server-side (no schema support yet) —
+    // keep chips for UX but they don't narrow results.
+
+    setLoading(true)
+    setError(null)
+    const t0 = performance.now()
+
+    fetch(`/api/catalog/mcps?${api.toString()}`, { signal: ac.signal })
+      .then(r => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`)
+        return r.json()
+      })
+      .then((data: { mcps: CatalogMcp[]; pagination: { totalCount: number } }) => {
+        setMcps(data.mcps || [])
+        setTotalCount(data.pagination?.totalCount ?? 0)
+        setMs(Math.round(performance.now() - t0))
+        setLoading(false)
+      })
+      .catch(err => {
+        if (err.name === 'AbortError') return
+        console.error('mcps fetch error', err)
+        setError('No se pudieron cargar los MCPs')
+        setLoading(false)
+      })
+
+    return () => { ac.abort() }
+  }, [query, page, parsed])
+
+  const totalPages = Math.max(1, Math.ceil(totalCount / PER_PAGE))
   const safePage = Math.min(page, totalPages)
-  const visible = filtered.slice((safePage - 1) * PER_PAGE, safePage * PER_PAGE)
+  const visible = mcps
 
   const updateQuery = (newQuery: string) => { setQuery(newQuery); setPage(1) }
 
@@ -260,7 +288,13 @@ export default function McpCatalogPageClient({
           {/* Conteo + chips */}
           <div className="flex items-center flex-wrap gap-2 mb-4">
             <p className="text-sm text-stone-400 dark:text-stone-500">
-              <span className="text-stone-700 dark:text-stone-300 font-medium">{filtered.length}</span> servidor{filtered.length !== 1 ? 'es' : ''} encontrado{filtered.length !== 1 ? 's' : ''}{ms !== null && <span className="ml-1">({ms}ms)</span>}
+              {loading ? (
+                <span className="text-stone-500 dark:text-stone-400">Cargando…</span>
+              ) : (
+                <>
+                  <span className="text-stone-700 dark:text-stone-300 font-medium">{totalCount}</span> servidor{totalCount !== 1 ? 'es' : ''} encontrado{totalCount !== 1 ? 's' : ''}{ms !== null && <span className="ml-1">({ms}ms)</span>}
+                </>
+              )}
             </p>
             {parsed.location && (
               <Chip label={`location:${parsed.location}`} onRemove={() => updateQuery(query.replace(/location:\S+/g, '').trim())} />
@@ -285,7 +319,15 @@ export default function McpCatalogPageClient({
             )}
           </div>
 
-          {visible.length > 0 ? (
+          {error ? (
+            <p className="text-red-500 text-sm py-16 text-center">{error}</p>
+          ) : loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 items-stretch">
+              {Array.from({ length: PER_PAGE }).map((_, i) => (
+                <div key={i} className="rounded-xl p-3 h-[140px] border border-gray-200 dark:border-gray-700/50 animate-pulse bg-gray-50 dark:bg-white/5" />
+              ))}
+            </div>
+          ) : visible.length > 0 ? (
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 items-stretch">
                 {visible.map(mcp => <McpCatalogCard key={mcp.id} mcp={mcp} />)}

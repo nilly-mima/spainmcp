@@ -89,7 +89,7 @@ const ALL_CLIENTS: Record<string, ClientInfo> = {
 }
 
 /* ── Big icon ── */
-function McpBigIcon({ nombre, id }: { nombre: string; id: string }) {
+function McpBigIcon({ nombre, id, logoUrl }: { nombre: string; id: string; logoUrl?: string }) {
   const initials = nombre.split(/[\s\-_—]/).map(w => w[0]).join('').slice(0, 2).toUpperCase()
   const palettes = [
     { bg: 'linear-gradient(135deg,#FF6B35,#F7C59F)', text: '#fff' },
@@ -101,6 +101,13 @@ function McpBigIcon({ nombre, id }: { nombre: string; id: string }) {
     { bg: 'linear-gradient(135deg,#00B09B,#96C93D)', text: '#fff' },
   ]
   const p = palettes[id.charCodeAt(0) % palettes.length]
+  if (logoUrl) {
+    return (
+      <div className="w-16 h-16 rounded-2xl shrink-0 shadow-md overflow-hidden bg-stone-100 dark:bg-stone-800 flex items-center justify-center">
+        <img src={logoUrl} alt={nombre} className="w-full h-full object-contain" onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none' }} />
+      </div>
+    )
+  }
   return (
     <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-xl font-bold shrink-0 shadow-md"
       style={{ background: p.bg, color: p.text }}>
@@ -622,7 +629,7 @@ const tools = await mcp.tools()`
         {/* Fila 1: icono + título + subtítulo + botón download (para locales) */}
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div className="flex items-center gap-4 min-w-0 flex-1">
-            <McpBigIcon nombre={mcp.nombre} id={mcp.id} />
+            <McpBigIcon nombre={mcp.nombre} id={mcp.id} logoUrl={mcp.logo_url} />
             <div className="flex flex-col gap-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
                 <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100 leading-tight">{mcp.nombre}</h1>

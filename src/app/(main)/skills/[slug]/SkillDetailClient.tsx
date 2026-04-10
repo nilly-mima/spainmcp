@@ -229,10 +229,12 @@ function FileTree({ nodes, repoUrl }: { nodes: FileNode[]; repoUrl: string }) {
     })
   }
 
-  // Extract owner/repo from repoUrl for building file links
-  const repoMatch = repoUrl.match(/github\.com\/([^/]+\/[^/]+)\/tree\/main\/(.+)/)
+  // Extract owner/repo/branch/basePath from repoUrl for building file links
+  // Supports any branch (main, canary, production, master, etc.)
+  const repoMatch = repoUrl.match(/github\.com\/([^/]+\/[^/]+)\/tree\/([^/]+)\/(.+)/)
   const repoSlug = repoMatch?.[1] ?? ''
-  const basePath = repoMatch?.[2] ?? ''
+  const branch = repoMatch?.[2] ?? 'main'
+  const basePath = repoMatch?.[3] ?? ''
 
   const renderNodes = (items: FileNode[], depth: number): React.ReactNode => {
     return items.map(node => (
@@ -249,7 +251,7 @@ function FileTree({ nodes, repoUrl }: { nodes: FileNode[]; repoUrl: string }) {
           </button>
         ) : (
           <a
-            href={`https://github.com/${repoSlug}/blob/main/${basePath}/${node.path}`}
+            href={`https://github.com/${repoSlug}/blob/${branch}/${basePath}/${node.path}`}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-2 py-1 px-1 rounded hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors text-sm text-[var(--foreground)] hover:text-blue-600 dark:hover:text-blue-400"

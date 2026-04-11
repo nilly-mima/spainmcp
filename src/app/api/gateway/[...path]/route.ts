@@ -1,5 +1,5 @@
 import { createClient } from "@supabase/supabase-js"
-import { NextRequest } from "next/server"
+import { NextRequest, after } from "next/server"
 import crypto from "node:crypto"
 
 const supabase = createClient(
@@ -36,7 +36,7 @@ function hashIP(ip: string | null): string | null {
   return crypto.createHash("sha256").update(ip).digest("hex").slice(0, 16)
 }
 
-async function logGateway(params: {
+type LogParams = {
   slug: string
   method: string
   status_code: number
@@ -45,8 +45,16 @@ async function logGateway(params: {
   ip_hash: string | null
   user_agent: string | null
   error?: string
-}): Promise<void> {
-  void supabase.from("gateway_logs").insert(params)
+}
+
+function scheduleLog(params: LogParams): void {
+  // Next.js 15+ after(): ejecuta tras enviar la response pero mantiene
+  // el lifecycle Vercel activo hasta que el insert complete. Evita el
+  // fire-and-forget fantasma donde la instancia se congela antes del insert.
+  after(async () => {
+    const { error } = await supabase.from("gateway_logs").insert(params)
+    if (error) console.error("gateway_logs insert failed:", error.message)
+  })
 }
 
 async function handler(req: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
@@ -79,7 +87,7 @@ async function handler(req: NextRequest, { params }: { params: Promise<{ path: s
     .single()
 
   if (!entry) {
-    void logGateway({
+    scheduleLog({
       slug, method: req.method, status_code: 404, duration_ms: Date.now() - t0,
       tier: "unknown", ip_hash: ipHash, user_agent: userAgent,
       error: "not in allowlist",
@@ -92,7 +100,7 @@ async function handler(req: NextRequest, { params }: { params: Promise<{ path: s
 
   // 2) Tier check
   if (entry.tier === "blocked") {
-    void logGateway({
+    scheduleLog({
       slug, method: req.method, status_code: 403, duration_ms: Date.now() - t0,
       tier: "blocked", ip_hash: ipHash, user_agent: userAgent,
       error: "tier=blocked",
@@ -110,7 +118,7 @@ async function handler(req: NextRequest, { params }: { params: Promise<{ path: s
     // Requiere que el cliente traiga su propia API key del servicio upstream
     const userKey = req.headers.get("x-user-api-key")
     if (!userKey) {
-      void logGateway({
+      scheduleLog({
         slug, method: req.method, status_code: 401, duration_ms: Date.now() - t0,
         tier: "user_key", ip_hash: ipHash, user_agent: userAgent,
         error: "missing x-user-api-key",
@@ -127,7 +135,7 @@ async function handler(req: NextRequest, { params }: { params: Promise<{ path: s
   }
 
   if (!entry.upstream_url) {
-    void logGateway({
+    scheduleLog({
       slug, method: req.method, status_code: 500, duration_ms: Date.now() - t0,
       tier: entry.tier, ip_hash: ipHash, user_agent: userAgent,
       error: "no upstream_url",
@@ -172,7 +180,7 @@ async function handler(req: NextRequest, { params }: { params: Promise<{ path: s
     responseHeaders.set("x-spainmcp-tier", entry.tier)
     responseHeaders.set("x-spainmcp-gateway", "1")
 
-    void logGateway({
+    scheduleLog({
       slug, method: req.method, status_code: upstreamRes.status,
       duration_ms: Date.now() - t0, tier: entry.tier,
       ip_hash: ipHash, user_agent: userAgent,
@@ -184,7 +192,7 @@ async function handler(req: NextRequest, { params }: { params: Promise<{ path: s
     })
   } catch (err) {
     console.error(`Gateway error [${slug}]:`, err)
-    void logGateway({
+    scheduleLog({
       slug, method: req.method, status_code: 502, duration_ms: Date.now() - t0,
       tier: entry.tier, ip_hash: ipHash, user_agent: userAgent,
       error: err instanceof Error ? err.message : "unknown",

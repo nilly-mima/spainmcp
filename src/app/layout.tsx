@@ -1,6 +1,5 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
-import Script from 'next/script'
 import './globals.css'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -17,6 +16,10 @@ export const metadata: Metadata = {
   },
 }
 
+// Theme init script — plain <script> avoids Next.js 16 "script inside React component" warning.
+// Runs once at SSR, never re-evaluated by React on client hydration.
+const themeInit = `try{var t=localStorage.getItem('theme');var d=t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme:dark)').matches);document.documentElement.classList.toggle('dark',d)}catch(e){}`
+
 export default function RootLayout({
   children,
 }: {
@@ -25,13 +28,7 @@ export default function RootLayout({
   return (
     <html lang="es" suppressHydrationWarning>
       <head>
-        <Script
-          id="theme-init"
-          strategy="beforeInteractive"
-          dangerouslySetInnerHTML={{
-            __html: `try{var t=localStorage.getItem('theme');var d=t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme:dark)').matches);document.documentElement.classList.toggle('dark',d)}catch(e){}`,
-          }}
-        />
+        <script dangerouslySetInnerHTML={{ __html: themeInit }} />
       </head>
       <body className={inter.className} suppressHydrationWarning>
         {children}

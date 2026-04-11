@@ -1,6 +1,31 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
+
+/* ── Hook: fetch real stats from /api/stats/:slug ── */
+type StatsData = {
+  slug: string
+  totals: { calls: number; ok: number; errors: number; avg_ms: number; p95_ms: number; uptime_pct: number }
+  daily: { day: string; calls: number; avg_ms: number; uptime: number }[]
+  topClients: { label: string; count: number }[]
+  has_data: boolean
+}
+function useStats(slug: string): { stats: StatsData | null; loading: boolean } {
+  const [stats, setStats] = useState<StatsData | null>(null)
+  const [loading, setLoading] = useState(true)
+  useEffect(() => {
+    let cancelled = false
+    fetch(`/api/stats/${encodeURIComponent(slug)}`)
+      .then(r => r.json())
+      .then(d => { if (!cancelled) { setStats(d); setLoading(false) } })
+      .catch(() => { if (!cancelled) setLoading(false) })
+    return () => { cancelled = true }
+  }, [slug])
+  return { stats, loading }
+}
+
+const fmtNum = (n: number) => n.toLocaleString('es-ES')
+const fmtLatency = (ms: number) => ms >= 1000 ? `${(ms / 1000).toFixed(1)}s` : `${Math.round(ms)}ms`
 import Link from 'next/link'
 import type { Mcp } from '@/lib/mcps'
 import { CATEGORIA_LABELS } from '@/lib/mcps-constants'
@@ -389,28 +414,38 @@ function LatencyChart({ data }: { data: number[] }) {
   )
 }
 
-/* ── Performance tab ── */
+/* ── Performance tab (datos reales de /api/stats/:slug) ── */
 function PerformanceTab({ mcp }: { mcp: Mcp }) {
+  const { stats, loading } = useStats(mcp.id)
   const tools = mcp.tools_list ?? []
-  const seed = mcp.id.charCodeAt(0)
-  const toolStats = tools.map((tool, i) => {
-    const calls = Math.max(10, 420 - i * 85 + (tool.name.charCodeAt(0) % 40))
-    const latencyMs = 180 + (tool.name.charCodeAt(0) % 600) + seed % 200
-    const uptime = i === 0 ? 100 : i % 4 === 0 ? 98.5 : 100
-    return { name: tool.name, calls, latencyMs, uptime }
-  })
-  const total = { calls: toolStats.reduce((s, t) => s + t.calls, 0), latencyMs: toolStats.length ? toolStats.reduce((s, t) => s + t.latencyMs, 0) / toolStats.length : 300, uptime: toolStats.length ? toolStats.reduce((s, t) => s + t.uptime, 0) / toolStats.length : 100 }
-  const fmtL = (ms: number) => ms >= 1000 ? `${(ms / 1000).toFixed(1)}s` : `${Math.round(ms)}ms`
   const fmtN = (n: string) => n.length > 20 ? n.slice(0, 17) + '...' : n
-  const uptimeBars = Array.from({ length: 30 }, (_, i) => i < 4 ? 'grey' : i % 11 === 7 ? 'grey' : 'blue')
-  const base = total.latencyMs
-  const latencyData = [30,base*0.9,base*1.1,base*1.0,base*0.95,base*0.85,base*0.9,base*0.88,base*0.92,base*0.9,base*0.87,base*0.9,base*0.88,base*0.91,base*0.89,base*0.9,base*1.1,base*1.4,base*1.0,base*2.2,base*0.2,base*0.15,base*2.8,base*0.1,base*0.1,base*1.6,base*1.4,base*1.1,base*2.2,base*1.3]
+
+  if (loading) {
+    return (
+      <div className="flex flex-col gap-6">
+        <h2 className="flex items-center gap-2 text-lg font-bold text-stone-800 dark:text-stone-200"><PerfIcon /> Rendimiento</h2>
+        <div className="text-sm text-stone-500">Cargando estadísticas…</div>
+      </div>
+    )
+  }
+
+  const totals = stats?.totals ?? { calls: 0, ok: 0, errors: 0, avg_ms: 0, p95_ms: 0, uptime_pct: 100 }
+  const daily = stats?.daily ?? []
+  const uptimeBars = daily.map(d => d.calls === 0 ? 'grey' : d.uptime >= 99 ? 'blue' : d.uptime >= 90 ? 'yellow' : 'red')
+  const latencyData = daily.map(d => d.avg_ms)
 
   return (
     <div className="flex flex-col gap-6">
       <h2 className="flex items-center gap-2 text-lg font-bold text-stone-800 dark:text-stone-200">
         <PerfIcon /> Rendimiento
       </h2>
+
+      {!stats?.has_data && (
+        <div className="rounded-xl p-4 bg-blue-50 dark:bg-blue-950/20 text-sm text-blue-700 dark:text-blue-300" style={{ border: '1px solid var(--border)' }}>
+          Este MCP aún no tiene tráfico registrado en el gateway SpainMCP. Las métricas se llenarán con datos reales en cuanto los usuarios empiecen a usarlo.
+        </div>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,380px)_1fr] gap-4">
 
         {/* Tool table */}
@@ -423,22 +458,25 @@ function PerformanceTab({ mcp }: { mcp: Mcp }) {
               <th className="text-right px-4 py-3 font-medium">Uptime</th>
             </tr></thead>
             <tbody>
-              {toolStats.map((t, i) => (
-                <tr key={t.name} className={`border-b border-stone-50 dark:border-stone-800/30 ${i === 0 ? 'bg-blue-50/70 dark:bg-blue-950/20' : ''}`}>
+              {tools.map((t) => (
+                <tr key={t.name} className="border-b border-stone-50 dark:border-stone-800/30">
                   <td className="px-4 py-2.5 font-mono text-stone-700 dark:text-stone-300">{fmtN(t.name)}</td>
-                  <td className="px-3 py-2.5 text-right text-stone-600 dark:text-stone-400 tabular-nums">{t.calls.toLocaleString()}</td>
-                  <td className="px-3 py-2.5 text-right text-stone-600 dark:text-stone-400">{fmtL(t.latencyMs)}</td>
-                  <td className="px-4 py-2.5 text-right text-stone-600 dark:text-stone-400">{t.uptime.toFixed(1)}%</td>
+                  <td className="px-3 py-2.5 text-right text-stone-400 dark:text-stone-500 tabular-nums">—</td>
+                  <td className="px-3 py-2.5 text-right text-stone-400 dark:text-stone-500">—</td>
+                  <td className="px-4 py-2.5 text-right text-stone-400 dark:text-stone-500">—</td>
                 </tr>
               ))}
             </tbody>
             <tfoot><tr className="border-t border-stone-200 dark:border-stone-700">
-              <td className="px-4 py-2.5" />
-              <td className="px-3 py-2.5 text-right font-semibold text-stone-700 dark:text-stone-300 tabular-nums">{total.calls.toLocaleString()}</td>
-              <td className="px-3 py-2.5 text-right font-semibold text-stone-700 dark:text-stone-300">{fmtL(total.latencyMs)}</td>
-              <td className="px-4 py-2.5 text-right font-semibold text-stone-700 dark:text-stone-300">{total.uptime.toFixed(1)}%</td>
+              <td className="px-4 py-2.5 text-stone-500 font-medium">Total</td>
+              <td className="px-3 py-2.5 text-right font-semibold text-stone-700 dark:text-stone-300 tabular-nums">{fmtNum(totals.calls)}</td>
+              <td className="px-3 py-2.5 text-right font-semibold text-stone-700 dark:text-stone-300">{totals.calls > 0 ? fmtLatency(totals.avg_ms) : '—'}</td>
+              <td className="px-4 py-2.5 text-right font-semibold text-stone-700 dark:text-stone-300">{totals.calls > 0 ? `${totals.uptime_pct.toFixed(1)}%` : '—'}</td>
             </tr></tfoot>
           </table>
+          <div className="px-4 py-2 text-[10px] text-stone-400 border-t border-stone-100 dark:border-stone-800">
+            El desglose por tool requiere parseo del body JSON-RPC — en roadmap.
+          </div>
         </div>
 
         {/* Right charts */}
@@ -446,21 +484,29 @@ function PerformanceTab({ mcp }: { mcp: Mcp }) {
           <div className="rounded-xl p-4 bg-white dark:bg-stone-900 flex flex-col gap-3" style={{ border: '1px solid var(--border)' }}>
             <div className="flex items-center gap-2 text-xs text-stone-500">
               <span>Uptime (30d)</span>
-              <span className="font-semibold text-stone-700 dark:text-stone-300">{total.uptime.toFixed(1)}%</span>
+              <span className="font-semibold text-stone-700 dark:text-stone-300">{totals.calls > 0 ? `${totals.uptime_pct.toFixed(1)}%` : 'Sin datos'}</span>
             </div>
             <div className="flex gap-0.5">
               {uptimeBars.map((c, i) => (
-                <div key={i} className={`flex-1 h-8 rounded-sm ${c === 'blue' ? 'bg-blue-400' : 'bg-stone-200 dark:bg-stone-700'}`} />
+                <div key={i} className={`flex-1 h-8 rounded-sm ${
+                  c === 'blue' ? 'bg-blue-400' :
+                  c === 'yellow' ? 'bg-yellow-400' :
+                  c === 'red' ? 'bg-red-400' :
+                  'bg-stone-200 dark:bg-stone-700'
+                }`} />
               ))}
             </div>
           </div>
           <div className="rounded-xl p-4 bg-white dark:bg-stone-900 flex flex-col flex-1 min-h-0" style={{ border: '1px solid var(--border)' }}>
             <div className="flex items-center gap-2 text-xs text-stone-500 mb-3">
               <span>Latency (30d)</span>
-              <span className="font-semibold text-stone-700 dark:text-stone-300">{fmtL(total.latencyMs)}</span>
+              <span className="font-semibold text-stone-700 dark:text-stone-300">{totals.calls > 0 ? fmtLatency(totals.avg_ms) : 'Sin datos'}</span>
+              {totals.calls > 0 && (
+                <span className="text-stone-400 ml-2">p95 {fmtLatency(totals.p95_ms)}</span>
+              )}
             </div>
             <div className="flex-1 min-h-0">
-              <LatencyChart data={latencyData} />
+              <LatencyChart data={latencyData.length ? latencyData : [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]} />
             </div>
           </div>
         </div>
@@ -469,33 +515,44 @@ function PerformanceTab({ mcp }: { mcp: Mcp }) {
   )
 }
 
-/* ── Usage tab ── */
+/* ── Usage tab (datos reales de /api/stats/:slug) ── */
 function UsageTab({ mcp }: { mcp: Mcp }) {
-  const topClients = [
-    { label: 'SpainMCP',    color: '#3B82F6', count: 14537 },
-    { label: 'Claude Code', color: '#7C3AED', count: 7907 },
-    { label: 'Claude.ai',   color: '#3B82F6', count: 4264 },
-    { label: 'Codex',       color: '#10B981', count: 883 },
-    { label: 'Cursor',      color: '#3B82F6', count: 511 },
-  ]
-  const maxCount = topClients[0].count
+  const { stats, loading } = useStats(mcp.id)
+
+  if (loading) {
+    return (
+      <div className="flex flex-col gap-6">
+        <h2 className="flex items-center gap-2 text-lg font-bold text-stone-800 dark:text-stone-200"><UsageIcon /> Uso</h2>
+        <div className="text-sm text-stone-500">Cargando estadísticas…</div>
+      </div>
+    )
+  }
+
+  const topClientsRaw = stats?.topClients ?? []
+  const PALETTE = ['#3B82F6', '#7C3AED', '#10B981', '#F59E0B', '#EF4444']
+  const topClients = topClientsRaw.length > 0
+    ? topClientsRaw.map((c, i) => ({ ...c, color: PALETTE[i % PALETTE.length] }))
+    : [{ label: 'Sin datos', color: '#9CA3AF', count: 0 }]
+  const maxCount = Math.max(1, topClients[0].count)
   const total = topClients.reduce((s, c) => s + c.count, 0)
 
-  // 31 días Mar 7 → Apr 6
-  const sessionData = [45,380,340,350,340,280,480,760,1220,1060,900,1280,1320,1420,1310,2000,1450,1420,1380,780,1100,1200,1380,1250,1400,730,740,1460,1320,1370,700]
-  const n = sessionData.length
-  const maxSes = 2000
+  // Serie diaria real de 30 puntos desde /api/stats
+  const sessionData = (stats?.daily ?? []).map(d => d.calls)
+  const n = Math.max(1, sessionData.length)
+  const maxSes = Math.max(1, ...sessionData, 10) // mínimo 10 para no colapsar
   const W = 500, H = 200, PT = 12, PB = 36, PL = 6, PR = 50
   const iW = W - PL - PR, iH = H - PT - PB
   const bW = (iW / n) * 0.72
   const toX = (i: number) => PL + (i + 0.5) * (iW / n)
   const toY = (v: number) => PT + iH - (v / maxSes) * iH
-  const gridVals = [0, 500, 1000, 1500, 2000]
-  // labels cada 3 días
+  // Grid Y: 5 líneas desde 0 a maxSes redondeado
+  const step = Math.ceil(maxSes / 4)
+  const gridVals = [0, step, step * 2, step * 3, step * 4]
+  // Labels X: cada 5 días, fecha real retrocedida desde hoy
   const xLabels: { i: number; label: string }[] = []
-  const startDate = new Date('2026-03-07')
-  for (let i = 0; i < n; i += 3) {
-    const d = new Date(startDate); d.setDate(d.getDate() + i)
+  const today = new Date()
+  for (let i = 0; i < n; i += 5) {
+    const d = new Date(today); d.setDate(d.getDate() - (n - 1 - i))
     xLabels.push({ i, label: d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' }) })
   }
 
@@ -520,7 +577,7 @@ function UsageTab({ mcp }: { mcp: Mcp }) {
                 <div className="flex-1 flex flex-col gap-1 min-w-0">
                   <div className="flex items-center justify-between gap-2">
                     <span className="text-sm font-medium text-stone-700 dark:text-stone-300 truncate">{c.label}</span>
-                    <span className="text-xs text-stone-500 tabular-nums shrink-0">{c.count.toLocaleString('de-DE')}</span>
+                    <span className="text-xs text-stone-500 tabular-nums shrink-0">{c.count.toLocaleString('es-ES')}</span>
                   </div>
                   <div className="h-1 bg-stone-100 dark:bg-stone-800 rounded-full overflow-hidden">
                     <div className="h-full rounded-full bg-blue-500" style={{ width: `${(c.count / maxCount) * 100}%` }} />
@@ -531,7 +588,7 @@ function UsageTab({ mcp }: { mcp: Mcp }) {
           </div>
           <div className="border-t border-stone-100 dark:border-stone-800 pt-3 flex justify-between">
             <span className="text-sm text-stone-500">Total</span>
-            <span className="text-sm font-bold text-stone-800 dark:text-stone-200">{total.toLocaleString('de-DE')}</span>
+            <span className="text-sm font-bold text-stone-800 dark:text-stone-200">{total.toLocaleString('es-ES')}</span>
           </div>
         </div>
 

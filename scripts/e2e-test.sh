@@ -36,12 +36,12 @@ echo ""
 
 echo "── Vercel API ──"
 check "Health" "$BASE/api/v1/health" '"status":"ok"'
-check "Servers list" "$BASE/api/v1/servers" '"servers"'
-check "Servers search" "$BASE/api/v1/servers?q=spain" '"SpainMCP"'
+check "Servers list" "$BASE/api/v1/servers" '"qualifiedName"'
+check "Servers search" "$BASE/api/v1/servers?q=postgres" '"qualifiedName"'
 check "Namespaces (auth)" "$BASE/api/v1/namespaces" '"namespaces"'
 check "Namespaces (no auth)" "$BASE/api/v1/namespaces" '"Unauthorized"' "GET_NOAUTH"
 check "Usage" "$BASE/api/v1/usage" '"plan"'
-check "Skills" "$BASE/api/v1/skills" '"pagination"'
+check "Skills" "$BASE/api/v1/skills" '"qualifiedName"'
 
 echo ""
 echo "── CF Worker ──"

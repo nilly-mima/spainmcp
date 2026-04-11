@@ -4,15 +4,15 @@ import { useState } from 'react'
 
 const ENDPOINTS = [
   { method: 'GET', path: '/api/v1/health', auth: false, body: null, description: 'Health check' },
-  { method: 'GET', path: '/api/v1/servers', auth: false, body: null, description: 'Listar servidores MCP' },
-  { method: 'GET', path: '/api/v1/servers?q=spain', auth: false, body: null, description: 'Buscar servidores' },
+  { method: 'GET', path: '/api/v1/servers', auth: false, body: null, description: 'Listar MCPs del catálogo curado (solo lectura)' },
+  { method: 'GET', path: '/api/v1/servers?q=spain', auth: false, body: null, description: 'Buscar MCPs en el catálogo' },
   { method: 'GET', path: '/api/v1/namespaces', auth: true, body: null, description: 'Listar tus namespaces' },
   { method: 'POST', path: '/api/v1/namespaces', auth: true, body: '{"name":"test-ns"}', description: 'Crear namespace' },
   { method: 'POST', path: '/api/v1/namespaces/generated', auth: true, body: null, description: 'Crear namespace con nombre auto' },
   { method: 'GET', path: '/api/v1/connections/{namespace}', auth: true, body: null, description: 'Listar conexiones' },
   { method: 'POST', path: '/api/v1/auth/token', auth: true, body: '{"policy":[{"namespaces":"test-ns","resources":"connections","operations":["read","execute"],"ttl":"1h"}]}', description: 'Crear token scoped' },
   { method: 'GET', path: '/api/v1/usage', auth: true, body: null, description: 'Ver uso actual (RPCs/mes)' },
-  { method: 'GET', path: '/api/v1/skills', auth: false, body: null, description: 'Listar skills publicadas via API (namespace). Para catálogo curado → /api/catalog/skills' },
+  { method: 'GET', path: '/api/v1/skills', auth: false, body: null, description: 'Listar skills del catálogo curado (solo lectura)' },
 ]
 
 export default function PlaygroundPage() {

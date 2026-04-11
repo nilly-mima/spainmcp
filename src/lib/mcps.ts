@@ -41,6 +41,7 @@ export interface Mcp {
   homepage?: string
   license?: string
   repository_url?: string
+  downloads?: number
 }
 
 const DATA_DIR = path.join(process.cwd(), 'src/data/mcps')

@@ -56,36 +56,61 @@ function Sparkline({ data }: { data: number[] }) {
 }
 
 /* ── Client data ── */
-type ClientInfo = { label: string; color: string; install: string }
+const gfav = (domain: string) => `https://www.google.com/s2/favicons?domain=${domain}&sz=32`
+type ClientInfo = { label: string; color: string; logo: string; install: string }
 const MCP_REMOTE = `npx -y mcp-remote https://mcp.lat/api/mcp --header "Authorization: Bearer TU_API_KEY"`
 const ALL_CLIENTS: Record<string, ClientInfo> = {
-  'api':             { label: 'API',              color: '#6B7280', install: `URL: https://mcp.lat/api/mcp\nHeader: Authorization: Bearer TU_API_KEY` },
-  'claude-code':     { label: 'Claude Code',      color: '#7C3AED', install: `claude mcp add spainmcp -- npx -y mcp-remote https://mcp.lat/api/mcp --header "Authorization: Bearer TU_API_KEY"` },
-  'codex':           { label: 'Codex',            color: '#10A37F', install: MCP_REMOTE },
-  'openclaw':        { label: 'OpenClaw',         color: '#DC2626', install: MCP_REMOTE },
-  'cursor':          { label: 'Cursor',           color: '#1A1A1A', install: MCP_REMOTE },
-  'poke':            { label: 'Poke',             color: '#16A34A', install: MCP_REMOTE },
-  'claude':          { label: 'Claude',           color: '#2563EB', install: MCP_REMOTE },
-  'chatgpt':         { label: 'ChatGPT',          color: '#10A37F', install: MCP_REMOTE },
-  'librechat':       { label: 'LibreChat',        color: '#7C3AED', install: MCP_REMOTE },
-  'gemini-cli':      { label: 'Gemini CLI',       color: '#1A73E8', install: MCP_REMOTE },
-  'vscode':          { label: 'VS Code',          color: '#0078D4', install: `code --add-mcp '{"name":"spainmcp","command":"npx","args":["-y","mcp-remote","https://mcp.lat/api/mcp","--header","Authorization: Bearer TU_API_KEY"]}'` },
-  'cline':           { label: 'Cline',            color: '#1C1C1C', install: MCP_REMOTE },
-  'windsurf':        { label: 'Windsurf',         color: '#0369A1', install: MCP_REMOTE },
-  'vscode-insiders': { label: 'VS Code Insiders', color: '#1C9E5B', install: `code-insiders --add-mcp '{"name":"spainmcp","command":"npx","args":["-y","mcp-remote","https://mcp.lat/api/mcp","--header","Authorization: Bearer TU_API_KEY"]}'` },
-  'qordinate':       { label: 'Qordinate',        color: '#0D9488', install: MCP_REMOTE },
-  'goose':           { label: 'Goose',            color: '#4B5563', install: MCP_REMOTE },
-  'deepgram-saga':   { label: 'Deepgram Saga',    color: '#1E1E1E', install: MCP_REMOTE },
-  'highlight':       { label: 'Highlight',        color: '#2563EB', install: MCP_REMOTE },
-  'raycast':         { label: 'Raycast',          color: '#FF6363', install: MCP_REMOTE },
-  'roo-code':        { label: 'Roo Code',         color: '#1D4ED8', install: MCP_REMOTE },
-  'augment':         { label: 'Augment',          color: '#2563EB', install: MCP_REMOTE },
-  'boltai':          { label: 'BoltAI',           color: '#D97706', install: MCP_REMOTE },
-  'witsy':           { label: 'Witsy',            color: '#DB2777', install: MCP_REMOTE },
-  'enconvo':         { label: 'Enconvo',          color: '#0891B2', install: MCP_REMOTE },
-  'amazon-bedrock':  { label: 'Amazon Bedrock',   color: '#FF9900', install: MCP_REMOTE },
-  'amazon-q':        { label: 'Amazon Q',         color: '#232F3E', install: MCP_REMOTE },
-  'claude-desktop':  { label: 'Claude Desktop',   color: '#2563EB', install: MCP_REMOTE },
+  'claude-code':  { label: 'Claude Code',    color: '#D97706', logo: gfav('claude.ai'),           install: `claude mcp add spainmcp -- npx -y mcp-remote https://mcp.lat/api/mcp --header "Authorization: Bearer TU_API_KEY"` },
+  'codex':        { label: 'Codex',          color: '#10A37F', logo: gfav('openai.com'),          install: MCP_REMOTE },
+  'openclaw':     { label: 'OpenClaw',       color: '#DC2626', logo: gfav('openclaw.ai'),         install: MCP_REMOTE },
+  'cursor':       { label: 'Cursor',         color: '#1A1A1A', logo: gfav('cursor.com'),          install: MCP_REMOTE },
+  'amp':          { label: 'Amp',            color: '#FF4500', logo: gfav('ampcode.com'),         install: MCP_REMOTE },
+  'copilot':      { label: 'GitHub Copilot', color: '#24292F', logo: gfav('github.com'),          install: MCP_REMOTE },
+  'gemini-cli':   { label: 'Gemini CLI',     color: '#4285F4', logo: gfav('gemini.google.com'),   install: MCP_REMOTE },
+  'kilo-code':    { label: 'Kilo Code',      color: '#7C3AED', logo: gfav('kilocode.ai'),         install: MCP_REMOTE },
+  'junie':        { label: 'Junie',          color: '#22C55E', logo: gfav('junie.jetbrains.com'), install: MCP_REMOTE },
+  'replit':       { label: 'Replit',         color: '#F26207', logo: gfav('replit.com'),          install: MCP_REMOTE },
+  'windsurf':     { label: 'Windsurf',       color: '#06B6D4', logo: gfav('codeium.com'),         install: MCP_REMOTE },
+  'cline':        { label: 'Cline',          color: '#F97316', logo: gfav('cline.bot'),           install: MCP_REMOTE },
+  'continue':     { label: 'Continue',       color: '#6B7280', logo: gfav('continue.dev'),        install: MCP_REMOTE },
+  'opencode':     { label: 'OpenCode',       color: '#3B82F6', logo: gfav('opencode.ai'),         install: MCP_REMOTE },
+  'openhands':    { label: 'OpenHands',      color: '#EAB308', logo: gfav('all-hands.dev'),       install: MCP_REMOTE },
+  'roo-code':     { label: 'Roo Code',       color: '#8B5CF6', logo: gfav('roocode.com'),         install: MCP_REMOTE },
+  'augment':      { label: 'Augment',        color: '#6B7280', logo: gfav('augmentcode.com'),     install: MCP_REMOTE },
+  'goose':        { label: 'Goose',          color: '#1D4ED8', logo: gfav('block.github.io/goose'), install: MCP_REMOTE },
+  'trae':         { label: 'Trae',           color: '#0EA5E9', logo: gfav('trae.ai'),             install: MCP_REMOTE },
+  'zencoder':     { label: 'Zencoder',       color: '#F97316', logo: gfav('zencoder.ai'),         install: MCP_REMOTE },
+  'antigravity':  { label: 'Antigravity',    color: '#2563EB', logo: gfav('antigravity.google'),  install: MCP_REMOTE },
+}
+
+/* ── Copyable slug ── */
+function CopyableSlug({ slug }: { slug: string }) {
+  const [copied, setCopied] = useState(false)
+  const [hovered, setHovered] = useState(false)
+  function handleCopy(e: React.MouseEvent) {
+    e.preventDefault()
+    navigator.clipboard.writeText(slug).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    })
+  }
+  return (
+    <span
+      className="relative inline-flex items-center cursor-pointer"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      onClick={handleCopy}
+    >
+      <span className="text-sm text-stone-400">{slug}</span>
+      {(hovered || copied) && (
+        <span className={`absolute -top-0.5 left-full ml-1.5 inline-flex items-center text-xs px-1.5 py-0.5 rounded font-medium whitespace-nowrap ${
+          copied ? 'bg-green-600 text-white' : 'bg-stone-800 dark:bg-stone-600 text-white'
+        }`}>
+          {copied ? 'Copiado!' : 'Copy'}
+        </span>
+      )}
+    </span>
+  )
 }
 
 /* ── Big icon ── */
@@ -137,27 +162,27 @@ function ToolItem({ name, description, parameters }: { name: string; description
         onClick={() => setOpen(v => !v)}
         className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-stone-50 dark:hover:bg-stone-800/50 transition-colors"
       >
-        <span className={`font-mono text-xs font-semibold tracking-wide uppercase ${open ? 'text-blue-600' : 'text-stone-700 dark:text-stone-300'}`}>
+        <span className={`font-mono text-sm font-semibold ${open ? 'text-blue-600 dark:text-blue-400' : 'text-stone-700 dark:text-stone-300'}`}>
           {name}
         </span>
         <ChevronIcon open={open} />
       </button>
       {open && (
-        <div className="px-4 py-4 border-t border-stone-100 dark:border-stone-800 flex flex-col gap-4">
-          <p className="text-sm text-stone-500 dark:text-stone-400">{description}</p>
+        <div className="px-4 pb-4 pt-2 border-t border-stone-100 dark:border-stone-800">
+          <p className="text-sm text-stone-500 dark:text-stone-400 mb-3">{description}</p>
           {parameters && parameters.length > 0 && (
-            <div className="flex flex-col gap-1">
-              <p className="text-xs font-medium text-stone-400 mb-2">Parámetros</p>
-              {parameters.map(p => (
-                <div key={p.name} className="flex flex-col gap-1 py-1">
-                  <div className="flex items-center gap-2 flex-wrap">
+            <div className="rounded-md bg-stone-50 dark:bg-stone-900/50 border border-stone-100 dark:border-stone-800 overflow-hidden">
+              <p className="text-xs font-medium text-stone-400 px-3 py-2 border-b border-stone-100 dark:border-stone-800">Parameters</p>
+              {parameters.map((p, i) => (
+                <div key={p.name} className={`flex items-start gap-3 px-3 py-2 ${i < parameters.length - 1 ? 'border-b border-stone-100 dark:border-stone-800' : ''}`}>
+                  <div className="flex items-center gap-1.5 min-w-0 shrink-0">
                     <span className="text-sm font-semibold text-stone-800 dark:text-stone-200">{p.name}</span>
                     {p.required && <span className="text-blue-500 text-xs font-bold">*</span>}
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-blue-50 border border-blue-200 text-blue-600 font-mono dark:bg-blue-950/30 dark:border-blue-800 dark:text-blue-400">
+                    <span className="text-xs px-1.5 py-0.5 rounded bg-blue-50 border border-blue-200 text-blue-600 font-mono dark:bg-blue-950/30 dark:border-blue-800 dark:text-blue-400">
                       {p.type}
                     </span>
                   </div>
-                  {p.description && <p className="text-xs text-stone-400 dark:text-stone-500">{p.description}</p>}
+                  {p.description && <p className="text-xs text-stone-400 dark:text-stone-500 pt-0.5">{p.description}</p>}
                 </div>
               ))}
             </div>
@@ -225,9 +250,8 @@ function ClientList() {
           ← Volver
         </button>
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-sm font-bold shrink-0"
-            style={{ background: info.color }}>
-            {info.label[0]}
+          <div className="w-6 h-6 rounded-md flex items-center justify-center shrink-0 overflow-hidden bg-stone-100 dark:bg-stone-800 border border-stone-200 dark:border-stone-700">
+            <img src={info.logo} alt={info.label} className="w-4 h-4 object-contain" onError={e => { const el = e.currentTarget as HTMLImageElement; el.style.display='none'; const p = el.parentElement; if(p){p.style.background=info.color;p.classList.add('text-white','font-bold','text-[10px]');p.textContent=info.label[0]} }} />
           </div>
           <span className="text-base font-semibold text-stone-800 dark:text-stone-200">{info.label}</span>
         </div>
@@ -246,16 +270,15 @@ function ClientList() {
     <div className="flex flex-col gap-1">
       <div className="flex items-center gap-2 px-3 py-2 rounded-lg mb-1 bg-stone-50 dark:bg-stone-800" style={{ border: '1px solid var(--border)' }}>
         <SearchIcon />
-        <input value={q} onChange={e => setQ(e.target.value)} placeholder="Buscar clientes"
+        <input value={q} onChange={e => setQ(e.target.value)} placeholder="Buscar agentes..."
           className="flex-1 text-sm bg-transparent outline-none text-stone-700 dark:text-stone-300 placeholder:text-stone-400" />
       </div>
       <div className="flex flex-col rounded-xl bg-white dark:bg-stone-900 px-3 max-h-72 overflow-y-auto" style={{ border: '1px solid var(--border)' }}>
         {filtered.map(([id, info]) => (
           <button key={id} onClick={() => setSelected(id)}
             className="flex items-center gap-3 py-2.5 px-1 hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors text-left w-full border-b border-stone-100 dark:border-stone-800 last:border-0">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-sm font-bold shrink-0"
-              style={{ background: info.color }}>
-              {info.label[0]}
+            <div className="w-6 h-6 rounded-md flex items-center justify-center shrink-0 overflow-hidden bg-stone-100 dark:bg-stone-800 border border-stone-200 dark:border-stone-700">
+              <img src={info.logo} alt={info.label} className="w-4 h-4 object-contain" onError={e => { const el = e.currentTarget as HTMLImageElement; el.style.display='none'; const p = el.parentElement; if(p){p.style.background=info.color;p.classList.add('text-white','font-bold','text-[10px]');p.textContent=info.label[0]} }} />
             </div>
             <span className="text-sm text-stone-700 dark:text-stone-300">{info.label}</span>
           </button>
@@ -267,12 +290,11 @@ function ClientList() {
 
 /* ── Agent connection prompt card ── */
 function AgentPromptCard({ nombre, instalacion_npx }: { nombre: string; instalacion_npx: string }) {
-  const promptText = `Conecta ${nombre} en mi asistente usando: ${instalacion_npx}`
+  const promptText = `"Conecta a ${nombre} usando ${instalacion_npx}"`
   const [copied, setCopied] = useState(false)
   const copy = () => { navigator.clipboard.writeText(promptText); setCopied(true); setTimeout(() => setCopied(false), 1500) }
   return (
     <div className="rounded-xl flex flex-col bg-white dark:bg-stone-900 overflow-hidden" style={{ border: '1px solid var(--border)' }}>
-      {/* Header */}
       <div className="flex items-start justify-between gap-3 px-4 pt-4 pb-2">
         <div className="flex flex-col gap-0.5">
           <div className="flex items-center gap-2">
@@ -286,8 +308,7 @@ function AgentPromptCard({ nombre, instalacion_npx }: { nombre: string; instalac
           <CopyIcon />{copied ? 'Copiado' : 'Copy'}
         </button>
       </div>
-      {/* Quote box */}
-      <div className="mx-4 mb-4 mt-2 rounded-lg bg-white dark:bg-stone-800/40 px-4 py-3 text-sm text-stone-600 dark:text-stone-400 leading-relaxed" style={{ border: '1px solid var(--border)' }}>
+      <div className="mx-4 mb-4 mt-1 rounded-lg bg-stone-50 dark:bg-stone-800/40 px-4 py-3 text-sm text-stone-600 dark:text-stone-400 leading-relaxed" style={{ border: '1px solid var(--border)' }}>
         &#8220;Conecta a{' '}
         <strong className="font-semibold text-stone-800 dark:text-stone-200">{nombre}</strong>
         {' '}usando{' '}
@@ -620,11 +641,19 @@ const mcp = await experimental_createMCPClient({
 const tools = await mcp.tools()`
 
   return (
-    <div className="flex flex-col gap-6 py-6">
+    <div className="flex flex-col gap-6">
 
+      {/* ── Hero banner ── */}
+      <div className="relative -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 pt-8 pb-6 overflow-hidden"
+        style={{ background: 'linear-gradient(135deg, #EFF6FF 0%, #F5F3FF 50%, #F0FDF4 100%)' }}>
+        {/* Decorative blobs */}
+        <div className="absolute top-0 right-0 w-64 h-64 rounded-full opacity-20 blur-3xl pointer-events-none"
+          style={{ background: 'radial-gradient(circle, #3B82F6, transparent)', transform: 'translate(30%, -30%)' }} />
+        <div className="absolute bottom-0 left-1/3 w-48 h-48 rounded-full opacity-15 blur-3xl pointer-events-none"
+          style={{ background: 'radial-gradient(circle, #8B5CF6, transparent)', transform: 'translateY(30%)' }} />
 
       {/* ── Header ── */}
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4 relative">
 
         {/* Fila 1: icono + título + subtítulo + botón download (para locales) */}
         <div className="flex items-start justify-between gap-4 flex-wrap">
@@ -636,7 +665,7 @@ const tools = await mcp.tools()`
                 {mcp.verificado && <VerifiedIcon />}
               </div>
               <p className="text-sm text-stone-400">
-                <span>{isLocal && mcp.creador ? `${mcp.creador.toLowerCase()}/${mcp.id}` : mcp.creador.toLowerCase()}</span>
+                <CopyableSlug slug={isLocal && mcp.creador ? `${mcp.creador.toLowerCase()}/${mcp.id}` : mcp.creador.toLowerCase()} />
                 {mcp.fecha_verificado && (
                   <>
                     <span className="mx-1.5">·</span>
@@ -660,32 +689,30 @@ const tools = await mcp.tools()`
           )}
         </div>
 
-        {/* Fila 2: stat badges — dinámicos según scope */}
+        {/* Fila 2: stat badges */}
         <div className="flex flex-wrap gap-2">
-          {/* Badge 1: verificado */}
-          <span className="flex items-center gap-1.5 text-xs px-3 py-1 rounded-full border border-stone-200 dark:border-stone-700 text-stone-500 dark:text-stone-400">
-            <PersonIcon /> {mcp.verificado ? 'Verificado' : 'Sin verificar'}
-          </span>
-          {/* Badge 2: local / remoto */}
+          {/* Badge 1: local / remoto */}
           <span className="flex items-center gap-1.5 text-xs px-3 py-1 rounded-full border border-stone-200 dark:border-stone-700 text-stone-500 dark:text-stone-400">
             <GlobeIcon size={11} /> {isLocal ? 'Local' : 'Remoto'}
           </span>
-          {/* Badge 3: tools */}
-          <span className="flex items-center gap-1.5 text-xs px-3 py-1 rounded-full border border-stone-200 dark:border-stone-700 text-stone-500 dark:text-stone-400">
-            <UsageIcon /> {mcp.num_tools} tool{mcp.num_tools !== 1 ? 's' : ''}
-          </span>
-          {/* Badge 4: prompts (solo si hay) */}
-          {mcp.prompts_list && mcp.prompts_list.length > 0 && (
+          {/* Badge 2: quick setup (si tiene comando de instalación) */}
+          {mcp.instalacion_npx && (
             <span className="flex items-center gap-1.5 text-xs px-3 py-1 rounded-full border border-stone-200 dark:border-stone-700 text-stone-500 dark:text-stone-400">
-              <MsgIcon /> {mcp.prompts_list.length} prompts
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              Setup Rápido
             </span>
           )}
-          {/* Badge 5: gratuito */}
-          <span className="flex items-center gap-1.5 text-xs px-3 py-1 rounded-full border border-stone-200 dark:border-stone-700 text-stone-500 dark:text-stone-400">
-            <VerifiedBadgeIcon /> {mcp.gratuito ? 'Gratuito' : mcp.precio_info ?? 'De pago'}
-          </span>
+          {/* Badge 3: llamadas */}
+          {mcp.downloads != null && mcp.downloads > 0 && (
+            <span className="flex items-center gap-1.5 text-xs px-3 py-1 rounded-full border border-stone-200 dark:border-stone-700 text-stone-500 dark:text-stone-400">
+              <UsageIcon /> {mcp.downloads >= 1000 ? (mcp.downloads / 1000).toFixed(1) + 'k' : String(mcp.downloads)} llamadas
+            </span>
+          )}
         </div>
       </div>
+      </div>{/* end hero banner */}
+
+      <div className="flex flex-col gap-6 pt-2">
 
       {/* ── Tabs ── */}
       <div className="border-b border-stone-200 dark:border-stone-700">
@@ -769,22 +796,25 @@ const tools = await mcp.tools()`
                 {capTab === 'prompts' && mcp.prompts_list && (
                   <div className="flex flex-col gap-2">
                     {mcp.prompts_list.map(prompt => (
-                      <div key={prompt.name} className="rounded-xl overflow-hidden" style={{ border: '1px solid var(--border)' }}>
+                      <div key={prompt.name} className="rounded-lg overflow-hidden" style={{ border: '1px solid var(--border)' }}>
                         <div className="px-4 py-3">
-                          <span className="font-mono text-xs font-semibold tracking-wide uppercase text-stone-700 dark:text-stone-300">
+                          <span className="font-mono text-sm font-semibold text-blue-600 dark:text-blue-400">
                             {prompt.name}
                           </span>
                           {prompt.description && (
                             <p className="text-sm text-stone-500 dark:text-stone-400 mt-1.5">{prompt.description}</p>
                           )}
                           {prompt.arguments && prompt.arguments.length > 0 && (
-                            <div className="flex flex-col gap-1 mt-3">
-                              <p className="text-xs font-medium text-stone-400 mb-1">Argumentos</p>
-                              {prompt.arguments.map(a => (
-                                <div key={a.name} className="flex items-center gap-2 py-0.5">
-                                  <span className="text-sm font-semibold text-stone-800 dark:text-stone-200">{a.name}</span>
-                                  {a.required && <span className="text-blue-500 text-xs font-bold">*</span>}
-                                  {a.description && <span className="text-xs text-stone-400 dark:text-stone-500">· {a.description}</span>}
+                            <div className="rounded-md bg-stone-50 dark:bg-stone-900/50 border border-stone-100 dark:border-stone-800 overflow-hidden mt-3">
+                              <p className="text-xs font-medium text-stone-400 px-3 py-2 border-b border-stone-100 dark:border-stone-800">Parameters</p>
+                              {prompt.arguments.map((a, i) => (
+                                <div key={a.name} className={`flex items-start gap-3 px-3 py-2 ${i < prompt.arguments!.length - 1 ? 'border-b border-stone-100 dark:border-stone-800' : ''}`}>
+                                  <div className="flex items-center gap-1.5 shrink-0">
+                                    <span className="text-sm font-semibold text-stone-800 dark:text-stone-200">{a.name}</span>
+                                    {a.required && <span className="text-blue-500 text-xs font-bold">*</span>}
+                                    <span className="text-xs px-1.5 py-0.5 rounded bg-blue-50 border border-blue-200 text-blue-600 font-mono dark:bg-blue-950/30 dark:border-blue-800 dark:text-blue-400">string</span>
+                                  </div>
+                                  {a.description && <p className="text-xs text-stone-400 dark:text-stone-500 pt-0.5">{a.description}</p>}
                                 </div>
                               ))}
                             </div>
@@ -839,7 +869,10 @@ const tools = await mcp.tools()`
                         : 'border-transparent text-stone-400 hover:text-stone-700'
                     }`}
                   >
-                    {ct === 'agents' ? <><PersonIcon /> Agentes</> : <><PersonIcon /> Humanos</>}
+                    {ct === 'agents'
+                      ? <><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="7" r="3"/><path d="M8 11V9a4 4 0 0 1 8 0v2"/><line x1="9" y1="15" x2="9" y2="17"/><line x1="12" y1="15" x2="12" y2="17"/><line x1="15" y1="15" x2="15" y2="17"/></svg> Agentes</>
+                      : <><PersonIcon /> Humanos</>
+                    }
                   </button>
                 ))}
               </div>
@@ -853,19 +886,20 @@ const tools = await mcp.tools()`
 
               <p className="text-xs text-stone-400 text-center pt-1">
                 ¿Construyendo un cliente o agente?{' '}
-                <Link href="/docs" className="text-stone-600 dark:text-stone-300 underline underline-offset-2 hover:text-blue-500 transition-colors font-medium">
+                <Link href="/docs/clientes/conectar-mcps" className="text-stone-600 dark:text-stone-300 underline underline-offset-2 hover:text-blue-500 transition-colors font-medium">
                   Ver documentación
                 </Link>
               </p>
 
             </div>
 
-            {/* Sidebar meta — Published + Repository + Homepage + License + (Weekly calls solo remotos) */}
-            <div className="flex flex-col gap-4 pt-2">
+            {/* Sidebar meta */}
+            <div className="flex flex-col text-sm" style={{ borderTop: '1px solid var(--border)' }}>
+
               {mcp.fecha_verificado && (
-                <div className="flex flex-col gap-1">
-                  <span className="text-sm font-medium text-stone-700 dark:text-stone-300">Publicado</span>
-                  <div className="flex items-center gap-1.5 text-sm text-stone-500 dark:text-stone-400">
+                <div className="flex items-center justify-between py-2.5" style={{ borderBottom: '1px solid var(--border)' }}>
+                  <span className="text-stone-500 dark:text-stone-400">Publicado</span>
+                  <div className="flex items-center gap-1.5 text-stone-700 dark:text-stone-300">
                     <CalendarIcon />
                     {new Date(mcp.fecha_verificado).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' })}
                   </div>
@@ -873,77 +907,56 @@ const tools = await mcp.tools()`
               )}
 
               {mcp.repository_url && (
-                <>
-                  <div className="h-px bg-stone-200 dark:bg-stone-700" />
-                  <div className="flex flex-col gap-1">
-                    <span className="text-sm font-medium text-stone-700 dark:text-stone-300">Repositorio</span>
-                    <a href={mcp.repository_url} target="_blank" rel="noopener noreferrer"
-                       className="flex items-center gap-1.5 text-sm text-blue-600 dark:text-blue-400 hover:underline break-all">
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" className="shrink-0">
-                        <path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.21 11.39.6.11.82-.26.82-.58v-2.02c-3.34.73-4.04-1.61-4.04-1.61-.55-1.38-1.33-1.75-1.33-1.75-1.09-.74.08-.73.08-.73 1.2.08 1.84 1.24 1.84 1.24 1.07 1.83 2.81 1.3 3.49.99.11-.77.42-1.3.76-1.6-2.66-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.12-.3-.54-1.52.12-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.29-1.55 3.3-1.23 3.3-1.23.66 1.66.24 2.88.12 3.18.77.84 1.23 1.91 1.23 3.22 0 4.61-2.81 5.63-5.49 5.92.43.37.81 1.1.81 2.22v3.29c0 .32.22.69.82.58C20.56 21.8 24 17.3 24 12c0-6.63-5.37-12-12-12z"/>
-                      </svg>
-                      <span className="truncate">{mcp.repository_url.replace('https://github.com/', '')}</span>
-                    </a>
-                  </div>
-                </>
+                <div className="flex items-center justify-between py-2.5" style={{ borderBottom: '1px solid var(--border)' }}>
+                  <span className="text-stone-500 dark:text-stone-400">Repositorio</span>
+                  <a href={mcp.repository_url} target="_blank" rel="noopener noreferrer"
+                     className="flex items-center gap-1.5 text-blue-600 dark:text-blue-400 hover:underline">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" className="shrink-0">
+                      <path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.21 11.39.6.11.82-.26.82-.58v-2.02c-3.34.73-4.04-1.61-4.04-1.61-.55-1.38-1.33-1.75-1.33-1.75-1.09-.74.08-.73.08-.73 1.2.08 1.84 1.24 1.84 1.24 1.07 1.83 2.81 1.3 3.49.99.11-.77.42-1.3.76-1.6-2.66-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.12-.3-.54-1.52.12-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.29-1.55 3.3-1.23 3.3-1.23.66 1.66.24 2.88.12 3.18.77.84 1.23 1.91 1.23 3.22 0 4.61-2.81 5.63-5.49 5.92.43.37.81 1.1.81 2.22v3.29c0 .32.22.69.82.58C20.56 21.8 24 17.3 24 12c0-6.63-5.37-12-12-12z"/>
+                    </svg>
+                    <span className="truncate max-w-[140px]">{mcp.repository_url.replace('https://github.com/', '')}</span>
+                  </a>
+                </div>
               )}
 
               {mcp.web_oficial && (
-                <>
-                  <div className="h-px bg-stone-200 dark:bg-stone-700" />
-                  <div className="flex flex-col gap-1">
-                    <span className="text-sm font-medium text-stone-700 dark:text-stone-300">Homepage</span>
-                    <a href={mcp.web_oficial} target="_blank" rel="noopener noreferrer"
-                       className="flex items-center gap-1.5 text-sm text-blue-600 dark:text-blue-400 hover:underline break-all">
-                      <GlobeIcon size={13} />
-                      <span className="truncate">{mcp.web_oficial.replace(/^https?:\/\//, '').replace(/\/$/, '')}</span>
-                    </a>
-                  </div>
-                </>
+                <div className="flex items-center justify-between py-2.5" style={{ borderBottom: '1px solid var(--border)' }}>
+                  <span className="text-stone-500 dark:text-stone-400">Homepage</span>
+                  <a href={mcp.web_oficial} target="_blank" rel="noopener noreferrer"
+                     className="flex items-center gap-1.5 text-blue-600 dark:text-blue-400 hover:underline">
+                    <GlobeIcon size={13} />
+                    <span className="truncate max-w-[140px]">{mcp.web_oficial.replace(/^https?:\/\//, '').replace(/\/$/, '')}</span>
+                  </a>
+                </div>
               )}
 
               {mcp.license && (
-                <>
-                  <div className="h-px bg-stone-200 dark:bg-stone-700" />
-                  <div className="flex flex-col gap-1">
-                    <span className="text-sm font-medium text-stone-700 dark:text-stone-300">Licencia</span>
-                    <span className="text-sm text-stone-500 dark:text-stone-400 font-mono">{mcp.license}</span>
-                  </div>
-                </>
+                <div className="flex items-center justify-between py-2.5" style={{ borderBottom: '1px solid var(--border)' }}>
+                  <span className="text-stone-500 dark:text-stone-400">Licencia</span>
+                  <span className="text-stone-700 dark:text-stone-300 font-mono">{mcp.license}</span>
+                </div>
               )}
 
-              {isLocal && mcp.bundle_sha256 && (
-                <>
-                  <div className="h-px bg-stone-200 dark:bg-stone-700" />
-                  <div className="flex flex-col gap-1">
-                    <span className="text-sm font-medium text-stone-700 dark:text-stone-300">SHA256</span>
-                    <span className="text-xs text-stone-500 dark:text-stone-400 font-mono break-all">
-                      {mcp.bundle_sha256.slice(0, 16)}…{mcp.bundle_sha256.slice(-8)}
-                    </span>
-                    {mcp.bundle_source === 'spainmcp' && (
-                      <span className="text-xs text-green-600 dark:text-green-400 mt-0.5">✓ Alojado por SpainMCP</span>
-                    )}
+
+              {!isLocal && mcp.downloads != null && mcp.downloads > 0 && (
+                <div className="flex items-center justify-between py-2.5" style={{ borderBottom: '1px solid var(--border)' }}>
+                  <span className="text-stone-500 dark:text-stone-400">Llamadas semanales</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-stone-700 dark:text-stone-300 font-mono">{mcp.downloads.toLocaleString()}</span>
+                    <div className="w-16"><Sparkline data={[12,28,45,38,52,61,55,48,63,70,58,47,42,38,30,25,22,18,15,14]} /></div>
                   </div>
-                </>
+                </div>
               )}
 
-              {!isLocal && (
-                <>
-                  <div className="h-px bg-stone-200 dark:bg-stone-700" />
-                  <div className="flex flex-col gap-2">
-                    <span className="text-sm font-medium text-stone-700 dark:text-stone-300">Llamadas semanales</span>
-                    <div className="flex items-center gap-3">
-                      <div className="flex items-center gap-1.5 text-sm text-stone-500 dark:text-stone-400 shrink-0">
-                        <UsageIcon />
-                        <span className="font-mono">{(mcp.num_tools * 47).toLocaleString()}</span>
-                      </div>
-                      <div className="flex-1">
-                        <Sparkline data={[12,28,45,38,52,61,55,48,63,70,58,47,42,38,30,25,22,18,15,14]} />
-                      </div>
-                    </div>
-                  </div>
-                </>
+              {/* Report an Issue */}
+              {mcp.github_url && (
+                <a href={`${mcp.github_url}/issues/new`} target="_blank" rel="noopener noreferrer"
+                   className="flex items-center justify-center gap-2 mt-3 px-4 py-2.5 rounded-lg text-sm font-medium text-stone-600 dark:text-stone-300 border border-stone-200 dark:border-stone-700 hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                  Reportar problema
+                </a>
               )}
+
             </div>
 
           </div>
@@ -981,7 +994,7 @@ const tools = await mcp.tools()`
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="8" cy="8" r="3"/><path d="M21 3l-9 9"/><path d="M15 3h6v6"/></svg>
                 Obtener API key
               </a>
-              <a href="/docs"
+              <a href="/docs/clientes/conectar-mcps"
                 className="flex items-center gap-2 justify-center px-4 py-2.5 rounded-lg text-sm font-medium text-stone-700 dark:text-stone-300 bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
                 Ver documentación
@@ -1043,6 +1056,7 @@ const tools = await mcp.tools()`
         </>
       )}
 
+      </div>{/* end inner flex col */}
     </div>
   )
 }

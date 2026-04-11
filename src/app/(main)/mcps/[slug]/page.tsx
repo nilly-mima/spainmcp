@@ -103,6 +103,7 @@ async function getMcp(slug: string): Promise<Mcp | null> {
       homepage: data.homepage ?? undefined,
       license: data.license ?? undefined,
       repository_url: data.repository_url ?? undefined,
+      downloads: data.downloads ?? undefined,
     }
   } catch {
     return null

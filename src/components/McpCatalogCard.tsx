@@ -105,9 +105,7 @@ export default function McpCatalogCard({ mcp }: { mcp: CatalogMcp }) {
 
   return (
     <a
-      href={mcp.upstream_url || '#'}
-      target={mcp.upstream_url ? '_blank' : undefined}
-      rel="noopener noreferrer"
+      href={`/mcps/${mcp.slug}`}
       className="group block h-full"
     >
       <div className="bg-transparent rounded-xl p-3 h-full flex flex-col gap-2 transition-colors hover:bg-gray-50 dark:hover:bg-white/5 cursor-pointer border border-gray-200 dark:border-gray-700/50">

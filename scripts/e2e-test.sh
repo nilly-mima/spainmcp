@@ -41,7 +41,7 @@ check "Servers search" "$BASE/api/v1/servers?q=spain" '"SpainMCP"'
 check "Namespaces (auth)" "$BASE/api/v1/namespaces" '"namespaces"'
 check "Namespaces (no auth)" "$BASE/api/v1/namespaces" '"Unauthorized"' "GET_NOAUTH"
 check "Usage" "$BASE/api/v1/usage" '"plan"'
-check "Skills" "$BASE/api/v1/skills" '"skills"'
+check "Skills" "$BASE/api/v1/skills" '"pagination"'
 
 echo ""
 echo "── CF Worker ──"

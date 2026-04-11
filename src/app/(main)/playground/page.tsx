@@ -12,7 +12,7 @@ const ENDPOINTS = [
   { method: 'GET', path: '/api/v1/connections/{namespace}', auth: true, body: null, description: 'Listar conexiones' },
   { method: 'POST', path: '/api/v1/auth/token', auth: true, body: '{"policy":[{"namespaces":"test-ns","resources":"connections","operations":["read","execute"],"ttl":"1h"}]}', description: 'Crear token scoped' },
   { method: 'GET', path: '/api/v1/usage', auth: true, body: null, description: 'Ver uso actual (RPCs/mes)' },
-  { method: 'GET', path: '/api/v1/skills', auth: false, body: null, description: 'Listar skills' },
+  { method: 'GET', path: '/api/v1/skills', auth: false, body: null, description: 'Listar skills publicadas via API (namespace). Para catálogo curado → /api/catalog/skills' },
 ]
 
 export default function PlaygroundPage() {

@@ -1,0 +1,721 @@
+{
+  "imported": [
+    "mikechao/metmuseum-mcp",
+    "wangtsiao/pulse-cn-mcp",
+    "chirag127/clear-thought-mcp-server",
+    "flrngel/mcp-painter",
+    "pinkpixel-dev/mindbridge-mcp",
+    "hugeicons/mcp-server",
+    "f4ww4z/mcp-mysql-server",
+    "databutton/databutton-mcp",
+    "JigsawStack/ai-web-scraper",
+    "burtthecoder/mcp-shodan",
+    "JigsawStack/vocr",
+    "smithery-ai/postgres",
+    "ThinkFar/clear-thought-mcp",
+    "Jimmy974/n8n-workflow-builder",
+    "omd01/aws-ses-mcp",
+    "jason-tan-swe/railway-mcp",
+    "pinkpixel-dev/deep-research-mcp",
+    "ThirdGuard/mcp-etherscan-server",
+    "dynamicendpoints/m365-bookings-mcp",
+    "lex-tools/codebase-context-dumper",
+    "brendancopley/mcp-chain-of-draft-prompt-tool",
+    "akaramanapp/greeting",
+    "mk965/asset-price-mcp",
+    "GigaChatTester/lichess-mcp",
+    "KaranThink41/workday_mcp_server",
+    "pinkpixel-dev/mem0-mcp-server",
+    "AlexKissiJr/unreal-mcp-server",
+    "JigsawStack/jigsawstack-text-to-speech",
+    "huangfeng19820712/mcp-mysql-server",
+    "Cyreslab-AI/shodan-mcp-server",
+    "dpflucas/mysql-mcp-server",
+    "KaranThink41/gchat_post_text_message",
+    "runpod/runpod-mcp-ts",
+    "wlu03/alpaca-mcp",
+    "multiversx/mx-mcp",
+    "aiuluna/knowledge-graph-mcp",
+    "zsh52013148087/metabase-mcp",
+    "boezzz/ridewithgps-mcp",
+    "AkekaratP/flights-mcp-ts",
+    "thirdstrandstudio/mcp-xpath",
+    "Deploya-labs/mcp-resend",
+    "JigsawStack/jigsawstack-nsfw",
+    "Jeetanshu18/tavily-mcp",
+    "qianniuspace/mcp-security-audit",
+    "marcinwyszynski/pylon-mcp",
+    "geobio/mcp-server-nationalparks",
+    "DanWahlin/marvel-mcp",
+    "pixelsock/directus-mcp",
+    "NYO2008/firecrawl-mcp-server",
+    "binalyze/air-mcp",
+    "mabeldata/pocketbase-mcp",
+    "geezerrrr/exa-mcp-server-1",
+    "henryhawke/wolfram-llm-mcp",
+    "KaranThink41/keka_official_mcp",
+    "DaInfernalCoder/perplexity-mcp",
+    "diegofornalha/mcp-server-serper",
+    "Domoteek/mcp-server-airbnb",
+    "MrunmayS/exa-mcp-server",
+    "JigsawStack/translation",
+    "dynamicendpoints/cloudflare-github-backup-mcp",
+    "metatool-ai/mcp-server-metamcp",
+    "zereight/bithumb-mcp",
+    "bennyzen/mcp-color-convert",
+    "GoPlausible/tinyman-mcp",
+    "smartbookingofc/smart-booking-mcp",
+    "BlekZz/metabase-mcp",
+    "skrapeai/skrape-mcp",
+    "JustaName-id/ens-mcp-server",
+    "tembo-io/mcp-server-tembo",
+    "clarenous/veyrax-mcp",
+    "enescinar/twitter-mcp",
+    "msathiyakeerthi/google-cloud-healthcare-api-mcp",
+    "tkoba1974/mcp-kroki",
+    "CPR43/metabase-mcp",
+    "antonioevans/railway-mcp",
+    "kbsooo/mcp_atom_of_thoughts",
+    "Bob-lance/instagram-engagement-mcp",
+    "pjookim/mcp-visit-korea",
+    "devassistantai/github-projects",
+    "WebpageFX/ltc-mcp-server",
+    "lite/iterm-mcp",
+    "Streen9/react-mcp",
+    "ns-personal/echo-map",
+    "slicequeue/k-targo-subway-mcp-server",
+    "OutreachToday/cold-outreach",
+    "bradleygolden/hexdocs-mcp",
+    "KaranThink41/hubspot_private_app",
+    "Laksh-star/mcp-server-tmdb",
+    "geobio/mcp-server-airbnb",
+    "DiogoAzevedo03/ipma-mcp-server",
+    "k-jarzyna/mcp-miro",
+    "rakeshdavid/tavus-mcp",
+    "lumile/mercadolibre-mcp",
+    "Desearch-ai/desearch",
+    "souky-byte/sloneek-mcp",
+    "davibauer/tiktok-mcp",
+    "yuyao1999/rt-prompt-mcp-server",
+    "dynamicendpoints/paloalto-device-server",
+    "velt-js/velt-api-mcp",
+    "Zwe1/figma-context-mcp",
+    "puremd/puremd-mcp",
+    "Danielmelody/enhanced-fetch-mcp",
+    "hyeongjun-dev/metabase-mcp-server",
+    "Decodo/decodo-mcp-server",
+    "flynnhou/deep-dive-mcp",
+    "paracetamol951/my-smithery-app",
+    "praveencs87/trello-mcp",
+    "comet-ml/opik-mcp-server",
+    "xiaobenyang-com/mcp_tools_3",
+    "yokingma/time-mcp",
+    "FradSer/mcp-server-to-markdown",
+    "vaebe/github-search",
+    "hostedmcp/multitool",
+    "AndyManastorm/smithery-reference-servers",
+    "Krieg2065/firecrawl-mcp-server",
+    "cameroncooke/xcodebuildmcp",
+    "JonyanDunh/brave-search-mcp",
+    "comqx/alertmanager-mcp",
+    "powerdrillai/powerdrill-mcp",
+    "emmett-deen/linear-mcp-server",
+    "mikechao/balldontlie-mcp",
+    "mackenly/mcp-fathom-analytics",
+    "dazeb/markdown-downloader",
+    "tahaswx/mcp-server-serper-test",
+    "lars-hagen/slack-user-mcp",
+    "xue20010808/readfile_mcp",
+    "arjunkmrm/time-server",
+    "VapiAI/vapi-mcp-server",
+    "smithery-ai/gitlab",
+    "vyb1ng/plex-mcp",
+    "Handwriting-OCR/handwriting-ocr-mcp-server",
+    "devlimelabs/lulu-print-mcp",
+    "meicanhong/exa-mcp-server",
+    "imprvhub/mcp-claude-hackernews",
+    "kailashAppDev/figma-mcp-toolkit",
+    "makingendless/endless-mcp",
+    "meowrain/mcp-server-cambridge-dict",
+    "xue20010808/r3adfile_mcp",
+    "Vistara-Labs/hypercore-mcp",
+    "dongri/mcp-server-lgtm",
+    "marco280690/mcp",
+    "Chrusic/todoist-mcp-server-extended",
+    "traghav/metabase-server",
+    "renantrendt/mcp-github",
+    "kemalersin/fonparam-mcp",
+    "JHSeo-git/my-first-mcp-2",
+    "baranwang/mcp-deep-research",
+    "ryanmaule/metabase-mcp",
+    "madhukarkumar/singlestore-mcp-server",
+    "Doist/todoist-mcp",
+    "sinco-lab/mcp-youtube-transcript",
+    "Kruglyak/railway-mcp",
+    "kohasummons/chaingpt-mcp",
+    "brianellin/bsky-mcp-server",
+    "hiraishikentaro/wezterm-mcp",
+    "avac22/tavily-mcp",
+    "JigsawStack/image-generation",
+    "jutalik/originforge-generate-nft-mcp",
+    "jeanibarz/knowledge-base-mcp-server",
+    "Dumpling-AI/mcp-server-dumplingai",
+    "mikechao/brave-search-mcp",
+    "Fabien-desablens/mcp-webpage-timestamps",
+    "lowkeyrd/servers",
+    "rishipradeep-think41/gchat-mcp",
+    "HenkDz/postgresql-mcp-server",
+    "adarshem/mcp-server-learn",
+    "hiromitsusasaki/raindrop-io-mcp-server",
+    "buoooou/supaui-mcp",
+    "novitalabs/novita-mcp-server",
+    "cyberimaginationsi-gif/mcp-smithery",
+    "alexandrebagio/swapi-mcp",
+    "InstantMCP/linkedinadsmcpserverv1",
+    "TmRichrd/weather",
+    "mario-andreschak/mcp-abap-abap-adt-api",
+    "Rz017/tavily-mcp",
+    "mh8974/railway-mcp",
+    "afarhadi99/wordpress-mcp-full",
+    "RuKapSan/railway-mcp",
+    "fundfluent-admin/funding-assistant",
+    "pbteja1998/sourcesyncai-mcp",
+    "marcusbai/caiyun-weather-mcp",
+    "1Levick3/postgresql-mcp-server",
+    "andylee20014/mcp-replicate-flux",
+    "hyperbrowserai/mcp",
+    "VisActor/vchart-mcp-server",
+    "bitscorp-mcp/mcp-adjust",
+    "renantrendt/reference-servers",
+    "KyrieTangSheng/mcp-server-nationalparks",
+    "InstantMCP/midjourneyserver",
+    "itsanamune/seo-mcp",
+    "kiennd/reference-servers",
+    "kiwamizamurai/mcp-kibela-server",
+    "kohasummons/paystack-mcp",
+    "mrseanchow/cowsay-mcp",
+    "dynamicendpoints/fantasy-pros-mcp",
+    "Arodoid/unitymcp",
+    "jjikky/dynamo-readonly-mcp",
+    "ivo-toby/contentful-mcp-graphql",
+    "windalfin/clickup-mcp-server",
+    "knowall-ai/mcp-neo4j-agent-memory",
+    "kopfrechner/gitlab-mr-mcp",
+    "stanislavlysenko0912/todoist-mcp-server",
+    "manolaz/emergency-medicare-planner-mcp-server",
+    "guptabhishek/multi-search-mcp",
+    "ruixingshi/deepseek-thinker-mcp-1",
+    "WebpageFX/miracle-rec-mcp-server",
+    "recraft-ai/mcp-recraft-server",
+    "firstorderai/authenticator_mcp",
+    "cuongpo/aptos-mcp",
+    "samihalawa/mcp-server-smtp",
+    "MushroomFleet/uno-mcp",
+    "junmer/mcp-server-lottiefiles",
+    "CircleCI-Public/mcp-server-circleci",
+    "brandao-20/mcp_server_ipma",
+    "Rentapad/image-mcp-server-gemini",
+    "YassineTk/mcp-docs-provider",
+    "shreyaskarnik/mcpet",
+    "SaptaDey/research-blueprint",
+    "marcopesani/mcp-server-serper",
+    "dragonkhoi/mixpanel-mcp",
+    "palolxx/geminimcptest",
+    "PV-Bhat/gemsuite-mcp",
+    "deepwriter-ai/deepwriter-mcp",
+    "alxspiker/Windows-Command-Line-MCP-Server",
+    "Rapiernik/mcp-server",
+    "eliteamz/amazon-sp-mcp-server",
+    "devlimelabs/meilisearch-ts-mcp",
+    "vaebe/mcp",
+    "kingdomseed/structured-workflow-mcp",
+    "leonskenidy/omi-mcp",
+    "mikechao/artic-mcp",
+    "JigsawStack/jigsawstack-speech-to-text",
+    "togethercomputer/mcp-server-tci",
+    "openSVM/dflow-mcp",
+    "leegentle/skincare-mcp",
+    "mirinda-cmd/reference-servers-check",
+    "darekrossman/contentstack-mcp",
+    "lekt9/gigahard-mcp",
+    "Gitmaxd/dubco-mcp-server-npm",
+    "akaramanapp/weather-mcp-server",
+    "clockworked247/flights-mcp-ts",
+    "heilgar/shadcn-ui-mcp-server",
+    "mauricio-cantu/brasil-api-mcp-server",
+    "fourcolors/omi-mcp",
+    "JigsawStack/ai-web-search",
+    "zereight/sentry-mcp",
+    "Octember/flights-mcp-ts",
+    "tavily-ai/tavily-mcp",
+    "AudienseCo/mcp-audiense-insights",
+    "Cyreslab-AI/hibp-mcp-server",
+    "phuc-nt/mcp-atlassian-server",
+    "gannonh/memento-mcp",
+    "hakunapotato/todoist-mcp",
+    "miottid/todoist-mcp",
+    "ngoiyaeric/mapbox-mcp-server",
+    "GoPlausible/vestige-mcp",
+    "delty-inc/delty-mcp-server",
+    "ucalyptus/prem-mcp-server",
+    "ronantakizawa/gis-dataconvertersion-mcp",
+    "qpd-v/mcp-delete",
+    "devlimelabs/firestore-mcp",
+    "JigsawStack/jigsawstack-object-detection",
+    "bbangjooo/mcp-finder-mcp-server",
+    "togethercomputer/together-flux-mcp",
+    "InstantMCP/linkedinrealtimesearchserver",
+    "samihalawa/wuolah-mcp-server",
+    "CDataSoftware/connectcloud-mcp-server",
+    "AIM-Intelligence/aim-mcp",
+    "KaranThink41/official-slack-mcp",
+    "advenimus/jw-mcp",
+    "itsanishjain/alchemy-sdk-mcp",
+    "velt-js/velt-analytics-mcp",
+    "alxspiker/mcp-server-ftp",
+    "Hzzy2O/flux-cloudfare-mcp",
+    "pinkpixel-dev/datetime-mcp",
+    "cgize/claude-mcp-think-tool",
+    "cdugo/mcp-get-docs",
+    "pipethedev/browsercat-mcp-server",
+    "Jeetanshu18/time-mcp",
+    "doggybee/mcp-server-leetcode",
+    "madhusudan-kulkarni/mcp-fal-ai-image",
+    "AkekaratP/mcp-server-airbnb",
+    "karayaman/lichess-mcp",
+    "ejfox/vulpes-spotify-mcp",
+    "snjyor/binance-mcp-data",
+    "imatrixme/pocketbase-mcp-server",
+    "antonioevans/runpod-mcp-ts",
+    "hungthai1401/bruno-mcp",
+    "iamadk/github",
+    "antoncoding/mcp-brianknows",
+    "Scrapezy/mcp",
+    "minbang930/youtube-vision-mcp",
+    "weidwonder/terminal-mcp-server",
+    "jfrog/mcp-jfrog"
+  ],
+  "failed": [
+    {
+      "qualifiedName": "orchestrator-server",
+      "error": "Cannot read properties of null (reading 'map'): TypeError: Cannot read properties of null (reading 'map')"
+    },
+    {
+      "qualifiedName": "iterm-mcp",
+      "error": "Cannot read properties of null (reading 'map'): TypeError: Cannot read properties of null (reading 'map')"
+    },
+    {
+      "qualifiedName": "indigoprotocol/cardano-mcp",
+      "error": "Cannot read properties of null (reading 'map'): TypeError: Cannot read properties of null (reading 'map')"
+    },
+    {
+      "qualifiedName": "server-cmd",
+      "error": "Cannot read properties of null (reading 'map'): TypeError: Cannot read properties of null (reading 'map')"
+    },
+    {
+      "qualifiedName": "ibraheem4/linear-mcp",
+      "error": "Cannot read properties of null (reading 'map'): TypeError: Cannot read properties of null (reading 'map')"
+    },
+    {
+      "qualifiedName": "mcp-server-stability-ai",
+      "error": "Cannot read properties of null (reading 'map'): TypeError: Cannot read properties of null (reading 'map')"
+    },
+    {
+      "qualifiedName": "automatalabs/mcp-server-playwright",
+      "error": "Cannot read properties of null (reading 'map'): TypeError: Cannot read properties of null (reading 'map')"
+    },
+    {
+      "qualifiedName": "mcp-pinecone",
+      "error": "Cannot read properties of null (reading 'map'): TypeError: Cannot read properties of null (reading 'map')"
+    },
+    {
+      "qualifiedName": "mcp-starter",
+      "error": "Cannot read properties of null (reading 'map'): TypeError: Cannot read properties of null (reading 'map')"
+    },
+    {
+      "qualifiedName": "obsidian-mcp",
+      "error": "Cannot read properties of null (reading 'map'): TypeError: Cannot read properties of null (reading 'map')"
+    },
+    {
+      "qualifiedName": "mcp-trader",
+      "error": "Cannot read properties of null (reading 'map'): TypeError: Cannot read properties of null (reading 'map')"
+    },
+    {
+      "qualifiedName": "mcp-summarization-functions",
+      "error": "Cannot read properties of null (reading 'map'): TypeError: Cannot read properties of null (reading 'map')"
+    },
+    {
+      "qualifiedName": "gxjansen/Transistor-MCP",
+      "error": "Cannot read properties of null (reading 'map'): TypeError: Cannot read properties of null (reading 'map')"
+    },
+    {
+      "qualifiedName": "mcp-server-bigquery",
+      "error": "Cannot read properties of null (reading 'map'): TypeError: Cannot read properties of null (reading 'map')"
+    },
+    {
+      "qualifiedName": "xiaok/etherscan-mcp-server",
+      "error": "Cannot read properties of null (reading 'map'): TypeError: Cannot read properties of null (reading 'map')"
+    },
+    {
+      "qualifiedName": "mcp-server-duckdb",
+      "error": "Cannot read properties of null (reading 'map'): TypeError: Cannot read properties of null (reading 'map')"
+    },
+    {
+      "qualifiedName": "microsoft/playwright-mcp",
+      "error": "Cannot read properties of null (reading 'map'): TypeError: Cannot read properties of null (reading 'map')"
+    },
+    {
+      "qualifiedName": "GongRzhe/server-gmail-autoauth-mcp",
+      "error": "Cannot read properties of null (reading 'map'): TypeError: Cannot read properties of null (reading 'map')"
+    },
+    {
+      "qualifiedName": "mcp-text-editor",
+      "error": "Cannot read properties of null (reading 'map'): TypeError: Cannot read properties of null (reading 'map')"
+    },
+    {
+      "qualifiedName": "github-mapper-mcp-server",
+      "error": "Upsert 400: {\"code\":\"23502\",\"details\":\"Failing row contains (db43a18b-e408-4e26-b8eb-69e2ac452c0c, GitHub Mapper: Error: Upsert 400: {\"code\":\"23502\",\"details\":\"Failing row contains (db43a18b-e408-4e26-b8eb-69e2ac452c0c, GitHub Mapper"
+    },
+    {
+      "qualifiedName": "mcp-mongo-server",
+      "error": "Cannot read properties of null (reading 'map'): TypeError: Cannot read properties of null (reading 'map')"
+    },
+    {
+      "qualifiedName": "executeautomation/playwright-mcp-server",
+      "error": "Cannot read properties of null (reading 'map'): TypeError: Cannot read properties of null (reading 'map')"
+    },
+    {
+      "qualifiedName": "find-flights-mcp",
+      "error": "Cannot read properties of null (reading 'map'): TypeError: Cannot read properties of null (reading 'map')"
+    },
+    {
+      "qualifiedName": "mendableai/mcp-server-firecrawl",
+      "error": "Cannot read properties of null (reading 'map'): TypeError: Cannot read properties of null (reading 'map')"
+    },
+    {
+      "qualifiedName": "mcp-server-ticketmaster",
+      "error": "Cannot read properties of null (reading 'map'): TypeError: Cannot read properties of null (reading 'map')"
+    },
+    {
+      "qualifiedName": "jina-ai-mcp-server",
+      "error": "Upsert 400: {\"code\":\"23502\",\"details\":\"Failing row contains (39b648c0-1f7a-4f07-b4d8-3cb33035df23, Jina AI, null: Error: Upsert 400: {\"code\":\"23502\",\"details\":\"Failing row contains (39b648c0-1f7a-4f07-b4d8-3cb33035df23, Jina AI, null"
+    },
+    {
+      "qualifiedName": "apple-notes-mcp",
+      "error": "Cannot read properties of null (reading 'map'): TypeError: Cannot read properties of null (reading 'map')"
+    },
+    {
+      "qualifiedName": "wcgw",
+      "error": "Cannot read properties of null (reading 'map'): TypeError: Cannot read properties of null (reading 'map')"
+    },
+    {
+      "qualifiedName": "perplexity-mcp",
+      "error": "Cannot read properties of null (reading 'map'): TypeError: Cannot read properties of null (reading 'map')"
+    },
+    {
+      "qualifiedName": "mcp-minecraft",
+      "error": "Cannot read properties of null (reading 'map'): TypeError: Cannot read properties of null (reading 'map')"
+    },
+    {
+      "qualifiedName": "mcp-server-ccxt",
+      "error": "Cannot read properties of null (reading 'map'): TypeError: Cannot read properties of null (reading 'map')"
+    },
+    {
+      "qualifiedName": "thirdstrandstudio/mcp-figma",
+      "error": "Registry 429: Error: Registry 429"
+    },
+    {
+      "qualifiedName": "gandli/yanyue-mcp",
+      "error": "Registry 429: Error: Registry 429"
+    },
+    {
+      "qualifiedName": "mcp-memory-libsql",
+      "error": "Cannot read properties of null (reading 'map'): TypeError: Cannot read properties of null (reading 'map')"
+    },
+    {
+      "qualifiedName": "YuChenSSR/multi-ai-advisor-mcp",
+      "error": "Registry 429: Error: Registry 429"
+    },
+    {
+      "qualifiedName": "aditya002p/mcp-server",
+      "error": "Registry 429: Error: Registry 429"
+    },
+    {
+      "qualifiedName": "mcp-neovim-server",
+      "error": "Registry 429: Error: Registry 429"
+    },
+    {
+      "qualifiedName": "AgentOps-AI/agentops-mcp",
+      "error": "Registry 429: Error: Registry 429"
+    },
+    {
+      "qualifiedName": "HitmanLy007/todoist-mcp-server-extended",
+      "error": "Registry 429: Error: Registry 429"
+    },
+    {
+      "qualifiedName": "sirmews/mcp-remote-server",
+      "error": "Registry 429: Error: Registry 429"
+    },
+    {
+      "qualifiedName": "superseoworld/mcp-spotify",
+      "error": "Registry 429: Error: Registry 429"
+    },
+    {
+      "qualifiedName": "cisa-m365",
+      "error": "Upsert 400: {\"code\":\"23502\",\"details\":\"Failing row contains (56c59ae9-51be-4fbc-9424-b3a52663a76e, CISA M365, nu: Error: Upsert 400: {\"code\":\"23502\",\"details\":\"Failing row contains (56c59ae9-51be-4fbc-9424-b3a52663a76e, CISA M365, nu"
+    },
+    {
+      "qualifiedName": "tinybirdco/mcp-tinybird",
+      "error": "Registry 429: Error: Registry 429"
+    },
+    {
+      "qualifiedName": "geezerrrr/exa-mcp-server",
+      "error": "Cannot read properties of null (reading 'map'): TypeError: Cannot read properties of null (reading 'map')"
+    },
+    {
+      "qualifiedName": "orchidautomation/instantly-mcp",
+      "error": "Registry 429: Error: Registry 429"
+    },
+    {
+      "qualifiedName": "tacticlaunch/mcp-linear",
+      "error": "Registry 429: Error: Registry 429"
+    },
+    {
+      "qualifiedName": "niledatabase/nile-mcp-server",
+      "error": "Registry 429: Error: Registry 429"
+    },
+    {
+      "qualifiedName": "MushroomFleet/transcriptiontools-mcp",
+      "error": "Registry 429: Error: Registry 429"
+    },
+    {
+      "qualifiedName": "ZubeidHendricks/youtube",
+      "error": "Cannot read properties of null (reading 'map'): TypeError: Cannot read properties of null (reading 'map')"
+    },
+    {
+      "qualifiedName": "Qwinty/anytype-mcp",
+      "error": "Registry 429: Error: Registry 429"
+    },
+    {
+      "qualifiedName": "0xzapata/firecrawl-mcp-server",
+      "error": "Registry 429: Error: Registry 429"
+    },
+    {
+      "qualifiedName": "8enSmith/mcp-open-library",
+      "error": "Registry 429: Error: Registry 429"
+    },
+    {
+      "qualifiedName": "imprvhub/mcp-status-observer",
+      "error": "Registry 429: Error: Registry 429"
+    },
+    {
+      "qualifiedName": "Magic-Sauce/quickchart-mcp-server",
+      "error": "Registry 429: Error: Registry 429"
+    },
+    {
+      "qualifiedName": "mcp-server-webscan",
+      "error": "Registry 429: Error: Registry 429"
+    },
+    {
+      "qualifiedName": "kelvin6365/plane-mcp-server",
+      "error": "Registry 429: Error: Registry 429"
+    },
+    {
+      "qualifiedName": "chirag127/stochastic-thinking-mcp-server",
+      "error": "Registry 429: Error: Registry 429"
+    },
+    {
+      "qualifiedName": "GeekyRiolu/mcp_insta",
+      "error": "Registry 429: Error: Registry 429"
+    },
+    {
+      "qualifiedName": "burakdirin/opsgenie-mcp-server",
+      "error": "Registry 429: Error: Registry 429"
+    },
+    {
+      "qualifiedName": "JHSeo-git/my-first-mcp",
+      "error": "Registry 429: Error: Registry 429"
+    },
+    {
+      "qualifiedName": "jpoles1/statpearls-mcp",
+      "error": "Registry 429: Error: Registry 429"
+    },
+    {
+      "qualifiedName": "GHSix/averbeporto-mcp",
+      "error": "Registry 429: Error: Registry 429"
+    },
+    {
+      "qualifiedName": "ai-zerolab/mcp-figma",
+      "error": "Registry 429: Error: Registry 429"
+    },
+    {
+      "qualifiedName": "antunesgabriel/logaflow-mcp-server",
+      "error": "Registry 429: Error: Registry 429"
+    },
+    {
+      "qualifiedName": "ronantakizawa/a11ymcp",
+      "error": "Registry 429: Error: Registry 429"
+    },
+    {
+      "qualifiedName": "amotivv/memory-box-mcp",
+      "error": "Registry 429: Error: Registry 429"
+    },
+    {
+      "qualifiedName": "cjo4m06/mcp-shrimp-task-manager",
+      "error": "Registry 429: Error: Registry 429"
+    },
+    {
+      "qualifiedName": "mnhlt/WebSearch-MCP",
+      "error": "Registry 429: Error: Registry 429"
+    },
+    {
+      "qualifiedName": "confluence-cloud",
+      "error": "Registry 429: Error: Registry 429"
+    },
+    {
+      "qualifiedName": "champierre/image-mcp-server",
+      "error": "Registry 429: Error: Registry 429"
+    },
+    {
+      "qualifiedName": "theclarityproject/mcp-server",
+      "error": "Registry 429: Error: Registry 429"
+    },
+    {
+      "qualifiedName": "samihalawa/brevo-mcp",
+      "error": "Registry 429: Error: Registry 429"
+    },
+    {
+      "qualifiedName": "big-omega/mem0-mcp",
+      "error": "Registry 429: Error: Registry 429"
+    },
+    {
+      "qualifiedName": "StevenFengLi/tavily-mcp",
+      "error": "Registry 429: Error: Registry 429"
+    },
+    {
+      "qualifiedName": "egyleader/dart-mcp",
+      "error": "Registry 429: Error: Registry 429"
+    },
+    {
+      "qualifiedName": "genm/switchbot-mcp",
+      "error": "Registry 429: Error: Registry 429"
+    },
+    {
+      "qualifiedName": "liveblocks/liveblocks-mcp-server",
+      "error": "Registry 429: Error: Registry 429"
+    },
+    {
+      "qualifiedName": "Gorav22/terminusai",
+      "error": "Registry 429: Error: Registry 429"
+    },
+    {
+      "qualifiedName": "AtilioA/tesouro-direto-mcp",
+      "error": "Registry 429: Error: Registry 429"
+    },
+    {
+      "qualifiedName": "smithery-ai/puppeteer",
+      "error": "Cannot read properties of null (reading 'map'): TypeError: Cannot read properties of null (reading 'map')"
+    },
+    {
+      "qualifiedName": "kongyo2/eve-online-mcp",
+      "error": "Registry 429: Error: Registry 429"
+    },
+    {
+      "qualifiedName": "imlewc/metabase-server",
+      "error": "Registry 429: Error: Registry 429"
+    },
+    {
+      "qualifiedName": "mcp-graphql",
+      "error": "Cannot read properties of null (reading 'map'): TypeError: Cannot read properties of null (reading 'map')"
+    },
+    {
+      "qualifiedName": "Aias/barnsworthburning-mcp",
+      "error": "Registry 429: Error: Registry 429"
+    },
+    {
+      "qualifiedName": "polymarket_mcp",
+      "error": "Cannot read properties of null (reading 'map'): TypeError: Cannot read properties of null (reading 'map')"
+    },
+    {
+      "qualifiedName": "Gitmaxd/dubco-mcp-server",
+      "error": "Registry 429: Error: Registry 429"
+    },
+    {
+      "qualifiedName": "arxiv-mcp-server",
+      "error": "Cannot read properties of null (reading 'map'): TypeError: Cannot read properties of null (reading 'map')"
+    },
+    {
+      "qualifiedName": "mcp-obsidian",
+      "error": "Registry 429: Error: Registry 429"
+    },
+    {
+      "qualifiedName": "mcp-nmap-server",
+      "error": "Cannot read properties of null (reading 'map'): TypeError: Cannot read properties of null (reading 'map')"
+    },
+    {
+      "qualifiedName": "luizzzvictor/mcp-comexstat",
+      "error": "Registry 429: Error: Registry 429"
+    },
+    {
+      "qualifiedName": "felores/placid-mcp-server",
+      "error": "Cannot read properties of null (reading 'map'): TypeError: Cannot read properties of null (reading 'map')"
+    },
+    {
+      "qualifiedName": "llmindset/mcp-miro",
+      "error": "Cannot read properties of null (reading 'map'): TypeError: Cannot read properties of null (reading 'map')"
+    },
+    {
+      "qualifiedName": "ShadowSethcpu/mcp-starwars",
+      "error": "Registry 429: Error: Registry 429"
+    },
+    {
+      "qualifiedName": "x-mcp",
+      "error": "Cannot read properties of null (reading 'map'): TypeError: Cannot read properties of null (reading 'map')"
+    },
+    {
+      "qualifiedName": "datafe/quick-chart-mcp",
+      "error": "Registry 429: Error: Registry 429"
+    },
+    {
+      "qualifiedName": "MetehanGZL/pokemcp",
+      "error": "Registry 429: Error: Registry 429"
+    },
+    {
+      "qualifiedName": "jackedelic/exa-mcp-server",
+      "error": "Registry 429: Error: Registry 429"
+    },
+    {
+      "qualifiedName": "mcp_snowflake_server",
+      "error": "Cannot read properties of null (reading 'map'): TypeError: Cannot read properties of null (reading 'map')"
+    },
+    {
+      "qualifiedName": "kj455/mcp-kibela",
+      "error": "Registry 429: Error: Registry 429"
+    },
+    {
+      "qualifiedName": "OctoMind-dev/octomind-mcp",
+      "error": "Registry 429: Error: Registry 429"
+    },
+    {
+      "qualifiedName": "Cyreslab-AI/flightradar-mcp-server",
+      "error": "Registry 429: Error: Registry 429"
+    },
+    {
+      "qualifiedName": "mcp-pagespeed-server",
+      "error": "Registry 429: Error: Registry 429"
+    },
+    {
+      "qualifiedName": "roman0211/mcp-crypto-price",
+      "error": "Registry 429: Error: Registry 429"
+    },
+    {
+      "qualifiedName": "dabhivijay2478/auth",
+      "error": "Registry 429: Error: Registry 429"
+    },
+    {
+      "qualifiedName": "deep-ai-kr/dev-mcp",
+      "error": "Registry 429: Error: Registry 429"
+    }
+  ],
+  "skipped": []
+}

@@ -35,6 +35,30 @@ if (!SUPABASE_URL || !SUPABASE_KEY) {
   process.exit(1);
 }
 
+// --- tools transformer: Smithery inputSchema → parameters[] ---
+function transformTools(tools = []) {
+  return tools.map(tool => {
+    const schema = tool.inputSchema
+    const params = []
+    if (schema?.properties) {
+      const required = Array.isArray(schema.required) ? schema.required : []
+      for (const [name, def] of Object.entries(schema.properties)) {
+        params.push({
+          name,
+          type: def.type || 'string',
+          description: def.description,
+          required: required.includes(name),
+        })
+      }
+    }
+    return {
+      name: tool.name,
+      description: tool.description || '',
+      ...(params.length > 0 ? { parameters: params } : {}),
+    }
+  })
+}
+
 // --- CLI args ---
 const args = process.argv.slice(2);
 const qualifiedName = args.find(a => !a.startsWith('--'));
@@ -81,56 +105,103 @@ if (reg.remote !== false) {
 }
 
 const connection = reg.connections?.[0];
-if (!connection || connection.type !== 'stdio' || !connection.bundleUrl) {
-  console.error('❌ Expected stdio connection with bundleUrl');
+if (!connection || connection.type !== 'stdio') {
+  console.error('❌ Expected stdio connection');
   process.exit(1);
 }
 
-const bundleUrl = connection.bundleUrl;
 const runtime = connection.runtime || 'node';
-console.log(`  ✓ bundleUrl: ${bundleUrl}`);
+const isNpmBased = !connection.bundleUrl && !!connection.stdioFunction;
+console.log(`  ✓ type: ${isNpmBased ? 'npm package (stdioFunction)' : 'bundled (.mcpb)'}`);
 console.log(`  ✓ runtime: ${runtime}`);
 console.log(`  ✓ tools: ${reg.tools?.length ?? 0}`);
 console.log(`  ✓ prompts: ${reg.prompts?.length ?? 0}`);
-console.log(`  ✓ resources: ${reg.resources?.length ?? 0}`);
-
-// --- 2. Download the .mcpb ---
-console.log(`\n📥 Downloading bundle from Smithery...`);
-const bundleRes = await fetch(bundleUrl);
-if (!bundleRes.ok) {
-  console.error(`Bundle download failed: ${bundleRes.status}`);
-  process.exit(1);
+if (reg.tools?.length > 0 && reg.tools[0].inputSchema?.properties) {
+  const params = Object.keys(reg.tools[0].inputSchema.properties);
+  if (params.length > 0) console.log(`  ✓ first tool params: ${params.join(', ')}`);
 }
-const bundleBuffer = Buffer.from(await bundleRes.arrayBuffer());
-const sizeBytes = bundleBuffer.length;
-const sha256 = createHash('sha256').update(bundleBuffer).digest('hex');
-console.log(`  ✓ size: ${sizeBytes} bytes (${(sizeBytes / 1024).toFixed(1)} KB)`);
-console.log(`  ✓ sha256: ${sha256.slice(0, 16)}...${sha256.slice(-8)}`);
 
-// --- 3. Upload to Supabase Storage ---
+// --- Fetch npm metadata (homepage, license, version) if npm-based ---
 const [owner, slugPart] = qualifiedName.split('/');
-const storagePath = `${owner}/${slugPart}/server.mcpb`;
-const uploadUrl = `${SUPABASE_URL}/storage/v1/object/${BUCKET}/${storagePath}`;
-
-console.log(`\n📤 Uploading to Supabase Storage (${BUCKET}/${storagePath})...`);
-const uploadRes = await fetch(uploadUrl, {
-  method: 'POST',
-  headers: {
-    authorization: `Bearer ${SUPABASE_KEY}`,
-    apikey: SUPABASE_KEY,
-    'content-type': 'application/octet-stream',
-    'x-upsert': 'true',
-    'cache-control': 'public, max-age=31536000, immutable',
-  },
-  body: bundleBuffer,
-});
-if (!uploadRes.ok) {
-  const err = await uploadRes.text();
-  console.error(`Upload failed: ${uploadRes.status} ${err}`);
-  process.exit(1);
+let npmMeta = { homepage: null, license: null, version: null, bundleUrl: null };
+const npmPkg = `@${owner}/${slugPart}`;
+if (isNpmBased) {
+  console.log(`\n📦 Fetching npm metadata for ${npmPkg}...`);
+  try {
+    const npmRes = await fetch(`https://registry.npmjs.org/${npmPkg}/latest`);
+    if (npmRes.ok) {
+      const npmData = await npmRes.json();
+      npmMeta.homepage = npmData.homepage || null;
+      npmMeta.license = typeof npmData.license === 'string' ? npmData.license : (npmData.license?.type || null);
+      npmMeta.version = npmData.version || null;
+      // repository URL from npm package.json (more reliable than slug-based guess)
+      const repoUrl = npmData.repository?.url || npmData.repository || null;
+      if (repoUrl) {
+        npmMeta.repository = repoUrl.replace(/^git\+/, '').replace(/\.git$/, '').replace('git://github.com', 'https://github.com');
+      } else if (npmMeta.homepage?.includes('github.com')) {
+        npmMeta.repository = npmMeta.homepage;
+      }
+      const pkgName = slugPart; // e.g. desktop-commander
+      npmMeta.bundleUrl = npmMeta.version
+        ? `https://registry.npmjs.org/${npmPkg}/-/${pkgName}-${npmMeta.version}.tgz`
+        : null;
+      console.log(`  ✓ version: ${npmMeta.version}`);
+      console.log(`  ✓ homepage: ${npmMeta.homepage || 'N/A'}`);
+      console.log(`  ✓ license: ${npmMeta.license || 'N/A'}`);
+      if (npmMeta.bundleUrl) console.log(`  ✓ tarball: ${npmMeta.bundleUrl}`);
+    }
+  } catch (e) {
+    console.log(`  ⚠ npm fetch failed: ${e.message}`);
+  }
 }
-const publicBundleUrl = `${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${storagePath}`;
-console.log(`  ✓ public URL: ${publicBundleUrl}`);
+
+// --- 2+3. Download bundle OR use npm registry directly ---
+let publicBundleUrl = null;
+let sha256 = null;
+let sizeBytes = null;
+let bundleSource = 'smithery-mirror';
+
+if (isNpmBased) {
+  // npm package → use npm registry tarball directly (no upload needed)
+  publicBundleUrl = npmMeta.bundleUrl;
+  bundleSource = 'direct-host';
+  console.log(`\n⏭  Skipping upload — npm package, using registry tarball directly.`);
+} else {
+  // .mcpb bundle → download + upload to Supabase Storage
+  console.log(`\n📥 Downloading bundle from Smithery...`);
+  const bundleRes = await fetch(connection.bundleUrl);
+  if (!bundleRes.ok) {
+    console.error(`Bundle download failed: ${bundleRes.status}`);
+    process.exit(1);
+  }
+  const bundleBuffer = Buffer.from(await bundleRes.arrayBuffer());
+  sizeBytes = bundleBuffer.length;
+  sha256 = createHash('sha256').update(bundleBuffer).digest('hex');
+  console.log(`  ✓ size: ${sizeBytes} bytes (${(sizeBytes / 1024).toFixed(1)} KB)`);
+  console.log(`  ✓ sha256: ${sha256.slice(0, 16)}...${sha256.slice(-8)}`);
+
+  const storagePath = `${owner}/${slugPart}/server.mcpb`;
+  const uploadUrl = `${SUPABASE_URL}/storage/v1/object/${BUCKET}/${storagePath}`;
+  console.log(`\n📤 Uploading to Supabase Storage (${BUCKET}/${storagePath})...`);
+  const uploadRes = await fetch(uploadUrl, {
+    method: 'POST',
+    headers: {
+      authorization: `Bearer ${SUPABASE_KEY}`,
+      apikey: SUPABASE_KEY,
+      'content-type': 'application/octet-stream',
+      'x-upsert': 'true',
+      'cache-control': 'public, max-age=31536000, immutable',
+    },
+    body: bundleBuffer,
+  });
+  if (!uploadRes.ok) {
+    const err = await uploadRes.text();
+    console.error(`Upload failed: ${uploadRes.status} ${err}`);
+    process.exit(1);
+  }
+  publicBundleUrl = `${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${storagePath}`;
+  console.log(`  ✓ public URL: ${publicBundleUrl}`);
+}
 
 // --- 4. Build the row for mcp_catalog ---
 const slug = slugPart;
@@ -162,14 +233,14 @@ const row = {
   bundle_url: publicBundleUrl,
   bundle_sha256: sha256,
   bundle_size_bytes: sizeBytes,
-  bundle_source: 'smithery-mirror',
-  bundle_version: null,
+  bundle_source: bundleSource,
+  bundle_version: npmMeta.version || null,
   runtime,
-  npm_package: `@${owner}/${slugPart}`,
-  homepage: null,
-  license: null,
-  repository_url: `https://github.com/${qualifiedName}`,
-  tools_list: reg.tools || [],
+  npm_package: npmPkg,
+  homepage: npmMeta.homepage || reg.homepage || reg.websiteUrl || null,
+  license: npmMeta.license || reg.license || null,
+  repository_url: npmMeta.repository || reg.repository || `https://github.com/${qualifiedName}`,
+  tools_list: transformTools(reg.tools),
   prompts_list: reg.prompts || [],
 };
 

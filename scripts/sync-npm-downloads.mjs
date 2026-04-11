@@ -4,12 +4,15 @@
  * Uso: node scripts/sync-npm-downloads.mjs
  */
 import { createClient } from '@supabase/supabase-js'
-import { config } from 'dotenv'
+import { readFileSync } from 'node:fs'
 import { resolve, dirname } from 'path'
 import { fileURLToPath } from 'url'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
-config({ path: resolve(__dirname, '../.env.local') })
+for (const line of readFileSync(resolve(__dirname, '../.env.local'), 'utf8').split('\n')) {
+  const m = line.match(/^([A-Z_][A-Z0-9_]*)=(.*)$/)
+  if (m) process.env[m[1]] ??= m[2].replace(/^["']|["']$/g, '')
+}
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY)
 

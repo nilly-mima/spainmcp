@@ -102,6 +102,7 @@ export default function McpCatalogCard({ mcp }: { mcp: CatalogMcp }) {
   const isRemote = mcp.scope === 'remote' || mcp.scope === 'remoto'
   const initials = mcp.nombre.split(/[\s\-_]/).map(w => w[0]).join('').slice(0, 2).toUpperCase()
   const palette = PALETTES[mcp.nombre.charCodeAt(0) % PALETTES.length]
+  const [iconBroken, setIconBroken] = useState(false)
 
   return (
     <a
@@ -110,8 +111,13 @@ export default function McpCatalogCard({ mcp }: { mcp: CatalogMcp }) {
     >
       <div className="bg-transparent rounded-xl p-3 h-full flex flex-col gap-2 transition-colors hover:bg-gray-50 dark:hover:bg-white/5 cursor-pointer border border-gray-200 dark:border-gray-700/50">
         <div className="flex items-start gap-3">
-          {mcp.icon_url ? (
-            <img src={mcp.icon_url} alt="" className="w-9 h-9 rounded-lg object-contain shrink-0" />
+          {mcp.icon_url && !iconBroken ? (
+            <img
+              src={mcp.icon_url}
+              alt=""
+              className="w-9 h-9 rounded-lg object-contain shrink-0"
+              onError={() => setIconBroken(true)}
+            />
           ) : (
             <div className={`w-9 h-9 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 ${palette}`}>
               {initials}

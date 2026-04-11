@@ -8,6 +8,7 @@ type StatsData = {
   totals: { calls: number; ok: number; errors: number; avg_ms: number; p95_ms: number; uptime_pct: number }
   daily: { day: string; calls: number; avg_ms: number; uptime: number }[]
   topClients: { label: string; count: number }[]
+  tools: { name: string; calls: number; avg_ms: number; p95_ms: number; uptime: number }[]
   has_data: boolean
 }
 function useStats(slug: string): { stats: StatsData | null; loading: boolean } {
@@ -458,14 +459,17 @@ function PerformanceTab({ mcp }: { mcp: Mcp }) {
               <th className="text-right px-4 py-3 font-medium">Uptime</th>
             </tr></thead>
             <tbody>
-              {tools.map((t) => (
-                <tr key={t.name} className="border-b border-stone-50 dark:border-stone-800/30">
-                  <td className="px-4 py-2.5 font-mono text-stone-700 dark:text-stone-300">{fmtN(t.name)}</td>
-                  <td className="px-3 py-2.5 text-right text-stone-400 dark:text-stone-500 tabular-nums">—</td>
-                  <td className="px-3 py-2.5 text-right text-stone-400 dark:text-stone-500">—</td>
-                  <td className="px-4 py-2.5 text-right text-stone-400 dark:text-stone-500">—</td>
-                </tr>
-              ))}
+              {tools.map((t) => {
+                const toolStat = (stats?.tools ?? []).find(x => x.name === t.name)
+                return (
+                  <tr key={t.name} className="border-b border-stone-50 dark:border-stone-800/30">
+                    <td className="px-4 py-2.5 font-mono text-stone-700 dark:text-stone-300">{fmtN(t.name)}</td>
+                    <td className="px-3 py-2.5 text-right text-stone-600 dark:text-stone-400 tabular-nums">{toolStat ? fmtNum(toolStat.calls) : '—'}</td>
+                    <td className="px-3 py-2.5 text-right text-stone-600 dark:text-stone-400">{toolStat ? fmtLatency(toolStat.avg_ms) : '—'}</td>
+                    <td className="px-4 py-2.5 text-right text-stone-600 dark:text-stone-400">{toolStat ? `${toolStat.uptime.toFixed(1)}%` : '—'}</td>
+                  </tr>
+                )
+              })}
             </tbody>
             <tfoot><tr className="border-t border-stone-200 dark:border-stone-700">
               <td className="px-4 py-2.5 text-stone-500 font-medium">Total</td>
@@ -474,9 +478,6 @@ function PerformanceTab({ mcp }: { mcp: Mcp }) {
               <td className="px-4 py-2.5 text-right font-semibold text-stone-700 dark:text-stone-300">{totals.calls > 0 ? `${totals.uptime_pct.toFixed(1)}%` : '—'}</td>
             </tr></tfoot>
           </table>
-          <div className="px-4 py-2 text-[10px] text-stone-400 border-t border-stone-100 dark:border-stone-800">
-            El desglose por tool requiere parseo del body JSON-RPC — en roadmap.
-          </div>
         </div>
 
         {/* Right charts */}
@@ -497,15 +498,15 @@ function PerformanceTab({ mcp }: { mcp: Mcp }) {
               ))}
             </div>
           </div>
-          <div className="rounded-xl p-4 bg-white dark:bg-stone-900 flex flex-col flex-1 min-h-0" style={{ border: '1px solid var(--border)' }}>
-            <div className="flex items-center gap-2 text-xs text-stone-500 mb-3">
+          <div className="rounded-xl p-4 bg-white dark:bg-stone-900 flex flex-col" style={{ border: '1px solid var(--border)' }}>
+            <div className="flex items-center gap-2 text-xs text-stone-500 mb-2">
               <span>Latency (30d)</span>
               <span className="font-semibold text-stone-700 dark:text-stone-300">{totals.calls > 0 ? fmtLatency(totals.avg_ms) : 'Sin datos'}</span>
               {totals.calls > 0 && (
                 <span className="text-stone-400 ml-2">p95 {fmtLatency(totals.p95_ms)}</span>
               )}
             </div>
-            <div className="flex-1 min-h-0">
+            <div className="aspect-[5/2] w-full">
               <LatencyChart data={latencyData.length ? latencyData : [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]} />
             </div>
           </div>

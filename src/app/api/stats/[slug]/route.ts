@@ -23,7 +23,7 @@ export async function GET(
   // 1) Stats agregadas (totales + p95)
   const { data: logs } = await supabase
     .from('gateway_logs')
-    .select('status_code, duration_ms, user_agent, created_at')
+    .select('status_code, duration_ms, user_agent, created_at, tool_name')
     .eq('slug', slug)
     .gte('created_at', sinceISO)
 
@@ -83,6 +83,31 @@ export async function GET(
     .sort((a, b) => b.count - a.count)
     .slice(0, 5)
 
+  // 4) Desglose por tool (de las filas que tienen tool_name)
+  const byTool = new Map<string, { calls: number; ok: number; sum_ms: number; durations: number[] }>()
+  for (const r of rows) {
+    const row = r as unknown as { tool_name?: string; status_code: number; duration_ms: number | null }
+    if (!row.tool_name) continue
+    const acc = byTool.get(row.tool_name) ?? { calls: 0, ok: 0, sum_ms: 0, durations: [] }
+    acc.calls += 1
+    if (row.status_code >= 200 && row.status_code < 300) acc.ok += 1
+    acc.sum_ms += row.duration_ms ?? 0
+    if (row.duration_ms) acc.durations.push(row.duration_ms)
+    byTool.set(row.tool_name, acc)
+  }
+  const tools = Array.from(byTool.entries())
+    .map(([name, acc]) => {
+      const sorted = [...acc.durations].sort((a, b) => a - b)
+      return {
+        name,
+        calls: acc.calls,
+        avg_ms: Math.round(acc.sum_ms / acc.calls),
+        p95_ms: sorted.length ? sorted[Math.floor(sorted.length * 0.95)] ?? sorted[sorted.length - 1] : 0,
+        uptime: acc.calls > 0 ? (acc.ok / acc.calls) * 100 : 100,
+      }
+    })
+    .sort((a, b) => b.calls - a.calls)
+
   return NextResponse.json({
     slug,
     totals: {
@@ -95,6 +120,7 @@ export async function GET(
     },
     daily,
     topClients,
+    tools,
     has_data: total > 0,
   })
 }

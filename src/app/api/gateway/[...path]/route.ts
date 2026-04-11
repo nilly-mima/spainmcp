@@ -39,12 +39,38 @@ function hashIP(ip: string | null): string | null {
 type LogParams = {
   slug: string
   method: string
+  tool_name?: string
   status_code: number
   duration_ms: number
   tier: string
   ip_hash: string | null
   user_agent: string | null
   error?: string
+}
+
+// Parsea el body JSON-RPC de una petición MCP para extraer el tool invocado.
+// Si method === 'tools/call', saca params.name. Devuelve { bodyText, toolName }
+// — bodyText hay que usarlo como body del fetch upstream (porque req.body
+// solo se puede consumir una vez).
+async function parseJsonRpcBody(req: NextRequest): Promise<{ bodyText?: string; toolName?: string }> {
+  if (req.method === "GET" || req.method === "HEAD") return {}
+  const ct = req.headers.get("content-type") ?? ""
+  if (!ct.includes("application/json")) return {}
+  try {
+    const bodyText = await req.text()
+    if (!bodyText) return {}
+    try {
+      const rpc = JSON.parse(bodyText) as { method?: string; params?: { name?: string } }
+      if (rpc?.method === "tools/call" && typeof rpc?.params?.name === "string") {
+        return { bodyText, toolName: rpc.params.name }
+      }
+    } catch {
+      // Body no es JSON válido — lo reenviamos tal cual al upstream
+    }
+    return { bodyText }
+  } catch {
+    return {}
+  }
 }
 
 function scheduleLog(params: LogParams): void {
@@ -151,7 +177,10 @@ async function handler(req: NextRequest, { params }: { params: Promise<{ path: s
     ? `${entry.upstream_url.replace(/\/$/, "")}/${subpath}`
     : entry.upstream_url
 
-  // 4) Forward
+  // 4) Parsear body JSON-RPC para extraer tool_name (para métricas por tool)
+  const { bodyText, toolName } = await parseJsonRpcBody(req)
+
+  // 5) Forward
   const upstreamHeaders = buildUpstreamHeaders(req.headers)
 
   // Para user_key tier, convertir x-user-api-key → Authorization Bearer
@@ -165,9 +194,9 @@ async function handler(req: NextRequest, { params }: { params: Promise<{ path: s
     const upstreamRes = await fetch(upstreamUrl, {
       method: req.method,
       headers: upstreamHeaders,
-      // @ts-expect-error — duplex es necesario para streaming (Node 18+)
-      duplex: "half",
-      body: req.method !== "GET" && req.method !== "HEAD" ? req.body : undefined,
+      body: req.method !== "GET" && req.method !== "HEAD" ? (bodyText ?? req.body) : undefined,
+      // @ts-expect-error — duplex solo necesario si body es un stream
+      duplex: bodyText === undefined && req.method !== "GET" && req.method !== "HEAD" ? "half" : undefined,
     })
 
     const responseHeaders = new Headers()
@@ -181,7 +210,8 @@ async function handler(req: NextRequest, { params }: { params: Promise<{ path: s
     responseHeaders.set("x-spainmcp-gateway", "1")
 
     scheduleLog({
-      slug, method: req.method, status_code: upstreamRes.status,
+      slug, method: req.method, tool_name: toolName,
+      status_code: upstreamRes.status,
       duration_ms: Date.now() - t0, tier: entry.tier,
       ip_hash: ipHash, user_agent: userAgent,
     })
